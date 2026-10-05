@@ -611,9 +611,9 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .dr-set { display: none; }
   .empty { color: var(--muted); font-size: .85rem; padding: 1.2rem .2rem; }
 
-  :root { --ok: #2e7d4f; --okbg: #e6f3ea; --ko: #b3362b; --kobg: #f8e6e3; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #6fcf97; --okbg: #1d3328; --ko: #ef8a80; --kobg: #3a2220; } }
-  :root[data-theme="dark"] { --ok: #6fcf97; --okbg: #1d3328; --ko: #ef8a80; --kobg: #3a2220; }
+  :root { --ok: #00873a; --okbg: #c9f2d6; --ko: #d90000; --kobg: #ffd0d0; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #3dff7a; --okbg: #0b4a22; --ko: #ff4040; --kobg: #5e0f0f; } }
+  :root[data-theme="dark"] { --ok: #3dff7a; --okbg: #0b4a22; --ko: #ff4040; --kobg: #5e0f0f; }
   .quizcard { display: flex; align-items: center; gap: .9rem; width: 100%; margin: 0 0 .8rem; padding: .8rem 1rem; font: inherit; text-align: left; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; }
   .quizcard .qc-jp { font-size: 1.6rem; flex: 0 0 auto; }
   .quizcard .qc-t { flex: 1; min-width: 0; font-weight: 600; }
@@ -649,6 +649,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .q-opts { display: grid; gap: 10px; margin-top: .6rem; }
   .qopt { min-height: 56px; padding: .6rem 1rem; font: inherit; font-size: 1rem; text-align: center; color: var(--ink); background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; overflow-wrap: anywhere; }
   .qopt.kj { font-size: 2rem; }
+  .qopt.good::before { content: '✓ '; font-weight: 700; } .qopt.bad::before { content: '✗ '; font-weight: 700; }
+  .qopt.good, .qopt.bad { border-width: 2.5px; font-weight: 600; }
   .qopt.good { background: var(--okbg); border-color: var(--ok); color: var(--ok); }
   .qopt.bad { background: var(--kobg); border-color: var(--ko); color: var(--ko); }
   .qopt:disabled { opacity: 1; cursor: default; }
@@ -660,6 +662,14 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .q-fb .fbb { display: flex; gap: 10px; margin-top: .8rem; align-items: center; }
   .q-fb .fbb .qgo { flex: 1; border: 1.5px solid var(--ink); }
   .q-fb .fbk { font-size: 2rem; margin-right: .5rem; }
+  .qstat-btn { display: flex; margin: .9rem auto 0; }
+  .q-stats .qs-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.3rem; }
+  .qs-tiles > div { text-align: center; padding: .8rem .3rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .qs-tiles b { display: block; font-size: 1.6rem; } .qs-tiles span { font-size: .7rem; color: var(--muted); }
+  .qs-types { display: grid; gap: .8rem; margin-bottom: 1.3rem; }
+  .qs-l { display: flex; justify-content: space-between; gap: .6rem; font-size: .85rem; margin-bottom: .3rem; }
+  .qs-bar { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; } .qs-bar i { display: block; height: 100%; background: var(--gold); }
+  .qs-cnt { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); font-size: .85rem; }
   .q-score { text-align: center; padding: 1.5rem 0 1rem; }
   .q-score .n { font-size: 3.6rem; font-weight: 700; }
   .q-score .n small { font-size: 1.4rem; color: var(--muted); font-weight: 400; }
@@ -5195,7 +5205,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
 
   /* ── état persistant ── */
-  var ST = { fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, kq: {}, kqc: null };
+  var ST = { fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   function toast(msg, action, fn) {
@@ -5480,7 +5490,20 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + QN.map(function (n) { return chipBtn(n, cfg.n === n, 'data-n="' + n + '"', n > ps.q); }).join('') + chipBtn('Tout · ' + ps.k, cfg.n === 0, 'data-n="0"', ps.k === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' kanji à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       var can = cfg.types.length && ps.q > 0;
+      h += '<button type="button" class="mini qstat-btn" id="q-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="q-go"' + (can ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? ps.k : Math.min(cfg.n, ps.q)) + ' questions</button>';
+      body.innerHTML = h;
+    }
+    function showStats() {
+      Q = null; ttl.textContent = 'Statistiques'; prog.textContent = ''; barI.style.width = '0';
+      var S = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }, pc = function (a, b) { return b ? Math.round(a / b * 100) + ' %' : '—'; };
+      var h = '<div class="q-stats"><div class="qs-tiles"><div><b>' + S.sess + '</b><span>quiz terminés</span></div><div><b>' + S.q + '</b><span>questions</span></div><div><b>' + pc(S.ok, S.q) + '</b><span>de réussite</span></div></div>';
+      h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + QT.map(function (t) { var T = (S.ty || {})[t.id] || { n: 0, ok: 0 }; var p = T.n ? Math.round(T.ok / T.n * 100) : 0;
+        return '<div class="qs-row"><div class="qs-l"><span>' + t.label + '</span><span><b>' + T.n + '</b> · ' + pc(T.ok, T.n) + '</span></div><div class="qs-bar"><i style="width:' + p + '%"></i></div></div>'; }).join('') + '</div>';
+      var worst = Object.keys(ST.kq).map(function (k) { var v = ST.kq[k]; return { k: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byK[v.k]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
+      h += '<h4 class="q-h">Kanji les plus ratés</h4>';
+      h += worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { var x = byK[v.k]; return '<div class="q-miss"><span class="kj">' + esc(v.k) + '</span><span>' + esc(x.s) + '<small>' + esc((x.on || '—') + ' · ' + (x.kun || '—')) + '</small></span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>';
+      h += '<div class="q-end"><button type="button" class="qgo" id="q-back">Retour</button><button type="button" class="mini" id="q-reset">Effacer les statistiques</button></div></div>';
       body.innerHTML = h;
     }
     function persist() { ST.kqc = cfg; save(); }
@@ -5496,7 +5519,9 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (b.id === 'q-next') { Q.i++; showQ(); }
       else if (b.id === 'q-say') { speak(JSON.parse(b.dataset.say)); }
       else if (b.id === 'q-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
-      else if (b.id === 'q-new') { showSetup(); }
+      else if (b.id === 'q-new' || b.id === 'q-back') { showSetup(); }
+      else if (b.id === 'q-stats') { showStats(); }
+      else if (b.id === 'q-reset') { if (confirm('Effacer toutes les statistiques et les kanji ratés ?')) { ST.kq = {}; ST.kqs = { sess: 0, q: 0, ok: 0, ty: {} }; save(); showStats(); } }
       else if (b.id === 'q-close') { open(false); paintCard(); }
     });
 
@@ -5525,7 +5550,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var cur = Q.cur; if (cur.done) return; cur.done = true;
       var o = cur.opts[+b.dataset.i], q = cur.q, x = byK[q.k], good = !!o.ok;
       body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
-      var st = ST.kq[x.k] || { n: 0, st: 0, w: false }; st.n++;
+      var st = ST.kq[x.k] || { n: 0, st: 0, w: false }; st.n++; if (!good) st.x = (st.x || 0) + 1;
+      var S = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S.q++; if (good) S.ok++; var T = S.ty[q.t] = S.ty[q.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (Q.wrongs.indexOf(x.k) < 0) { Q.wrongs.push(x.k); Q.wrongList.push({ k: x.k, t: q.t, w: q.w }); } }
       ST.kq[x.k] = st; save();
       var say = [];
@@ -5540,6 +5566,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       document.getElementById('q-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {
+      if (!Q.done) { Q.done = true; var S0 = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S0.sess++; save(); }
       var n = Q.items.length, pct = Math.round(Q.ok / n * 100), secs = Math.round((Date.now() - Q.t0) / 1000);
       ttl.textContent = 'Résultat'; prog.textContent = ''; barI.style.width = '100%';
       var wl = {}; Q.wrongs.forEach(function (k) { wl[k] = 1; });
