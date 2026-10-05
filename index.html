@@ -5193,7 +5193,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     if (e.target.closest('button, a, summary, input, label, .fab, .res, .deck, .toast, .searchbar')) return;
     var el = e.target.closest('td, th, li, .example, .cec-sentence, .tc-ex, .dc-example, .kana, .cec-verb, .sd-cell, .gc-pill, .fs-arrow, p, .ex-answer .ex-body');
     if (!el) return;
-    var m = el.textContent.match(JP); if (!m) return;
+    var clean = el.textContent.replace(/[(（]([\u3040-\u30ff\u3400-\u9fff々ー]+)[)）]/g, '$1');
+    var m = clean.match(JP); if (!m) return;
     var parts = []; m.forEach(function (x) { x.split(/[・･]/).forEach(function (y) { y = y.replace(/^[、。]+|[、。]+$/g, ''); if (y) parts.push(y); }); }); parts = parts.slice(0, 8);
     el.classList.add('speaking'); setTimeout(function () { el.classList.remove('speaking'); }, 1400);
     speak(parts);
