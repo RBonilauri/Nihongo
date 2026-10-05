@@ -614,6 +614,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   :root { --ok: #00873a; --okbg: #c9f2d6; --ko: #d90000; --kobg: #ffd0d0; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #3dff7a; --okbg: #0b4a22; --ko: #ff4040; --kobg: #5e0f0f; } }
   :root[data-theme="dark"] { --ok: #3dff7a; --okbg: #0b4a22; --ko: #ff4040; --kobg: #5e0f0f; }
+  .quizlist { display: grid; gap: .6rem; margin-top: 1rem; } .quizlist .quizcard { margin: 0; }
   .quizcard { display: flex; align-items: center; gap: .9rem; width: 100%; margin: 0 0 .8rem; padding: .8rem 1rem; font: inherit; text-align: left; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; }
   .quizcard .qc-jp { font-size: 1.6rem; flex: 0 0 auto; }
   .quizcard .qc-t { flex: 1; min-width: 0; font-weight: 600; }
@@ -5406,6 +5407,15 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
 
 
+  /* ═══════════ RUBRIQUE QUIZ (regroupe tous les quiz) ═══════════ */
+  function quizHost(mainEl) {
+    var host = mainEl.querySelector('#quiz-sec .quizlist'); if (host) return host;
+    var sec = document.createElement('details'); sec.className = 'sec'; sec.id = 'quiz-sec'; sec.setAttribute('name', 'sec');
+    sec.innerHTML = '<summary><span class="jp">クイズ</span><span class="lbl">Quiz</span></summary><div class="sec-body"><p class="jp-sub">クイズ — Kuizu</p><p>Teste-toi sur les kanji, le vocabulaire, la grammaire et les compteurs. Les ratés sont mémorisés et chaque quiz a sa page de statistiques.</p><div class="quizlist"></div></div>';
+    var first = mainEl.querySelector('details.sec'); mainEl.insertBefore(sec, first);
+    return sec.querySelector('.quizlist');
+  }
+
   /* ═══════════ QUIZ KANJI ═══════════ */
   var QT = [
     { id: 'k2s', label: 'Kanji → sens', short: 'Sens' },
@@ -5442,7 +5452,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     }
     paintCard();
     card.addEventListener('click', function () { openQuiz(); });
-    mainEl.insertBefore(card, mainEl.querySelector('.home'));
+    quizHost(mainEl).appendChild(card);
 
     function hideQuiz() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideQuiz); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideQuiz); }
@@ -5643,7 +5653,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     }
     paintCard();
     card.addEventListener('click', function () { open(true); showSetup(); });
-    mainEl.insertBefore(card, mainEl.querySelector('.home'));
+    quizHost(mainEl).appendChild(card);
     function hideV() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideV); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideV); }
     el.querySelector('.x').addEventListener('click', function () { open(false); });
@@ -5821,7 +5831,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     }
     paintCard();
     card.addEventListener('click', function () { open(true); showSetup(); });
-    mainEl.insertBefore(card, mainEl.querySelector('.home'));
+    quizHost(mainEl).appendChild(card);
     function hideG() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideG); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideG); }
     el.querySelector('.x').addEventListener('click', function () { open(false); });
@@ -6020,7 +6030,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     }
     paintCard();
     card.addEventListener('click', function () { open(true); showSetup(); });
-    mainEl.insertBefore(card, mainEl.querySelector('.home'));
+    quizHost(mainEl).appendChild(card);
     function hideC() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideC); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideC); }
     el.querySelector('.x').addEventListener('click', function () { open(false); });
