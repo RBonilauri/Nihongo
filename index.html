@@ -5105,7 +5105,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   document.addEventListener('toggle', function (e) {
     var d = e.target; if (!d.matches || !d.matches('details.sub') || !d.open) return;
     var id = Object.keys(subMap).filter(function (k) { return subMap[k].sub === d; })[0]; if (!id) return;
-    ST.rec = [id].concat(ST.rec.filter(function (x) { return x !== id; })).slice(0, 6); save(); renderHome();
+    ST.rec = [id].concat(ST.rec.filter(function (x) { return x !== id; })).slice(0, 3); save(); renderHome();
   }, true);
 
   /* ── fiches de révision (à partir des tableaux) ── */
@@ -5170,9 +5170,17 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   var JP = /[぀-ヿ㐀-鿿々〜ー]+/g, listening = false, voice = null;
   var fab = document.createElement('button'); fab.className = 'fab'; fab.setAttribute('aria-label', 'Mode écoute'); fab.textContent = '🔊';
   function pickVoice() { var vs = window.speechSynthesis ? speechSynthesis.getVoices() : []; voice = vs.filter(function (v) { return /^ja/i.test(v.lang); })[0] || null; }
-  function speak(text) {
+  var speakTok = 0;
+  function speak(parts) {
     if (!window.speechSynthesis) return;
-    speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(text); u.lang = 'ja-JP'; if (voice) u.voice = voice; u.rate = 0.85; speechSynthesis.speak(u);
+    speechSynthesis.cancel(); var tok = ++speakTok, i = 0;
+    (function next() {
+      if (tok !== speakTok || i >= parts.length) return;
+      var u = new SpeechSynthesisUtterance(parts[i++]); u.lang = 'ja-JP'; if (voice) u.voice = voice; u.rate = 0.85;
+      u.onend = function () { setTimeout(next, 500); };
+      u.onerror = function () { setTimeout(next, 500); };
+      speechSynthesis.speak(u);
+    })();
   }
   if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
   fab.addEventListener('click', function () {
@@ -5186,9 +5194,9 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     var el = e.target.closest('td, th, li, .example, .cec-sentence, .tc-ex, .dc-example, .kana, .cec-verb, .sd-cell, .gc-pill, .fs-arrow, p, .ex-answer .ex-body');
     if (!el) return;
     var m = el.textContent.match(JP); if (!m) return;
-    var text = m.join('、').slice(0, 220);
+    var parts = []; m.forEach(function (x) { x.split(/[・･]/).forEach(function (y) { y = y.replace(/^[、。]+|[、。]+$/g, ''); if (y) parts.push(y); }); }); parts = parts.slice(0, 8);
     el.classList.add('speaking'); setTimeout(function () { el.classList.remove('speaking'); }, 1400);
-    speak(text);
+    speak(parts);
   });
 
   /* ── mode lecture (flou romaji / traductions) ── */
