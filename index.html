@@ -485,6 +485,45 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inherit; padding: 0 1px; border-radius: 2px; }
   .flash { animation: flash 2.4s ease-out; scroll-margin-top: calc(var(--sb) + 130px); }
   @keyframes flash { 0%, 60% { background: color-mix(in srgb, var(--gold) 30%, transparent); outline: 2px solid var(--gold); } 100% { background: transparent; outline: 2px solid transparent; } }
+
+  /* ═══ FONCTIONS : favoris, écoute, fiches, réglages ═══ */
+  html.js { font-size: calc(17px * var(--fs, 1)); }
+  .fav { flex: 0 0 auto; width: 40px; height: 40px; margin-left: auto; border: 0; background: none; font-size: 1.25rem; line-height: 1; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+  .fav.on { color: var(--gold); }
+  details.sub > summary:has(.fav)::after { margin-left: 0; }
+  .home { margin: 0 0 1rem; }
+  .home h3 { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin: .8rem 0 .4rem; font-weight: 400; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip { min-height: 40px; padding: .3rem .9rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); background: var(--surface); color: var(--ink); border-radius: 20px; cursor: pointer; text-align: left; }
+  .chip small { color: var(--muted); font-size: .68rem; display: block; }
+  .deckbtn { display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; margin: 0 0 1rem; padding: .4rem 1rem; font: inherit; font-size: .82rem; background: var(--panel); color: var(--on-panel); border: 0; border-radius: 22px; cursor: pointer; }
+  .fab { position: fixed; z-index: 45; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--ink); font-size: 1.3rem; box-shadow: 0 2px 10px rgba(0,0,0,.25); cursor: pointer; display: grid; place-items: center; }
+  .fab.on { background: var(--gold); color: #fff; border-color: transparent; }
+  .speaking { outline: 2px solid var(--gold); background: color-mix(in srgb, var(--gold) 22%, transparent); }
+  html.listen main { cursor: pointer; }
+  .toast { position: fixed; z-index: 70; left: 16px; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); padding: .8rem 1rem; background: var(--panel); color: var(--on-panel); font-size: .85rem; display: flex; gap: .8rem; align-items: center; justify-content: space-between; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+  .toast button { font: inherit; font-size: .8rem; padding: .4rem .9rem; border: 1px solid currentColor; background: none; color: inherit; border-radius: 16px; cursor: pointer; min-height: 40px; }
+  .aid-hide .romaji, .aid-hide .cec-trans, .aid-hide .tc-trans, .aid-hide .dc-translation, .aid-hide .sd-translation, .aid-hide .cec-meaning { filter: blur(6px); cursor: pointer; }
+  .aid-hide .rv { filter: none !important; }
+  .set-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .6rem 0; border-bottom: 1px solid var(--border); font-size: .85rem; }
+  .set-row .lab { flex: 1 1 10rem; }
+  .set-row button, .set-row label.btn { min-height: 40px; padding: .3rem 1rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); background: var(--surface); color: var(--ink); border-radius: 20px; cursor: pointer; display: inline-grid; place-items: center; }
+  .deck { position: fixed; inset: 0; z-index: 80; background: var(--bg); display: flex; flex-direction: column; padding: env(safe-area-inset-top, 0px) 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .deck[hidden] { display: none; }
+  .deck-top { display: flex; align-items: center; gap: .8rem; height: 56px; flex: 0 0 auto; }
+  .deck-top .x { width: 44px; height: 44px; margin-left: -10px; border: 0; background: none; font-size: 1.6rem; color: var(--ink); cursor: pointer; }
+  .deck-top .ttl { flex: 1; min-width: 0; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .deck-top .prog { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .card { flex: 1; min-height: 0; margin: .5rem 0 1rem; border: 1px solid var(--border); background: var(--surface); padding: 1.5rem 1.2rem; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .8rem; cursor: pointer; }
+  .card .front { font-family: 'Noto Serif JP', serif; font-size: 1.6rem; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+  .card .flab { font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); }
+  .card .tap { font-size: .75rem; color: var(--muted); }
+  .card .back { width: 100%; text-align: left; border-top: 1px solid var(--border); padding-top: .8rem; }
+  .card .back div { padding: .35rem 0; font-size: .95rem; line-height: 1.5; overflow-wrap: anywhere; }
+  .card .back b { display: block; font-weight: 400; font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  .deck-btns { display: flex; gap: .8rem; flex: 0 0 auto; }
+  .deck-btns button { flex: 1; min-height: 52px; font: inherit; font-size: .95rem; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .deck-btns .ok { background: var(--panel); color: var(--on-panel); border-color: transparent; }
   .empty { color: var(--muted); font-size: .85rem; padding: 1.2rem .2rem; }
 </style>
 </head>
@@ -4854,10 +4893,11 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     return o;
   }
   var UNIT = 'tr, li, p, .group-card, .conj-ex-card, .te-card, .distinction-card, .fs-group, .conj-note, .sd-row, .conj-form-header, details.ex-answer, .section-title, .ex-list, .kanji-card, .cec-sentence';
-  var index = [];
+  var index = [], subMap = {};
   function build() {
     var secs = document.querySelectorAll('details.sec');
-    secs.forEach(function (sec) {
+    secs.forEach(function (sec, si) {
+      sec.dataset.i = si;
       var secLabel = sec.querySelector(':scope > summary .lbl').textContent.trim();
       var jp = sec.querySelector(':scope > summary .jp').textContent.trim();
       function add(el, path, sec, sub) {
@@ -4874,9 +4914,10 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         });
       };
       var subs = sec.querySelectorAll(':scope > .sec-body > details.sub');
-      subs.forEach(function (d) {
+      subs.forEach(function (d, sj) {
         var lbl = d.querySelector(':scope > summary').textContent.trim();
         var path = secLabel + ' › ' + lbl;
+        d.dataset.id = 's' + si + '-' + sj; subMap[path] = { sec: sec, sub: d, id: path, title: lbl, secLabel: secLabel };
         add(d.querySelector(':scope > summary'), path, sec, d);
         scope(d, path, d);
       });
@@ -4889,7 +4930,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       });
     });
   }
-  function esc(s) { return s.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function snippet(it, toks) {
     var t = it.text, n = it.norm, pos = -1;
     for (var i = 0; i < toks.length; i++) { var p = n.indexOf(toks[i]); if (p >= 0 && (pos < 0 || p < pos)) pos = p; }
@@ -4907,27 +4948,28 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   function run() {
     var raw = q.value.trim(); clr.hidden = !raw;
     if (!raw) { box.hidden = true; box.innerHTML = ''; return; }
-    var toks = fold(raw).split(/\s+/).filter(Boolean);
+    var toks = fold(raw).split(/\s+/).filter(Boolean).map(function (t) { var k = r2k(t); return k && k !== t ? [t, k] : [t]; });
     var hits = [];
     for (var i = 0; i < index.length; i++) {
       var it = index[i], ok = true, score = 0;
-      for (var j = 0; j < toks.length; j++) { var p = it.norm.indexOf(toks[j]); if (p < 0) { ok = false; break; } score += p === 0 ? 3 : 1; }
+      for (var j = 0; j < toks.length; j++) { var p = -1; for (var a = 0; a < toks[j].length; a++) { var pa = it.norm.indexOf(toks[j][a]); if (pa >= 0 && (p < 0 || pa < p)) p = pa; } if (p < 0) { ok = false; break; } score += p === 0 ? 3 : 1; }
       if (!ok) continue;
       if (it.el.tagName === 'SUMMARY' || it.el.classList.contains('section-title')) score += 4;
       score -= Math.min(it.text.length, 400) / 200;
       hits.push({ it: it, s: score });
     }
     hits.sort(function (a, b) { return b.s - a.s; });
+    var flat = []; toks.forEach(function (t) { t.forEach(function (x) { flat.push(x); }); });
     results = hits.slice(0, 60).map(function (h) { return h.it; });
     var html = '<div class="count">' + hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + (hits.length > 60 ? ' (60 affichés)' : '') + '</div>';
     if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' ». Essaie un seul mot, en français ou en japonais.</div>';
     results.forEach(function (it, k) {
-      html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, toks) + '</span></button>';
+      html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, flat) + '</span></button>';
     });
     box.innerHTML = html; box.hidden = false; box.scrollTop = 0;
   }
   function go(it) {
-    it.sec.open = true; if (it.sub) it.sub.open = true;
+    it.sec.open = true; if (it.sub) { it.sub.open = true; try { history.replaceState(null, '', '#' + it.sub.dataset.id); } catch (e) {} }
     box.hidden = true; q.blur();
     var el = it.el; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
     setTimeout(function () { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60);
@@ -4955,9 +4997,215 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     try { localStorage.setItem('jp-theme', next); } catch (e) {}
     applyTheme(next);
   });
-  var ready = function () { build(); };
+
+  /* ── romaji → hiragana (pour la recherche) ── */
+  var R = { a:'あ', i:'い', u:'う', e:'え', o:'お', ya:'や', yu:'ゆ', yo:'よ', wa:'わ', wo:'を', shi:'し', chi:'ち', tsu:'つ', fu:'ふ', ji:'じ', sha:'しゃ', shu:'しゅ', sho:'しょ', cha:'ちゃ', chu:'ちゅ', cho:'ちょ', ja:'じゃ', ju:'じゅ', jo:'じょ' };
+  (function () {
+    var rows = { k:'かきくけこ', g:'がぎぐげご', s:'さしすせそ', z:'ざじずぜぞ', t:'たちつてと', d:'だぢづでど', n:'なにぬねの', h:'はひふへほ', b:'ばびぶべぼ', p:'ぱぴぷぺぽ', m:'まみむめも', r:'らりるれろ' };
+    var v = 'aiueo';
+    Object.keys(rows).forEach(function (c) { for (var i = 0; i < 5; i++) { var key = c + v[i]; if (!R[key]) R[key] = rows[c][i]; } });
+    R.si = 'し'; R.ti = 'ち'; R.tu = 'つ'; R.hu = 'ふ'; R.zi = 'じ';
+    var sm = { a:'ゃ', u:'ゅ', o:'ょ' };
+    'kgnhbpmr'.split('').forEach(function (c) { ['a', 'u', 'o'].forEach(function (x) { R[c + 'y' + x] = rows[c][1] + sm[x]; }); });
+  })();
+  function r2k(s) {
+    if (!/^[a-z'-]+$/.test(s)) return null;
+    var o = '', i = 0;
+    while (i < s.length) {
+      var c = s[i], n = s[i + 1];
+      if (c === '-') { o += 'ー'; i++; continue; }
+      if (c === 'n' && (n === undefined || n === "'" || (!/[aiueoy]/.test(n)))) { o += 'ん'; i += (n === "'" || n === 'n') ? 2 : 1; continue; }
+      if (c === n && /[kgszjtdhbpmrwcf]/.test(c)) { o += 'っ'; i++; continue; }
+      var hit = null;
+      for (var L = 3; L >= 1 && !hit; L--) { var seg = s.substr(i, L); if (R[seg]) { hit = seg; } }
+      if (!hit) return null;
+      o += R[hit]; i += hit.length;
+    }
+    return o;
+  }
+
+  /* ── état persistant ── */
+  var ST = { fav: [], rec: [], su: {}, fs: 1, aid: false };
+  try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
+  function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
+  function toast(msg, action, fn) {
+    var t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
+    t.innerHTML = '<span>' + esc(msg) + '</span>' + (action ? '<button>' + esc(action) + '</button>' : '');
+    if (action) t.querySelector('button').addEventListener('click', function () { fn(); t.remove(); });
+    document.body.appendChild(t); setTimeout(function () { t.remove(); }, action ? 12000 : 2600);
+  }
+  function openTo(rec) {
+    rec.sec.open = true; rec.sub.open = true;
+    var sm = rec.sub.querySelector(':scope > summary'); sm.classList.remove('flash'); void sm.offsetWidth; sm.classList.add('flash');
+    try { history.replaceState(null, '', '#' + rec.sub.dataset.id); } catch (e) {}
+    setTimeout(function () { sm.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 60);
+    setTimeout(function () { sm.classList.remove('flash'); }, 2600);
+  }
+
+  /* ── favoris & récents ── */
+  var home = document.createElement('div'); home.className = 'home';
+  function chip(id) { var r = subMap[id]; if (!r) return ''; return '<button class="chip" data-id="' + esc(id) + '"><small>' + esc(r.secLabel) + '</small>' + esc(r.title) + '</button>'; }
+  function renderHome() {
+    var f = ST.fav.filter(function (id) { return subMap[id]; }), r = ST.rec.filter(function (id) { return subMap[id]; });
+    var h = '';
+    if (f.length) h += '<h3>★ Favoris</h3><div class="chips">' + f.map(chip).join('') + '</div>';
+    if (r.length) h += '<h3>Récents</h3><div class="chips">' + r.map(chip).join('') + '</div>';
+    home.innerHTML = h;
+  }
+  home.addEventListener('click', function (e) { var c = e.target.closest('.chip'); if (c) openTo(subMap[c.dataset.id]); });
+  function syncFavButtons() { document.querySelectorAll('.fav').forEach(function (b) { var on = ST.fav.indexOf(b.dataset.id) >= 0; b.classList.toggle('on', on); b.textContent = on ? '★' : '☆'; b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+  document.addEventListener('toggle', function (e) {
+    var d = e.target; if (!d.matches || !d.matches('details.sub') || !d.open) return;
+    var id = Object.keys(subMap).filter(function (k) { return subMap[k].sub === d; })[0]; if (!id) return;
+    ST.rec = [id].concat(ST.rec.filter(function (x) { return x !== id; })).slice(0, 6); save(); renderHome();
+  }, true);
+
+  /* ── fiches de révision (à partir des tableaux) ── */
+  var deck = document.createElement('div'); deck.className = 'deck'; deck.hidden = true;
+  deck.innerHTML = '<div class="deck-top"><button class="x" aria-label="Fermer">×</button><div class="ttl"></div><div class="prog"></div></div><div class="card" id="card" tabindex="0"></div><div class="deck-btns"><button class="again">À revoir</button><button class="ok">Su</button></div>';
+  var D = { cards: [], i: 0, flipped: false, title: '' };
+  function cardsFrom(sub, title) {
+    var out = [];
+    sub.querySelectorAll('table').forEach(function (t) {
+      var heads = Array.prototype.map.call(t.querySelectorAll('thead th, tr:first-child th'), function (h) { return h.textContent.replace(/\s+/g, ' ').trim(); });
+      t.querySelectorAll('tr').forEach(function (tr) {
+        var tds = tr.querySelectorAll('td'); if (tds.length < 2) return;
+        var cells = Array.prototype.map.call(tds, function (c) { return c.textContent.replace(/\s+/g, ' ').trim(); });
+        if (!cells[0]) return;
+        var back = []; for (var k = 1; k < cells.length; k++) if (cells[k]) back.push({ l: heads[k] || '', v: cells[k] });
+        if (!back.length) return;
+        out.push({ key: title + '|' + cells[0], fl: heads[0] || '', front: cells[0], back: back });
+      });
+    });
+    return out;
+  }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function showCard() {
+    var card = deck.querySelector('#card'), c = D.cards[D.i], total = D.cards.length;
+    deck.querySelector('.prog').textContent = Math.min(D.i + 1, total) + ' / ' + total;
+    if (!c) {
+      var known = D.cards.filter(function (x) { return ST.su[x.key]; }).length;
+      card.innerHTML = '<div class="front">Terminé</div><div class="tap">' + known + ' sur ' + total + ' sus</div>';
+      deck.querySelector('.deck-btns').innerHTML = '<button class="restart">Revoir les cartes à revoir</button><button class="ok close">Fermer</button>'; return;
+    }
+    D.flipped = false;
+    card.innerHTML = (c.fl ? '<div class="flab">' + esc(c.fl) + '</div>' : '') + '<div class="front">' + esc(c.front) + '</div><div class="tap">Touche pour voir la réponse</div>';
+    deck.querySelector('.deck-btns').innerHTML = '<button class="again">À revoir</button><button class="ok">Su</button>';
+  }
+  function flip() {
+    var c = D.cards[D.i]; if (!c) return; D.flipped = !D.flipped;
+    var card = deck.querySelector('#card');
+    card.innerHTML = (c.fl ? '<div class="flab">' + esc(c.fl) + '</div>' : '') + '<div class="front">' + esc(c.front) + '</div>' +
+      (D.flipped ? '<div class="back">' + c.back.map(function (b) { return '<div>' + (b.l ? '<b>' + esc(b.l) + '</b>' : '') + esc(b.v) + '</div>'; }).join('') + '</div>' : '<div class="tap">Touche pour voir la réponse</div>');
+  }
+  function startDeck(sub, title, onlyTodo) {
+    var all = cardsFrom(sub, title);
+    var list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
+    if (!list.length) { list = all; }
+    D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = sub; D.all = all;
+    deck.querySelector('.ttl').textContent = title; deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
+  }
+  function answer(ok) { var c = D.cards[D.i]; if (!c) return; if (ok) ST.su[c.key] = 1; else delete ST.su[c.key]; save(); D.i++; showCard(); }
+  deck.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (b) {
+      if (b.classList.contains('x') || b.classList.contains('close')) { deck.hidden = true; document.body.style.overflow = ''; }
+      else if (b.classList.contains('again')) answer(false);
+      else if (b.classList.contains('ok')) answer(true);
+      else if (b.classList.contains('restart')) startDeck(D.sub, D.title, true);
+      return;
+    }
+    if (e.target.closest('#card')) flip();
+  });
+
+  /* ── écoute (synthèse vocale japonaise) ── */
+  var JP = /[぀-ヿ㐀-鿿々〜ー]+/g, listening = false, voice = null;
+  var fab = document.createElement('button'); fab.className = 'fab'; fab.setAttribute('aria-label', 'Mode écoute'); fab.textContent = '🔊';
+  function pickVoice() { var vs = window.speechSynthesis ? speechSynthesis.getVoices() : []; voice = vs.filter(function (v) { return /^ja/i.test(v.lang); })[0] || null; }
+  function speak(text) {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(text); u.lang = 'ja-JP'; if (voice) u.voice = voice; u.rate = 0.85; speechSynthesis.speak(u);
+  }
+  if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  fab.addEventListener('click', function () {
+    listening = !listening; fab.classList.toggle('on', listening); document.documentElement.classList.toggle('listen', listening);
+    toast(listening ? 'Mode écoute : touche un texte japonais pour l\'entendre.' : 'Mode écoute désactivé.');
+    if (listening && window.speechSynthesis && !voice) { pickVoice(); if (!voice) toast('Aucune voix japonaise détectée : installe-la dans les réglages de synthèse vocale du téléphone.'); }
+  });
+  document.addEventListener('click', function (e) {
+    if (!listening) return;
+    if (e.target.closest('button, a, summary, input, label, .fab, .res, .deck, .toast, .searchbar')) return;
+    var el = e.target.closest('td, th, li, .example, .cec-sentence, .tc-ex, .dc-example, .kana, .cec-verb, .sd-cell, .gc-pill, .fs-arrow, p, .ex-answer .ex-body');
+    if (!el) return;
+    var m = el.textContent.match(JP); if (!m) return;
+    var text = m.join('、').slice(0, 220);
+    el.classList.add('speaking'); setTimeout(function () { el.classList.remove('speaking'); }, 1400);
+    speak(text);
+  });
+
+  /* ── mode lecture (flou romaji / traductions) ── */
+  document.addEventListener('click', function (e) {
+    if (!document.documentElement.classList.contains('aid-hide')) return;
+    var el = e.target.closest('.romaji, .cec-trans, .tc-trans, .dc-translation, .sd-translation, .cec-meaning'); if (el) el.classList.toggle('rv');
+  });
+
+  /* ── réglages ── */
+  function applyPrefs() {
+    document.documentElement.style.setProperty('--fs', ST.fs);
+    document.documentElement.classList.toggle('aid-hide', !!ST.aid);
+  }
+  function buildSettings(mainEl) {
+    var sec = document.createElement('details'); sec.className = 'sec'; sec.setAttribute('name', 'sec');
+    sec.innerHTML = '<summary><span class="jp">設定</span><span class="lbl">Réglages</span></summary><div class="sec-body">' +
+      '<div class="set-row"><span class="lab">Taille du texte</span><button id="fs-" aria-label="Réduire">A−</button><button id="fs+" aria-label="Agrandir">A+</button></div>' +
+      '<div class="set-row"><span class="lab">Masquer romaji et traductions<br><small style="color:var(--muted)">Flou : touche pour révéler</small></span><button id="aid"></button></div>' +
+      '<div class="set-row"><span class="lab">Sauvegarde (favoris, révisions)</span><button id="exp">Exporter</button><label class="btn">Importer<input id="imp" type="file" accept="application/json" hidden></label></div>' +
+      '<div class="set-row"><span class="lab">Cartes sues à remettre à zéro</span><button id="rst">Réinitialiser</button></div>' +
+      '</div>';
+    mainEl.appendChild(sec);
+    var aidB = sec.querySelector('#aid'); function aidLabel() { aidB.textContent = ST.aid ? 'Activé' : 'Désactivé'; } aidLabel();
+    sec.querySelector('#fs-').addEventListener('click', function () { ST.fs = Math.max(0.85, Math.round((ST.fs - 0.1) * 100) / 100); save(); applyPrefs(); });
+    sec.querySelector('#fs\\+').addEventListener('click', function () { ST.fs = Math.min(1.4, Math.round((ST.fs + 0.1) * 100) / 100); save(); applyPrefs(); });
+    aidB.addEventListener('click', function () { ST.aid = !ST.aid; save(); applyPrefs(); aidLabel(); });
+    sec.querySelector('#exp').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(ST, null, 1)], { type: 'application/json' }), a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'japonais-progression.json'; document.body.appendChild(a); a.click(); a.remove();
+    });
+    sec.querySelector('#imp').addEventListener('change', function (e) {
+      var f = e.target.files[0]; if (!f) return; var rd = new FileReader();
+      rd.onload = function () { try { var o = JSON.parse(rd.result); Object.keys(ST).forEach(function (k) { if (o[k] !== undefined) ST[k] = o[k]; }); save(); applyPrefs(); renderHome(); syncFavButtons(); aidLabel(); toast('Sauvegarde importée.'); } catch (err) { toast('Fichier invalide.'); } };
+      rd.readAsText(f);
+    });
+    sec.querySelector('#rst').addEventListener('click', function () { ST.su = {}; save(); toast('Révisions remises à zéro.'); });
+  }
+
+  function features() {
+    var mainEl = document.querySelector('main');
+    // étoiles + bouton Réviser dans chaque sous-section
+    Object.keys(subMap).forEach(function (id) {
+      var r = subMap[id], sm = r.sub.querySelector(':scope > summary');
+      var b = document.createElement('button'); b.className = 'fav'; b.type = 'button'; b.dataset.id = id; b.setAttribute('aria-label', 'Favori');
+      b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); var k = ST.fav.indexOf(id); if (k >= 0) ST.fav.splice(k, 1); else ST.fav.unshift(id); save(); syncFavButtons(); renderHome(); });
+      sm.appendChild(b);
+      if (cardsFrom(r.sub, id).length >= 3) {
+        var body = r.sub.querySelector(':scope > .sub-body');
+        var rb = document.createElement('button'); rb.className = 'deckbtn'; rb.type = 'button'; rb.textContent = '🃏 Réviser en fiches';
+        rb.addEventListener('click', function () { startDeck(r.sub, id, true); });
+        body.insertBefore(rb, body.firstChild);
+      }
+    });
+    var hint = mainEl.querySelector('.hint'); mainEl.insertBefore(home, (hint ? hint.nextSibling : mainEl.querySelector('details.sec')));
+    renderHome(); syncFavButtons(); buildSettings(mainEl);
+    document.body.appendChild(deck); document.body.appendChild(fab);
+    applyPrefs();
+    // ouverture depuis l'adresse (#s2-3)
+    var h = location.hash.replace('#', '');
+    if (h) { var rec = Object.keys(subMap).map(function (k) { return subMap[k]; }).filter(function (r) { return r.sub.dataset.id === h; })[0]; if (rec) openTo(rec); }
+  }
+
+  var ready = function () { build(); features(); };
   if ('requestIdleCallback' in window) requestIdleCallback(ready); else setTimeout(ready, 50);
-  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) navigator.serviceWorker.register('sw.js').catch(function () {});
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) { navigator.serviceWorker.register('sw.js').catch(function () {}); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.type === 'update') toast('Nouvelle version disponible.', 'Recharger', function () { location.reload(); }); }); }
 })();
 </script>
 </body>
