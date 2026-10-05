@@ -9,6 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="日本語">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>try{var t=localStorage.getItem("jp-theme");document.documentElement.setAttribute("data-theme",t==="dark"||t==="light"?t:(t==="auto"?"":"light"));if(!document.documentElement.getAttribute("data-theme"))document.documentElement.removeAttribute("data-theme")}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -462,12 +463,15 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   /* ═══ RECHERCHE ═══ */
   .searchbar { display: none; }
   html.js { --sb: 60px; }
-  html.js .searchbar { display: block; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; margin: 0 -16px; padding: 8px 16px; background: var(--bg); border-bottom: 1px solid var(--border); }
+  html.js .searchbar { display: flex; gap: 8px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; margin: 0 -16px; padding: 8px 16px; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .searchbar .field { position: relative; flex: 1; min-width: 0; }
+  .searchbar .theme { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--ink); font-size: 1.15rem; cursor: pointer; display: grid; place-items: center; }
+  .searchbar .theme small { display: none; }
   .searchbar input { width: 100%; height: 44px; padding: 0 2.6rem 0 2.5rem; font: 16px 'DM Mono', monospace; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 22px; -webkit-appearance: none; appearance: none; }
   .searchbar input:focus { outline: 2px solid var(--gold); outline-offset: 0; border-color: transparent; }
   .searchbar input::-webkit-search-cancel-button, .searchbar input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
-  .searchbar .ico { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 1rem; }
-  .searchbar .clr { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border: 0; background: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+  .searchbar .ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 1rem; }
+  .searchbar .clr { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border: 0; background: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
   html.js .hint { display: none; }
   html.js details.sec[open] > summary { top: calc(var(--sb) + env(safe-area-inset-top, 0px)); }
   html.js details.sub[open] > summary { top: calc(var(--sb) + 56px + env(safe-area-inset-top, 0px)); }
@@ -486,7 +490,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 </head>
 <body>
 <main>
-<div class="searchbar" id="searchbar"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher : て形, potentiel, 食べる…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" aria-label="Effacer" hidden>×</button></div>
+<div class="searchbar" id="searchbar"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" aria-label="Effacer" hidden>×</button></div><button class="theme" id="theme" type="button" aria-label="Changer de thème"><span id="theme-ico">☀</span></button></div>
 <div class="results" id="results" hidden></div>
 <header class="doc-head"><span class="logo-jp">日本語</span><span class="logo-fr">Référence grammaticale</span></header><p class="hint">Touche une section pour l'ouvrir. Tout fonctionne sans JavaScript.</p><details class="sec" name="sec"><summary><span class="jp">助詞</span><span class="lbl">Particules</span></summary><div class="sec-body"><p class="jp-sub">助詞 — Joshi</p><p>Le squelette de la phrase japonaise. Plusieurs familles selon leur rôle : structurer la phrase, marquer les cas, ou colorer émotionnellement l'énoncé.</p><details class="sub" name="sub-particules"><summary>終助詞 — Finales</summary><div class="sub-body">
 <p class="page-desc" style="margin-top:0">
@@ -4934,6 +4938,23 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   q.addEventListener('focus', function () { if (q.value.trim() && results.length) box.hidden = false; });
   q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && results[0]) go(results[0]); if (e.key === 'Escape') { q.value = ''; run(); } });
   clr.addEventListener('click', function () { q.value = ''; run(); q.focus(); });
+  // thème : clair (défaut) → sombre → auto (système)
+  var tbtn = document.getElementById('theme'), tico = document.getElementById('theme-ico'), root = document.documentElement;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  function getPref() { try { return localStorage.getItem('jp-theme') || 'light'; } catch (e) { return 'light'; } }
+  function applyTheme(p) {
+    if (p === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', p);
+    tico.textContent = p === 'light' ? '☀' : p === 'dark' ? '☾' : '◐';
+    tbtn.setAttribute('aria-label', 'Thème : ' + (p === 'light' ? 'clair' : p === 'dark' ? 'sombre' : 'automatique') + ' (toucher pour changer)');
+    var dark = p === 'dark' || (p === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+    if (meta) meta.setAttribute('content', dark ? '#17130f' : '#1c1510');
+  }
+  applyTheme(getPref());
+  tbtn.addEventListener('click', function () {
+    var cur = getPref(), next = cur === 'light' ? 'dark' : cur === 'dark' ? 'auto' : 'light';
+    try { localStorage.setItem('jp-theme', next); } catch (e) {}
+    applyTheme(next);
+  });
   var ready = function () { build(); };
   if ('requestIdleCallback' in window) requestIdleCallback(ready); else setTimeout(ready, 50);
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) navigator.serviceWorker.register('sw.js').catch(function () {});
