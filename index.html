@@ -524,14 +524,51 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .deck-btns { display: flex; gap: .8rem; flex: 0 0 auto; }
   .deck-btns button { flex: 1; min-height: 52px; font: inherit; font-size: .95rem; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
   .deck-btns .ok { background: var(--panel); color: var(--on-panel); border-color: transparent; }
+
+  /* ═══ MENU LATÉRAL ═══ */
+  .topbar, .drawer, .scrim { display: none; }
+  html.js { --sb: 52px; }
+  html.js .topbar { display: flex; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; height: 52px; align-items: center; gap: .5rem; padding: 0 6px; background: var(--panel); color: var(--on-panel); }
+  .tb-btn { width: 44px; height: 44px; border: 0; background: none; color: inherit; font-size: 1.5rem; line-height: 1; cursor: pointer; border-radius: 8px; display: grid; place-items: center; }
+  .tb-title { flex: 1; min-width: 0; font-family: 'Noto Serif JP', serif; font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-title small { font-family: 'DM Mono', monospace; font-weight: 400; font-size: .7rem; opacity: .6; margin-left: .6rem; letter-spacing: .12em; text-transform: uppercase; }
+  html.js .scrim { display: block; position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  html.js .drawer { display: flex; flex-direction: column; position: fixed; z-index: 100; top: 0; bottom: 0; left: 0; width: min(88vw, 360px); background: var(--bg); color: var(--ink); transform: translateX(-104%); transition: transform .22s ease; visibility: hidden; padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 0 40px rgba(0,0,0,.4); }
+  body.nav-open .drawer { transform: none; visibility: visible; }
+  body.nav-open .scrim { opacity: 1; pointer-events: auto; }
+  body.nav-open { overflow: hidden; }
+  .dr-head { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; height: calc(52px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 6px 0 16px; background: var(--panel); color: var(--on-panel); }
+  .dr-logo { font-family: 'Noto Serif JP', serif; font-weight: 700; font-size: 1.1rem; }
+  .dr-logo small { font-family: 'DM Mono', monospace; font-weight: 400; font-size: .7rem; opacity: .6; margin-left: .6rem; letter-spacing: .12em; text-transform: uppercase; }
+  .dr-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 24px; }
+  .drawer .field { position: relative; }
+  .drawer input { width: 100%; height: 46px; padding: 0 2.6rem 0 2.5rem; font: 16px 'DM Mono', monospace; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 23px; -webkit-appearance: none; appearance: none; }
+  .drawer input::-webkit-search-cancel-button, .drawer input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+  .drawer input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+  .drawer .ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .drawer .clr { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border: 0; background: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+  .drawer .results { position: static; inset: auto; z-index: auto; overflow: visible; background: none; padding: 6px 0 0; }
+  .drawer .results[hidden], .drawer .dr-body[hidden] { display: none; }
+  .dr-h { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin: 1.4rem 0 .5rem; }
+  .seg { display: flex; border: 1px solid var(--border); border-radius: 22px; overflow: hidden; }
+  .seg button { flex: 1; min-height: 44px; font: inherit; font-size: .8rem; border: 0; background: var(--surface); color: var(--ink); cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button[aria-pressed="true"] { background: var(--panel); color: var(--on-panel); }
+  .dr-set .set-row:last-child { border-bottom: 0; }
+  html.js details.sec[open] > summary { top: calc(52px + env(safe-area-inset-top, 0px)); }
+  html.js details.sub[open] > summary { top: calc(52px + 56px + env(safe-area-inset-top, 0px)); }
+  .flash { scroll-margin-top: 130px; }
   .empty { color: var(--muted); font-size: .85rem; padding: 1.2rem .2rem; }
 </style>
 </head>
 <body>
-<main>
-<div class="searchbar" id="searchbar"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" aria-label="Effacer" hidden>×</button></div><button class="theme" id="theme" type="button" aria-label="Changer de thème"><span id="theme-ico">☀</span></button></div>
+<header class="topbar"><button class="tb-btn" id="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="drawer">☰</button><div class="tb-title"><span>日本語</span><small>Référence</small></div><button class="tb-btn" id="tb-search" type="button" aria-label="Rechercher">⌕</button></header>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true"><div class="dr-head"><span class="dr-logo">日本語 <small>Référence</small></span><button class="tb-btn" id="dr-close" type="button" aria-label="Fermer le menu">×</button></div>
+<div class="dr-scroll"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div>
 <div class="results" id="results" hidden></div>
-<header class="doc-head"><span class="logo-jp">日本語</span><span class="logo-fr">Référence grammaticale</span></header><p class="hint">Touche une section pour l'ouvrir. Tout fonctionne sans JavaScript.</p><details class="sec" name="sec"><summary><span class="jp">助詞</span><span class="lbl">Particules</span></summary><div class="sec-body"><p class="jp-sub">助詞 — Joshi</p><p>Le squelette de la phrase japonaise. Plusieurs familles selon leur rôle : structurer la phrase, marquer les cas, ou colorer émotionnellement l'énoncé.</p><details class="sub" name="sub-particules"><summary>終助詞 — Finales</summary><div class="sub-body">
+<div class="dr-body" id="dr-body"><div class="dr-h">Thème</div><div class="seg" id="seg-theme" role="group" aria-label="Thème"><button type="button" data-t="light">☀ Clair</button><button type="button" data-t="dark">☾ Sombre</button><button type="button" data-t="auto">◐ Auto</button></div><div class="dr-h">Réglages</div></div></div></aside>
+<main><header class="doc-head"><span class="logo-jp">日本語</span><span class="logo-fr">Référence grammaticale</span></header><p class="hint">Touche une section pour l'ouvrir. Tout fonctionne sans JavaScript.</p><details class="sec" name="sec"><summary><span class="jp">助詞</span><span class="lbl">Particules</span></summary><div class="sec-body"><p class="jp-sub">助詞 — Joshi</p><p>Le squelette de la phrase japonaise. Plusieurs familles selon leur rôle : structurer la phrase, marquer les cas, ou colorer émotionnellement l'énoncé.</p><details class="sub" name="sub-particules"><summary>終助詞 — Finales</summary><div class="sub-body">
 <p class="page-desc" style="margin-top:0">
         Placées en toute fin de phrase, elles expriment l'attitude du locuteur : ton émotionnel, degré de certitude, recherche de confirmation. Très caractéristiques du japonais oral, elles varient selon le registre et le genre.
       </p>
@@ -4944,10 +4981,11 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     out += esc(seg.slice(cur));
     return (start > 0 ? '… ' : '') + out + (end < t.length ? ' …' : '');
   }
-  var results = [];
+  var results = [], drBody = document.getElementById('dr-body');
+  function setRes(v) { box.hidden = !v; drBody.hidden = v; }
   function run() {
     var raw = q.value.trim(); clr.hidden = !raw;
-    if (!raw) { box.hidden = true; box.innerHTML = ''; return; }
+    if (!raw) { setRes(false); box.innerHTML = ''; return; }
     var toks = fold(raw).split(/\s+/).filter(Boolean).map(function (t) { var k = r2k(t); return k && k !== t ? [t, k] : [t]; });
     var hits = [];
     for (var i = 0; i < index.length; i++) {
@@ -4966,37 +5004,44 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     results.forEach(function (it, k) {
       html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, flat) + '</span></button>';
     });
-    box.innerHTML = html; box.hidden = false; box.scrollTop = 0;
+    box.innerHTML = html; setRes(true);
   }
   function go(it) {
     it.sec.open = true; if (it.sub) { it.sub.open = true; try { history.replaceState(null, '', '#' + it.sub.dataset.id); } catch (e) {} }
-    box.hidden = true; q.blur();
+    setRes(false); closeNav();
     var el = it.el; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
     setTimeout(function () { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60);
     setTimeout(function () { el.classList.remove('flash'); }, 2600);
   }
   box.addEventListener('click', function (e) { var b = e.target.closest('.res'); if (b) go(results[+b.dataset.k]); });
   var t; q.addEventListener('input', function () { clearTimeout(t); t = setTimeout(run, 90); });
-  q.addEventListener('focus', function () { if (q.value.trim() && results.length) box.hidden = false; });
+  q.addEventListener('focus', function () { if (q.value.trim() && results.length) setRes(true); });
   q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && results[0]) go(results[0]); if (e.key === 'Escape') { q.value = ''; run(); } });
   clr.addEventListener('click', function () { q.value = ''; run(); q.focus(); });
-  // thème : clair (défaut) → sombre → auto (système)
-  var tbtn = document.getElementById('theme'), tico = document.getElementById('theme-ico'), root = document.documentElement;
-  var meta = document.querySelector('meta[name="theme-color"]');
+  // thème : clair (défaut) / sombre / auto
+  var root = document.documentElement, meta = document.querySelector('meta[name="theme-color"]'), seg = document.getElementById('seg-theme');
   function getPref() { try { return localStorage.getItem('jp-theme') || 'light'; } catch (e) { return 'light'; } }
   function applyTheme(p) {
     if (p === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', p);
-    tico.textContent = p === 'light' ? '☀' : p === 'dark' ? '☾' : '◐';
-    tbtn.setAttribute('aria-label', 'Thème : ' + (p === 'light' ? 'clair' : p === 'dark' ? 'sombre' : 'automatique') + ' (toucher pour changer)');
+    seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.t === p ? 'true' : 'false'); });
     var dark = p === 'dark' || (p === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
     if (meta) meta.setAttribute('content', dark ? '#17130f' : '#1c1510');
   }
   applyTheme(getPref());
-  tbtn.addEventListener('click', function () {
-    var cur = getPref(), next = cur === 'light' ? 'dark' : cur === 'dark' ? 'auto' : 'light';
-    try { localStorage.setItem('jp-theme', next); } catch (e) {}
-    applyTheme(next);
-  });
+  seg.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; try { localStorage.setItem('jp-theme', b.dataset.t); } catch (er) {} applyTheme(b.dataset.t); });
+
+  // menu latéral
+  var drawer = document.getElementById('drawer'), menuBtn = document.getElementById('menu');
+  function openNav(focusSearch) {
+    document.body.classList.add('nav-open'); drawer.setAttribute('aria-hidden', 'false'); menuBtn.setAttribute('aria-expanded', 'true');
+    if (focusSearch) setTimeout(function () { q.focus(); }, 240);
+  }
+  function closeNav() { document.body.classList.remove('nav-open'); drawer.setAttribute('aria-hidden', 'true'); menuBtn.setAttribute('aria-expanded', 'false'); q.blur(); }
+  menuBtn.addEventListener('click', function () { document.body.classList.contains('nav-open') ? closeNav() : openNav(false); });
+  document.getElementById('tb-search').addEventListener('click', function () { openNav(true); });
+  document.getElementById('dr-close').addEventListener('click', closeNav);
+  document.getElementById('scrim').addEventListener('click', closeNav);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('nav-open')) closeNav(); });
 
   /* ── romaji → hiragana (pour la recherche) ── */
   var R = { a:'あ', i:'い', u:'う', e:'え', o:'お', ya:'や', yu:'ゆ', yo:'よ', wa:'わ', wo:'を', shi:'し', chi:'ち', tsu:'つ', fu:'ふ', ji:'じ', sha:'しゃ', shu:'しゅ', sho:'しょ', cha:'ちゃ', chu:'ちゅ', cho:'ちょ', ja:'じゃ', ju:'じゅ', jo:'じょ' };
@@ -5155,14 +5200,14 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     document.documentElement.classList.toggle('aid-hide', !!ST.aid);
   }
   function buildSettings(mainEl) {
-    var sec = document.createElement('details'); sec.className = 'sec'; sec.setAttribute('name', 'sec');
-    sec.innerHTML = '<summary><span class="jp">設定</span><span class="lbl">Réglages</span></summary><div class="sec-body">' +
+    var sec = document.createElement('div'); sec.className = 'dr-set';
+    sec.innerHTML = ''+
       '<div class="set-row"><span class="lab">Taille du texte</span><button id="fs-" aria-label="Réduire">A−</button><button id="fs+" aria-label="Agrandir">A+</button></div>' +
       '<div class="set-row"><span class="lab">Masquer romaji et traductions<br><small style="color:var(--muted)">Flou : touche pour révéler</small></span><button id="aid"></button></div>' +
       '<div class="set-row"><span class="lab">Sauvegarde (favoris, révisions)</span><button id="exp">Exporter</button><label class="btn">Importer<input id="imp" type="file" accept="application/json" hidden></label></div>' +
       '<div class="set-row"><span class="lab">Cartes sues à remettre à zéro</span><button id="rst">Réinitialiser</button></div>' +
-      '</div>';
-    mainEl.appendChild(sec);
+      '';
+    document.getElementById('dr-body').appendChild(sec);
     var aidB = sec.querySelector('#aid'); function aidLabel() { aidB.textContent = ST.aid ? 'Activé' : 'Désactivé'; } aidLabel();
     sec.querySelector('#fs-').addEventListener('click', function () { ST.fs = Math.max(0.85, Math.round((ST.fs - 0.1) * 100) / 100); save(); applyPrefs(); });
     sec.querySelector('#fs\\+').addEventListener('click', function () { ST.fs = Math.min(1.4, Math.round((ST.fs + 0.1) * 100) / 100); save(); applyPrefs(); });
