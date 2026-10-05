@@ -5165,13 +5165,27 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   applyTheme(getPref());
   seg.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; try { localStorage.setItem('jp-theme', b.dataset.t); } catch (er) {} applyTheme(b.dataset.t); });
 
+  // bouton retour du téléphone : ferme la surcouche ouverte au lieu de quitter la page
+  var BK = [], bkSkip = 0;
+  function bkPush(fn) { BK.push(fn); try { history.pushState({ bk: 1 }, ''); } catch (e) {} }
+  function bkClose(fn) {
+    fn(); var i = BK.lastIndexOf(fn); if (i < 0) return;
+    var top = i === BK.length - 1; BK.splice(i, 1);
+    if (top) { bkSkip++; try { history.back(); } catch (e) { bkSkip--; } }
+  }
+  window.addEventListener('popstate', function () {
+    if (bkSkip > 0) { bkSkip--; return; }
+    var fn = BK.pop(); if (fn) fn();
+  });
   // menu latéral
   var drawer = document.getElementById('drawer'), menuBtn = document.getElementById('menu');
   function openNav(focusSearch) {
+    if (!document.body.classList.contains('nav-open')) bkPush(hideNav);
     document.body.classList.add('nav-open'); drawer.setAttribute('aria-hidden', 'false'); menuBtn.setAttribute('aria-expanded', 'true');
     if (focusSearch) setTimeout(function () { q.focus(); }, 240);
   }
-  function closeNav() { document.body.classList.remove('nav-open'); drawer.setAttribute('aria-hidden', 'true'); menuBtn.setAttribute('aria-expanded', 'false'); q.blur(); }
+  function closeNav() { bkClose(hideNav); }
+  function hideNav() { document.body.classList.remove('nav-open'); drawer.setAttribute('aria-hidden', 'true'); menuBtn.setAttribute('aria-expanded', 'false'); q.blur(); }
   menuBtn.addEventListener('click', function () { document.body.classList.contains('nav-open') ? closeNav() : openNav(false); });
   document.getElementById('tb-search').addEventListener('click', function () { openNav(true); });
   document.getElementById('dr-close').addEventListener('click', closeNav);
@@ -5278,18 +5292,19 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     card.innerHTML = (c.fl ? '<div class="flab">' + esc(c.fl) + '</div>' : '') + '<div class="front">' + esc(c.front) + '</div>' +
       (D.flipped ? '<div class="back">' + c.back.map(function (b) { return '<div>' + (b.l ? '<b>' + esc(b.l) + '</b>' : '') + esc(b.v) + '</div>'; }).join('') + '</div>' : '<div class="tap">Touche pour voir la réponse</div>');
   }
+  function hideDeck() { deck.hidden = true; document.body.style.overflow = ''; }
   function startDeck(sub, title, onlyTodo) {
     var all = cardsFrom(sub, title);
     var list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
     if (!list.length) { list = all; }
     D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = sub; D.all = all;
-    deck.querySelector('.ttl').textContent = title; deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
+    deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
   function answer(ok) { var c = D.cards[D.i]; if (!c) return; if (ok) ST.su[c.key] = 1; else delete ST.su[c.key]; save(); D.i++; showCard(); }
   deck.addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (b) {
-      if (b.classList.contains('x') || b.classList.contains('close')) { deck.hidden = true; document.body.style.overflow = ''; }
+      if (b.classList.contains('x') || b.classList.contains('close')) bkClose(hideDeck);
       else if (b.classList.contains('again')) answer(false);
       else if (b.classList.contains('ok')) answer(true);
       else if (b.classList.contains('restart')) startDeck(D.sub, D.title, true);
@@ -5413,7 +5428,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     card.addEventListener('click', function () { openQuiz(); });
     mainEl.insertBefore(card, mainEl.querySelector('.home'));
 
-    function open(v) { el.hidden = !v; document.body.style.overflow = v ? 'hidden' : ''; }
+    function hideQuiz() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
+    function open(v) { if (v) { if (el.hidden) bkPush(hideQuiz); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideQuiz); }
     function openQuiz() { open(true); showSetup(); }
     el.querySelector('.x').addEventListener('click', function () { open(false); paintCard(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) { open(false); paintCard(); } });
