@@ -5233,16 +5233,22 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   var speakTok = 0;
   function speak(parts) {
     if (!window.speechSynthesis) return;
-    speechSynthesis.cancel(); var tok = ++speakTok, i = 0;
-    (function next() {
+    var tok = ++speakTok, i = 0;
+    try { speechSynthesis.cancel(); } catch (e) {}
+    function next() {
       if (tok !== speakTok || i >= parts.length) return;
-      var u = new SpeechSynthesisUtterance(parts[i++]); u.lang = 'ja-JP'; if (voice) u.voice = voice; u.rate = 0.85;
-      u.onend = function () { setTimeout(next, 500); };
-      u.onerror = function () { setTimeout(next, 500); };
+      var text = parts[i++], done = false;
+      function advance() { if (done || tok !== speakTok) return; done = true; setTimeout(next, 500); }
+      var u = new SpeechSynthesisUtterance(text); u.lang = 'ja-JP'; if (voice) u.voice = voice; u.rate = 0.85;
+      u.onend = advance; u.onerror = advance;
+      setTimeout(advance, 3000 + text.length * 450); // sécurité si onend n'arrive jamais
+      try { speechSynthesis.resume(); } catch (e) {}
       speechSynthesis.speak(u);
-    })();
+    }
+    setTimeout(next, 80); // laisse cancel() se terminer avant de relancer (bug Chrome Android)
   }
   if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  document.body.appendChild(fab);
   fab.addEventListener('click', function () {
     listening = !listening; fab.classList.toggle('on', listening); document.documentElement.classList.toggle('listen', listening);
     toast(listening ? 'Mode écoute : touche un texte japonais pour l\'entendre.' : 'Mode écoute désactivé.');
@@ -5313,7 +5319,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     });
     var hint = mainEl.querySelector('.hint'); mainEl.insertBefore(home, (hint ? hint.nextSibling : mainEl.querySelector('details.sec')));
     renderHome(); syncFavButtons(); buildSettings();
-    document.body.appendChild(deck); document.body.appendChild(fab);
+    document.body.appendChild(deck);
     applyPrefs();
     // ouverture depuis l'adresse (#s2-3)
     var h = location.hash.replace('#', '');
