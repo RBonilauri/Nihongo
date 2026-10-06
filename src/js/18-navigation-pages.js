@@ -36,6 +36,7 @@
       h = dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
         '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>' +
         '<button type="button" class="nstats" data-act="stats"><i>📈</i>Ma progression<small>Réussite, jours actifs, points faibles</small></button>';
+    } else if (v === 'search') { title = ['日本語', 'Recherche'];
     } else if (v === 'stats') { title = ['日本語', 'Ma progression']; h = statsHtml();
     } else if (v === 'learn') {
       title = ['日本語', 'Apprendre'];
@@ -49,6 +50,7 @@
     navPage.innerHTML = h;
     var tb = document.querySelector('.tb-title'); tb.innerHTML = '<span>' + esc(title[0]) + '</span><small>' + esc(title[1]) + '</small>';
     document.getElementById('tb-back').hidden = NAV.length < 2;
+    if (v === 'search') { renderScopes(cur && q.value.trim() ? cur.counts : null); renderHist(); if (!q.value.trim()) setTimeout(function () { try { q.focus(); } catch (e) {} }, 120); }
     [].slice.call(document.querySelectorAll('#tabbar button[data-tab]')).forEach(function (b) { b.classList.toggle('on', b.dataset.tab === TAB); });
     navTop();
   }
@@ -56,6 +58,7 @@
   function navInit() {
     try { history.scrollRestoration = 'manual'; } catch (e) {}
     navMain = document.querySelector('main');
+    var sp = document.getElementById('spage'); navMain.insertBefore(sp, navMain.firstChild);
     navPage = document.createElement('div'); navPage.id = 'navpage'; navMain.insertBefore(navPage, navMain.querySelector('.home') || navMain.querySelector('details.sec'));
     [].slice.call(navMain.querySelectorAll(':scope > details.sec')).forEach(function (s) { secBy[secJp(s)] = s; });
     Object.keys(subMap).forEach(function (k) { subById[subMap[k].sub.dataset.id] = subMap[k].sub; });
@@ -83,7 +86,6 @@
     document.getElementById('tabbar').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.dataset.tab) { if (TAB === b.dataset.tab && NAV.length === 1) { window.scrollTo(0, 0); return; } navReset(b.dataset.tab); }
-      else if (b.dataset.srch) openNav(true);
     });
     document.getElementById('tb-back').addEventListener('click', function () { if (pushed > 0) history.back(); else { NAV = [NAV[0]]; navRender(); } });
     navRender();

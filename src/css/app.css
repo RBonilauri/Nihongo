@@ -177,3 +177,14 @@
   .shist .count { width: 100%; font-size: .72rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; padding: .3rem 0; }
   .shist[hidden] { display: none; }
   .shx { float: right; border: 0; background: none; color: var(--gold); font: inherit; font-size: .72rem; text-transform: none; cursor: pointer; padding: 0 .2rem; }
+
+  /* page Recherche : mêmes styles que le champ de l’ancien tiroir */
+  .spage .field { position: relative; }
+  .spage input { width: 100%; height: 46px; padding: 0 2.6rem 0 2.5rem; font: 16px 'DM Mono', monospace; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 23px; -webkit-appearance: none; appearance: none; }
+  .spage input::-webkit-search-cancel-button, .spage input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+  .spage input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+  .spage .ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .spage .clr { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border: 0; background: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+  .spage .results { position: static; inset: auto; z-index: auto; overflow: visible; background: none; padding: 6px 0 0; }
+  .spage .results[hidden], .spage .dr-body[hidden] { display: none; }
+  .spage .field { margin-bottom: 14px; }

@@ -644,6 +644,17 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .shist[hidden] { display: none; }
   .shx { float: right; border: 0; background: none; color: var(--gold); font: inherit; font-size: .72rem; text-transform: none; cursor: pointer; padding: 0 .2rem; }
 
+  /* page Recherche : mêmes styles que le champ de l’ancien tiroir */
+  .spage .field { position: relative; }
+  .spage input { width: 100%; height: 46px; padding: 0 2.6rem 0 2.5rem; font: 16px 'DM Mono', monospace; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 23px; -webkit-appearance: none; appearance: none; }
+  .spage input::-webkit-search-cancel-button, .spage input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+  .spage input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+  .spage .ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .spage .clr { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border: 0; background: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+  .spage .results { position: static; inset: auto; z-index: auto; overflow: visible; background: none; padding: 6px 0 0; }
+  .spage .results[hidden], .spage .dr-body[hidden] { display: none; }
+  .spage .field { margin-bottom: 14px; }
+
   /* ═══ NAVIGATION PAR PAGES ═══ */
   html.js .drawer { left: auto; right: 0; transform: translateX(104%); }
   html.js body.nav-open .drawer { transform: none; }
@@ -741,6 +752,20 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .q-more > summary::-webkit-details-marker { display: none; }
   .q-more > summary::before { content: '▸'; margin-right: .5rem; transition: transform .15s; }
   .q-more[open] > summary::before { transform: rotate(90deg); }
+
+  .spage { display: none; }
+  main.v-search > .spage { display: block; }
+  .spage .shead { position: sticky; top: calc(52px + env(safe-area-inset-top, 0px)); z-index: 15; background: var(--bg); margin: 0 -16px; padding: .7rem 16px .3rem; }
+  .spage .field { margin-bottom: .5rem; }
+  .spage .results .res.more { text-align: center; color: var(--gold); }
+  .spage .results[hidden], .spage .shist[hidden], .shint[hidden] { display: none; }
+  .scopes { display: flex; gap: .4rem; overflow-x: auto; padding: .1rem 0 .5rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .scopes::-webkit-scrollbar { display: none; }
+  .scopes .chip { flex: none; min-height: 36px; padding: .2rem .8rem; white-space: nowrap; }
+  .scopes .chip.on { background: var(--panel); color: var(--on-panel); border-color: var(--panel); }
+  .scopes .chip small { display: inline; margin-left: .25rem; font-size: .68rem; opacity: .75; }
+  .scopes .chip.zero { opacity: .45; }
+  .shint { color: var(--muted); font-size: .85rem; line-height: 1.5; padding: .6rem .2rem; }
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -865,13 +890,10 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 </head>
 <body>
 <header class="topbar"><button class="tb-btn" id="tb-back" type="button" aria-label="Retour" hidden>‹</button><div class="tb-title"><span>日本語</span><small>Référence</small></div><button class="tb-btn" id="menu" type="button" aria-label="Réglages" aria-expanded="false" aria-controls="drawer">⚙</button></header>
-<nav class="tabbar" id="tabbar" aria-label="Navigation"><button type="button" data-tab="home"><i>🏠</i>Accueil</button><button type="button" data-tab="learn"><i>📚</i>Apprendre</button><button type="button" data-tab="quiz"><i>❓</i>Quiz</button><button type="button" data-srch="1"><i>🔍</i>Recherche</button></nav>
+<nav class="tabbar" id="tabbar" aria-label="Navigation"><button type="button" data-tab="home"><i>🏠</i>Accueil</button><button type="button" data-tab="learn"><i>📚</i>Apprendre</button><button type="button" data-tab="quiz"><i>❓</i>Quiz</button><button type="button" data-tab="search"><i>🔍</i>Recherche</button></nav>
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true"><div class="dr-head"><span class="dr-logo">日本語 <small>Référence</small></span><button class="tb-btn" id="dr-close" type="button" aria-label="Fermer le menu">×</button></div>
-<div class="dr-scroll"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div>
-<div class="shist" id="shist" hidden></div>
-<div class="results" id="results" hidden></div>
-<div class="dr-body" id="dr-body">
+<div class="dr-scroll"><div class="dr-body" id="dr-body">
 <section class="dr-card"><h4>Apparence</h4>
 <div class="row stack"><span class="lab">Thème</span><div class="seg" id="seg-theme" role="group" aria-label="Thème"><button type="button" data-t="light">☀ Clair</button><button type="button" data-t="dark">☾ Sombre</button><button type="button" data-t="auto">◐ Auto</button></div></div>
 <div class="row"><span class="lab">Taille du texte</span><div class="stepper"><button id="fs-" type="button" aria-label="Réduire">A−</button><output id="fs-val" role="button" tabindex="0" title="Revenir à 100 %">100 %</output><button id="fs+" type="button" aria-label="Agrandir">A+</button></div></div>
@@ -886,6 +908,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 <div class="row"><span class="lab">Fiches sues<small>Tout remettre à zéro</small></span><button class="mini danger" id="rst" type="button">Réinitialiser</button></div>
 </section>
 </div></div></div></aside>
+<section class="spage" id="spage" aria-label="Recherche"><div class="shead"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div><div class="scopes" id="scopes" role="group" aria-label="Rubrique"></div></div><div class="shist" id="shist" hidden></div><div class="results" id="results" hidden></div><p class="shint" id="shint">Cherche en français, en romaji ou en japonais. Choisis une rubrique pour restreindre la recherche.</p></section>
 <main><header class="doc-head"><span class="logo-jp">日本語</span><span class="logo-fr">Référence grammaticale</span></header><p class="hint">Touche une section pour l'ouvrir. Tout fonctionne sans JavaScript.</p><details class="sec" name="sec"><summary><span class="jp">助詞</span><span class="lbl">Particules</span></summary><div class="sec-body"><p class="jp-sub">助詞 — Joshi</p><p>Le squelette de la phrase japonaise. Plusieurs familles selon leur rôle : structurer la phrase, marquer les cas, ou colorer émotionnellement l'énoncé.</p><details class="sub" name="sub-particules"><summary>終助詞 — Finales</summary><div class="sub-body">
 <p class="page-desc" style="margin-top:0">
         Placées en toute fin de phrase, elles expriment l'attitude du locuteur : ton émotionnel, degré de certitude, recherche de confirmation. Très caractéristiques du japonais oral, elles varient selon le registre et le genre.
@@ -5173,7 +5196,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       function add(el, path, sec, sub) {
         var txt = (el.tagName === 'TR' ? Array.prototype.map.call(el.children, function (c) { return c.textContent.replace(/\s+/g, ' ').trim(); }).filter(Boolean).join(' · ') : el.textContent).replace(/\s+/g, ' ').trim();
         if (txt.length < 2) return;
-        index.push({ el: el, path: path, sec: sec, sub: sub, text: txt, norm: fold(txt) + (el.dataset && el.dataset.ro ? ' ' + fold(el.dataset.ro) : '') });
+        index.push({ el: el, path: path, sec: sec, sj: jp, sub: sub, text: txt, norm: fold(txt) + (el.dataset && el.dataset.ro ? ' ' + fold(el.dataset.ro) : '') });
       }
       add(sec.querySelector(':scope > summary'), jp + ' ' + secLabel, sec, null);
       var scope = function (root, path, sub) {
@@ -5214,8 +5237,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     out += esc(seg.slice(cur));
     return (start > 0 ? '… ' : '') + out + (end < t.length ? ' …' : '');
   }
-  var results = [], drBody = document.getElementById('dr-body');
-  function setRes(v) { box.hidden = !v; drBody.hidden = v; }
+  var results = [], cur = null, shown = 40, shint = document.getElementById('shint'), scopesEl = document.getElementById('scopes');
+  function setRes(v) { box.hidden = !v; if (shint) shint.hidden = v; }
   /* mots uniques de l'index (pour la correction d'une faute de frappe) */
   var vocabW = null;
   function lev1(a, b) { // vrai si distance d'édition ≤ 1
@@ -5264,38 +5287,63 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     h.hidden = false;
   }
   function remember(w) { w = w.trim(); if (w.length < 2) return; ST.sh = [w].concat((ST.sh || []).filter(function (x) { return x !== w; })).slice(0, 6); save(); }
+  function scopeList() {
+    var o = [], seen = {};
+    index.forEach(function (it) { if (!seen[it.sj]) { seen[it.sj] = 1; o.push({ j: it.sj, l: it.sec.querySelector(':scope > summary .lbl').textContent.trim() }); } });
+    return o;
+  }
+  function renderScopes(counts) {
+    if (!scopesEl) return;
+    var sc = ST.ss || '', tot = counts ? Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0) : 0;
+    var h = '<button type="button" class="chip' + (sc ? '' : ' on') + '" data-sc="">Tout' + (counts ? ' <small>' + tot + '</small>' : '') + '</button>';
+    scopeList().forEach(function (s) {
+      var n = counts ? (counts[s.j] || 0) : null;
+      h += '<button type="button" class="chip' + (sc === s.j ? ' on' : '') + (n === 0 && sc !== s.j ? ' zero' : '') + '" data-sc="' + esc(s.j) + '">' + esc(s.l) + (n !== null ? ' <small>' + n + '</small>' : '') + '</button>';
+    });
+    scopesEl.innerHTML = h;
+    var on = scopesEl.querySelector('.on'); if (on && on.scrollIntoView && scopesEl.scrollWidth > scopesEl.clientWidth) scopesEl.scrollLeft = Math.max(0, on.offsetLeft - 40);
+  }
+  function paint() {
+    if (!cur) return;
+    var hits = cur.hits, raw = cur.raw, sc = ST.ss || '';
+    results = hits.slice(0, shown).map(function (h) { return h.it; });
+    var scLbl = ''; if (sc) { var f = scopeList().filter(function (s) { return s.j === sc; })[0]; scLbl = f ? f.l : sc; }
+    var html = '<div class="count">' + hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + (sc ? ' dans « ' + esc(scLbl) + ' »' : '') + '</div>';
+    if (cur.fixed && results.length) html += '<div class="empty">Aucun résultat exact pour « ' + esc(raw) + ' » — résultats proches.</div>';
+    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' »' + (sc ? ' dans cette rubrique' + (cur.total ? ' (' + cur.total + ' dans les autres : touche « Tout »)' : '') : '') + '. Essaie un seul mot, en français, en romaji ou en japonais.</div>';
+    results.forEach(function (it, k) {
+      html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, cur.flat) + '</span></button>';
+    });
+    if (hits.length > shown) html += '<button type="button" class="res more" data-more="1">Afficher plus (' + (hits.length - shown) + ')</button>';
+    box.innerHTML = html; setRes(true);
+  }
   function run() {
-    var raw = q.value.trim(); clr.hidden = !raw;
-    if (!raw) { setRes(false); box.innerHTML = ''; renderHist(); return; }
+    var raw = q.value.trim(); clr.hidden = !raw; shown = 40;
+    if (!raw) { cur = null; setRes(false); box.innerHTML = ''; renderScopes(null); renderHist(); return; }
     renderHist();
     var toks = fold(raw).replace(/\b(?:l|d|j|qu|c|s|t|m)['’]/g, '').split(/\s+/).filter(Boolean).map(altTok);
     var hits = search(toks), fixed = '';
     if (!hits.length) {
-      var t2 = toks.map(function (alts, j) { var base = alts[0]; if (base.length < 4 || !/^[a-z0-9]+$/.test(base)) return alts; var f = fixTok(base); return f.length ? alts.concat(f) : alts; });
+      var t2 = toks.map(function (alts) { var base = alts[0]; if (base.length < 4 || !/^[a-z0-9]+$/.test(base)) return alts; var f = fixTok(base); return f.length ? alts.concat(f) : alts; });
       var h2 = search(t2);
-      if (h2.length) { hits = h2; toks = t2; fixed = t2.map(function (a) { return a[0]; }).join(' '); }
+      if (h2.length) { hits = h2; toks = t2; fixed = 1; }
     }
+    var counts = {}; hits.forEach(function (h) { counts[h.it.sj] = (counts[h.it.sj] || 0) + 1; });
+    var sc = ST.ss || '', all = hits.length;
+    if (sc) hits = hits.filter(function (h) { return h.it.sj === sc; });
     var flat = []; toks.forEach(function (t) { t.forEach(function (x) { flat.push(x); }); });
-    results = hits.slice(0, 60).map(function (h) { return h.it; });
-    var html = '<div class="count">' + hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + (hits.length > 60 ? ' (60 affichés)' : '') + '</div>';
-    if (fixed && results.length) html += '<div class="empty">Aucun résultat exact pour « ' + esc(raw) + ' » — résultats proches.</div>';
-    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' ». Essaie un seul mot, en français, en romaji ou en japonais.</div>';
-    results.forEach(function (it, k) {
-      html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, flat) + '</span></button>';
-    });
-    box.innerHTML = html; setRes(true);
+    cur = { hits: hits, raw: raw, flat: flat, fixed: fixed, total: all - hits.length, counts: counts };
+    renderScopes(counts); paint();
   }
   function go(it) {
-    remember(q.value); setRes(false); closeNav();
-    setTimeout(function () {
-      navOpen(it.sec, it.sub);
-      var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 80);
-      setTimeout(function () { el.classList.remove('flash'); }, 2600);
-    }, 160);
+    remember(q.value); q.blur();
+    navOpen(it.sec, it.sub);
+    var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 120);
+    setTimeout(function () { el.classList.remove('flash'); }, 2800);
   }
-  box.addEventListener('click', function (e) { var b = e.target.closest('.res'); if (b) go(results[+b.dataset.k]); });
+  box.addEventListener('click', function (e) { var b = e.target.closest('.res'); if (!b) return; if (b.dataset.more) { shown += 40; paint(); return; } go(results[+b.dataset.k]); });
+  scopesEl.addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (!b) return; ST.ss = b.dataset.sc || ''; save(); shown = 40; if (q.value.trim()) run(); else renderScopes(null); });
   var t; q.addEventListener('input', function () { clearTimeout(t); t = setTimeout(run, 90); });
-  q.addEventListener('focus', function () { if (q.value.trim() && results.length) setRes(true); });
   q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && results[0]) go(results[0]); if (e.key === 'Escape') { q.value = ''; run(); } });
   clr.addEventListener('click', function () { q.value = ''; run(); q.focus(); });
   document.getElementById('shist').addEventListener('click', function (e) {
@@ -5369,7 +5417,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
 
   /* ── état persistant ── */
-  var ST = { gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -6980,6 +7028,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       h = dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
         '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>' +
         '<button type="button" class="nstats" data-act="stats"><i>📈</i>Ma progression<small>Réussite, jours actifs, points faibles</small></button>';
+    } else if (v === 'search') { title = ['日本語', 'Recherche'];
     } else if (v === 'stats') { title = ['日本語', 'Ma progression']; h = statsHtml();
     } else if (v === 'learn') {
       title = ['日本語', 'Apprendre'];
@@ -6993,6 +7042,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     navPage.innerHTML = h;
     var tb = document.querySelector('.tb-title'); tb.innerHTML = '<span>' + esc(title[0]) + '</span><small>' + esc(title[1]) + '</small>';
     document.getElementById('tb-back').hidden = NAV.length < 2;
+    if (v === 'search') { renderScopes(cur && q.value.trim() ? cur.counts : null); renderHist(); if (!q.value.trim()) setTimeout(function () { try { q.focus(); } catch (e) {} }, 120); }
     [].slice.call(document.querySelectorAll('#tabbar button[data-tab]')).forEach(function (b) { b.classList.toggle('on', b.dataset.tab === TAB); });
     navTop();
   }
@@ -7000,6 +7050,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   function navInit() {
     try { history.scrollRestoration = 'manual'; } catch (e) {}
     navMain = document.querySelector('main');
+    var sp = document.getElementById('spage'); navMain.insertBefore(sp, navMain.firstChild);
     navPage = document.createElement('div'); navPage.id = 'navpage'; navMain.insertBefore(navPage, navMain.querySelector('.home') || navMain.querySelector('details.sec'));
     [].slice.call(navMain.querySelectorAll(':scope > details.sec')).forEach(function (s) { secBy[secJp(s)] = s; });
     Object.keys(subMap).forEach(function (k) { subById[subMap[k].sub.dataset.id] = subMap[k].sub; });
@@ -7027,7 +7078,6 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     document.getElementById('tabbar').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.dataset.tab) { if (TAB === b.dataset.tab && NAV.length === 1) { window.scrollTo(0, 0); return; } navReset(b.dataset.tab); }
-      else if (b.dataset.srch) openNav(true);
     });
     document.getElementById('tb-back').addEventListener('click', function () { if (pushed > 0) history.back(); else { NAV = [NAV[0]]; navRender(); } });
     navRender();

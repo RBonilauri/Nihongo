@@ -1,11 +1,8 @@
 <header class="topbar"><button class="tb-btn" id="tb-back" type="button" aria-label="Retour" hidden>‹</button><div class="tb-title"><span>日本語</span><small>Référence</small></div><button class="tb-btn" id="menu" type="button" aria-label="Réglages" aria-expanded="false" aria-controls="drawer">⚙</button></header>
-<nav class="tabbar" id="tabbar" aria-label="Navigation"><button type="button" data-tab="home"><i>🏠</i>Accueil</button><button type="button" data-tab="learn"><i>📚</i>Apprendre</button><button type="button" data-tab="quiz"><i>❓</i>Quiz</button><button type="button" data-srch="1"><i>🔍</i>Recherche</button></nav>
+<nav class="tabbar" id="tabbar" aria-label="Navigation"><button type="button" data-tab="home"><i>🏠</i>Accueil</button><button type="button" data-tab="learn"><i>📚</i>Apprendre</button><button type="button" data-tab="quiz"><i>❓</i>Quiz</button><button type="button" data-tab="search"><i>🔍</i>Recherche</button></nav>
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true"><div class="dr-head"><span class="dr-logo">日本語 <small>Référence</small></span><button class="tb-btn" id="dr-close" type="button" aria-label="Fermer le menu">×</button></div>
-<div class="dr-scroll"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div>
-<div class="shist" id="shist" hidden></div>
-<div class="results" id="results" hidden></div>
-<div class="dr-body" id="dr-body">
+<div class="dr-scroll"><div class="dr-body" id="dr-body">
 <section class="dr-card"><h4>Apparence</h4>
 <div class="row stack"><span class="lab">Thème</span><div class="seg" id="seg-theme" role="group" aria-label="Thème"><button type="button" data-t="light">☀ Clair</button><button type="button" data-t="dark">☾ Sombre</button><button type="button" data-t="auto">◐ Auto</button></div></div>
 <div class="row"><span class="lab">Taille du texte</span><div class="stepper"><button id="fs-" type="button" aria-label="Réduire">A−</button><output id="fs-val" role="button" tabindex="0" title="Revenir à 100 %">100 %</output><button id="fs+" type="button" aria-label="Agrandir">A+</button></div></div>
@@ -20,3 +17,4 @@
 <div class="row"><span class="lab">Fiches sues<small>Tout remettre à zéro</small></span><button class="mini danger" id="rst" type="button">Réinitialiser</button></div>
 </section>
 </div></div></div></aside>
+<section class="spage" id="spage" aria-label="Recherche"><div class="shead"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div><div class="scopes" id="scopes" role="group" aria-label="Rubrique"></div></div><div class="shist" id="shist" hidden></div><div class="results" id="results" hidden></div><p class="shint" id="shint">Cherche en français, en romaji ou en japonais. Choisis une rubrique pour restreindre la recherche.</p></section>

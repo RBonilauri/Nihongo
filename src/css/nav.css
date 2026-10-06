@@ -96,3 +96,17 @@
   .q-more > summary::-webkit-details-marker { display: none; }
   .q-more > summary::before { content: '▸'; margin-right: .5rem; transition: transform .15s; }
   .q-more[open] > summary::before { transform: rotate(90deg); }
+
+  .spage { display: none; }
+  main.v-search > .spage { display: block; }
+  .spage .shead { position: sticky; top: calc(52px + env(safe-area-inset-top, 0px)); z-index: 15; background: var(--bg); margin: 0 -16px; padding: .7rem 16px .3rem; }
+  .spage .field { margin-bottom: .5rem; }
+  .spage .results .res.more { text-align: center; color: var(--gold); }
+  .spage .results[hidden], .spage .shist[hidden], .shint[hidden] { display: none; }
+  .scopes { display: flex; gap: .4rem; overflow-x: auto; padding: .1rem 0 .5rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .scopes::-webkit-scrollbar { display: none; }
+  .scopes .chip { flex: none; min-height: 36px; padding: .2rem .8rem; white-space: nowrap; }
+  .scopes .chip.on { background: var(--panel); color: var(--on-panel); border-color: var(--panel); }
+  .scopes .chip small { display: inline; margin-left: .25rem; font-size: .68rem; opacity: .75; }
+  .scopes .chip.zero { opacity: .45; }
+  .shint { color: var(--muted); font-size: .85rem; line-height: 1.5; padding: .6rem .2rem; }

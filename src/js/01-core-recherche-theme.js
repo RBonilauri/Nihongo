@@ -23,7 +23,7 @@
       function add(el, path, sec, sub) {
         var txt = (el.tagName === 'TR' ? Array.prototype.map.call(el.children, function (c) { return c.textContent.replace(/\s+/g, ' ').trim(); }).filter(Boolean).join(' · ') : el.textContent).replace(/\s+/g, ' ').trim();
         if (txt.length < 2) return;
-        index.push({ el: el, path: path, sec: sec, sub: sub, text: txt, norm: fold(txt) + (el.dataset && el.dataset.ro ? ' ' + fold(el.dataset.ro) : '') });
+        index.push({ el: el, path: path, sec: sec, sj: jp, sub: sub, text: txt, norm: fold(txt) + (el.dataset && el.dataset.ro ? ' ' + fold(el.dataset.ro) : '') });
       }
       add(sec.querySelector(':scope > summary'), jp + ' ' + secLabel, sec, null);
       var scope = function (root, path, sub) {
@@ -64,8 +64,8 @@
     out += esc(seg.slice(cur));
     return (start > 0 ? '… ' : '') + out + (end < t.length ? ' …' : '');
   }
-  var results = [], drBody = document.getElementById('dr-body');
-  function setRes(v) { box.hidden = !v; drBody.hidden = v; }
+  var results = [], cur = null, shown = 40, shint = document.getElementById('shint'), scopesEl = document.getElementById('scopes');
+  function setRes(v) { box.hidden = !v; if (shint) shint.hidden = v; }
   /* mots uniques de l'index (pour la correction d'une faute de frappe) */
   var vocabW = null;
   function lev1(a, b) { // vrai si distance d'édition ≤ 1
@@ -114,38 +114,63 @@
     h.hidden = false;
   }
   function remember(w) { w = w.trim(); if (w.length < 2) return; ST.sh = [w].concat((ST.sh || []).filter(function (x) { return x !== w; })).slice(0, 6); save(); }
+  function scopeList() {
+    var o = [], seen = {};
+    index.forEach(function (it) { if (!seen[it.sj]) { seen[it.sj] = 1; o.push({ j: it.sj, l: it.sec.querySelector(':scope > summary .lbl').textContent.trim() }); } });
+    return o;
+  }
+  function renderScopes(counts) {
+    if (!scopesEl) return;
+    var sc = ST.ss || '', tot = counts ? Object.keys(counts).reduce(function (a, k) { return a + counts[k]; }, 0) : 0;
+    var h = '<button type="button" class="chip' + (sc ? '' : ' on') + '" data-sc="">Tout' + (counts ? ' <small>' + tot + '</small>' : '') + '</button>';
+    scopeList().forEach(function (s) {
+      var n = counts ? (counts[s.j] || 0) : null;
+      h += '<button type="button" class="chip' + (sc === s.j ? ' on' : '') + (n === 0 && sc !== s.j ? ' zero' : '') + '" data-sc="' + esc(s.j) + '">' + esc(s.l) + (n !== null ? ' <small>' + n + '</small>' : '') + '</button>';
+    });
+    scopesEl.innerHTML = h;
+    var on = scopesEl.querySelector('.on'); if (on && on.scrollIntoView && scopesEl.scrollWidth > scopesEl.clientWidth) scopesEl.scrollLeft = Math.max(0, on.offsetLeft - 40);
+  }
+  function paint() {
+    if (!cur) return;
+    var hits = cur.hits, raw = cur.raw, sc = ST.ss || '';
+    results = hits.slice(0, shown).map(function (h) { return h.it; });
+    var scLbl = ''; if (sc) { var f = scopeList().filter(function (s) { return s.j === sc; })[0]; scLbl = f ? f.l : sc; }
+    var html = '<div class="count">' + hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + (sc ? ' dans « ' + esc(scLbl) + ' »' : '') + '</div>';
+    if (cur.fixed && results.length) html += '<div class="empty">Aucun résultat exact pour « ' + esc(raw) + ' » — résultats proches.</div>';
+    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' »' + (sc ? ' dans cette rubrique' + (cur.total ? ' (' + cur.total + ' dans les autres : touche « Tout »)' : '') : '') + '. Essaie un seul mot, en français, en romaji ou en japonais.</div>';
+    results.forEach(function (it, k) {
+      html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, cur.flat) + '</span></button>';
+    });
+    if (hits.length > shown) html += '<button type="button" class="res more" data-more="1">Afficher plus (' + (hits.length - shown) + ')</button>';
+    box.innerHTML = html; setRes(true);
+  }
   function run() {
-    var raw = q.value.trim(); clr.hidden = !raw;
-    if (!raw) { setRes(false); box.innerHTML = ''; renderHist(); return; }
+    var raw = q.value.trim(); clr.hidden = !raw; shown = 40;
+    if (!raw) { cur = null; setRes(false); box.innerHTML = ''; renderScopes(null); renderHist(); return; }
     renderHist();
     var toks = fold(raw).replace(/\b(?:l|d|j|qu|c|s|t|m)['’]/g, '').split(/\s+/).filter(Boolean).map(altTok);
     var hits = search(toks), fixed = '';
     if (!hits.length) {
-      var t2 = toks.map(function (alts, j) { var base = alts[0]; if (base.length < 4 || !/^[a-z0-9]+$/.test(base)) return alts; var f = fixTok(base); return f.length ? alts.concat(f) : alts; });
+      var t2 = toks.map(function (alts) { var base = alts[0]; if (base.length < 4 || !/^[a-z0-9]+$/.test(base)) return alts; var f = fixTok(base); return f.length ? alts.concat(f) : alts; });
       var h2 = search(t2);
-      if (h2.length) { hits = h2; toks = t2; fixed = t2.map(function (a) { return a[0]; }).join(' '); }
+      if (h2.length) { hits = h2; toks = t2; fixed = 1; }
     }
+    var counts = {}; hits.forEach(function (h) { counts[h.it.sj] = (counts[h.it.sj] || 0) + 1; });
+    var sc = ST.ss || '', all = hits.length;
+    if (sc) hits = hits.filter(function (h) { return h.it.sj === sc; });
     var flat = []; toks.forEach(function (t) { t.forEach(function (x) { flat.push(x); }); });
-    results = hits.slice(0, 60).map(function (h) { return h.it; });
-    var html = '<div class="count">' + hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + (hits.length > 60 ? ' (60 affichés)' : '') + '</div>';
-    if (fixed && results.length) html += '<div class="empty">Aucun résultat exact pour « ' + esc(raw) + ' » — résultats proches.</div>';
-    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' ». Essaie un seul mot, en français, en romaji ou en japonais.</div>';
-    results.forEach(function (it, k) {
-      html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, flat) + '</span></button>';
-    });
-    box.innerHTML = html; setRes(true);
+    cur = { hits: hits, raw: raw, flat: flat, fixed: fixed, total: all - hits.length, counts: counts };
+    renderScopes(counts); paint();
   }
   function go(it) {
-    remember(q.value); setRes(false); closeNav();
-    setTimeout(function () {
-      navOpen(it.sec, it.sub);
-      var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 80);
-      setTimeout(function () { el.classList.remove('flash'); }, 2600);
-    }, 160);
+    remember(q.value); q.blur();
+    navOpen(it.sec, it.sub);
+    var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 120);
+    setTimeout(function () { el.classList.remove('flash'); }, 2800);
   }
-  box.addEventListener('click', function (e) { var b = e.target.closest('.res'); if (b) go(results[+b.dataset.k]); });
+  box.addEventListener('click', function (e) { var b = e.target.closest('.res'); if (!b) return; if (b.dataset.more) { shown += 40; paint(); return; } go(results[+b.dataset.k]); });
+  scopesEl.addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (!b) return; ST.ss = b.dataset.sc || ''; save(); shown = 40; if (q.value.trim()) run(); else renderScopes(null); });
   var t; q.addEventListener('input', function () { clearTimeout(t); t = setTimeout(run, 90); });
-  q.addEventListener('focus', function () { if (q.value.trim() && results.length) setRes(true); });
   q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && results[0]) go(results[0]); if (e.key === 'Escape') { q.value = ''; run(); } });
   clr.addEventListener('click', function () { q.value = ''; run(); q.focus(); });
   document.getElementById('shist').addEventListener('click', function (e) {
