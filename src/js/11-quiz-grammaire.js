@@ -119,8 +119,8 @@
       var x = byI[it.i];
       if (it.t === 'pick') { var bad = x.p.d[Math.floor(Math.random() * x.p.d.length)]; return shuffle([{ v: fillS(x.p, x.p.a), ok: true, k: fillK(x.p, x.p.a) }, { v: fillS(x.p, bad), ok: false, k: fillK(x.p, bad) }]); }
       if (it.t === 'role') {
-        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: x.p.r, ok: true }], sR = {}; sR[x.p.r] = 1;
-        shuffle(famR.slice()).concat(shuffle([].concat.apply([], GROLES))).forEach(function (r) { if (outR.length < 4 && !sR[r] && !incompat(r, x.p.r)) { sR[r] = 1; outR.push({ v: r, ok: false }); } });
+        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: noJpHint(x.p.r), ok: true }], sR = {}; sR[noJpHint(x.p.r)] = 1;
+        shuffle(famR.slice()).concat(shuffle([].concat.apply([], GROLES))).forEach(function (r) { var n = noJpHint(r); if (outR.length < 4 && !sR[n] && !incompat(r, x.p.r)) { sR[n] = 1; outR.push({ v: n, ok: false }); } });
         return shuffle(outR);
       }
       if (it.t === 'p') return shuffle([{ v: x.p.a, ok: true }].concat(x.p.d.map(function (d) { return { v: d, ok: false }; })));
@@ -128,6 +128,7 @@
       if (it.t === 'c2f') {
         var ans = v.f[x.l], seen = {}, out = [{ v: ans, ok: true, k: kfa(v, ans) }]; seen[ans] = 1;
         function add(s, vv) { if (s && !seen[s] && out.length < 4) { seen[s] = 1; out.push({ v: s, ok: false, k: kfa(vv || v, s) }); } }
+        if (ans.indexOf(v.v) === 0) { add(v.v); add(v.v + 'か'); }   // la bonne réponse garde le verbe entier (ex. 行くな) : les mauvaises aussi
         wrongForms(v, x.l).slice(0, 1).forEach(add);
         shuffle(Object.keys(v.f).filter(function (l) { return l !== x.l && famOf[l] === x.fam; })).forEach(function (l) { add(v.f[l]); });
         shuffle(ALL.filter(function (o) { return o.c === 'c' && o.l === x.l && o.v !== v && o.v.v !== 'ある'; })).forEach(function (o) { if (out.length < 4) add(o.v.f[x.l], o.v); });
@@ -138,6 +139,8 @@
       GFAM.forEach(function (f) { if (f.id === x.fam) famLabels = f.f; });
       var cand = shuffle(famLabels.slice()).concat(shuffle(Object.keys(famOf)));
       cand.forEach(function (l) { if (out2.length < 4 && !s2[l] && v.f[l] !== v.f[x.l]) { s2[l] = 1; out2.push({ v: l, ok: false }); } });
+      var neu = function (l) { return l.replace('たら', 'tara').replace('て', 'te').replace('ば', 'ba'); };
+      out2.forEach(function (o) { o.v = neu(o.v); });
       return shuffle(out2);
     }
 

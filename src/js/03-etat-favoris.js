@@ -48,3 +48,6 @@
   }, true);
 
 
+
+  /* anti-indices : retire les parenthèses contenant du japonais, qui donneraient la réponse */
+  function noJpHint(s) { return String(s).replace(/\s*[（(][^）)]*[぀-ヿ㐀-鿿][^）)]*[）)]/g, '').replace(/\s+/g, ' ').trim(); }

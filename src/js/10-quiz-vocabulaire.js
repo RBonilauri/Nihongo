@@ -103,12 +103,12 @@
       }));
     }
     function options(it) {
-      var x = byI[it.i], key = it.t === 'f2j' ? 'jp' : 'fr', out = [x], seen = {}; seen[x[key]] = 1;
-      var rest = cands(x).filter(function (c) { return !seen[c[key]]; });
+      var x = byI[it.i], key = it.t === 'f2j' ? 'jp' : 'fr', out = [x], seen = {}, kv = function (c) { return key === 'fr' ? noJpHint(c.fr) : c.jp; }; seen[kv(x)] = 1;
+      var rest = cands(x).filter(function (c) { return !seen[kv(c)]; });
       var score = function (c) { return (c.g === x.g ? 0 : c.c === x.c ? 100 : 200) + Math.abs(c[key].length - x[key].length) + Math.random() * 12; };
       rest.sort(function (a, b) { return score(a) - score(b); });
-      rest.some(function (c) { if (seen[c[key]]) return false; seen[c[key]] = 1; out.push(c); return out.length >= 4; });
-      return shuffle(out.map(function (c) { return { v: c[key], ok: c === x, k: c.kk || c.jp }; }));
+      rest.some(function (c) { if (seen[kv(c)]) return false; seen[kv(c)] = 1; out.push(c); return out.length >= 4; });
+      return shuffle(out.map(function (c) { return { v: kv(c), ok: c === x, k: c.kk || c.jp }; }));
     }
 
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
@@ -161,7 +161,7 @@
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
       var ask, big, hint = '';
       if (it.t === 'j2f') { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
-      else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(x.fr) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
+      else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(noJpHint(x.fr)) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
       else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>'; }
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || vtag(x)) + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="v-fb"></div>';

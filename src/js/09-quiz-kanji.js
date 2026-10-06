@@ -113,8 +113,11 @@
         sameFirst(x, pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); })).some(function (c) { add(c[f], false); return out.length >= 4; });
       } else {
         var r = q.w[1]; add(r, true);
-        var words = []; levelPool(curLv()).forEach(function (c) { c.kw.forEach(function (w) { if (w[1] !== r && w[0] !== q.w[0]) words.push({ w: w, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }), d: Math.abs(w[1].length - r.length) }); }); });
-        shuffle(words).sort(function (a, b) { return (a.d > 1) - (b.d > 1) || (b.share - a.share); }).some(function (c) { add(c.w[1], false); return out.length >= 4; });
+        var tail = (q.w[0].match(/[ぁ-ゟ゠-ヿ]+$/) || [''])[0], words = [], wseen = {};
+        var addWords = function (list) { list.forEach(function (c) { c.kw.forEach(function (w) { if (w[1] !== r && w[0] !== q.w[0] && !wseen[w[0]]) { wseen[w[0]] = 1; words.push({ w: w, tl: tail && w[1].slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }), d: Math.abs(w[1].length - r.length) }); } }); }); };
+        addWords(levelPool(curLv()));
+        if (tail && words.filter(function (z) { return z.tl; }).length < 3) addWords(KD);
+        shuffle(words).sort(function (a, b) { return (b.tl - a.tl) || (a.d > 1) - (b.d > 1) || (b.share - a.share); }).some(function (c) { add(c.w[1], false); return out.length >= 4; });
       }
       return shuffle(out);
     }

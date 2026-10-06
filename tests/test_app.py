@@ -187,6 +187,13 @@ with sync_playwright() as p:
     pg.click('#tb-back'); pg.wait_for_timeout(300)
     check('Référence' in title() or 'REF' in title().upper(), 'retour à l’accueil')
 
+    print('Réponses non évidentes')
+    leak = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent);
+        const strip = s => String(s).replace(/\\s*[（(][^）)]*[぀-ヿ㐀-鿿][^）)]*[）)]/g, '').trim();
+        const all = []; (function w(o){ if (Array.isArray(o)) o.forEach(w); else if (o && typeof o === 'object') { if (typeof o.fr === 'string') all.push(o.fr); Object.values(o).forEach(w); } })(v);
+        return all.filter(f => !strip(f)).length; }""")
+    check(leak == 0, 'aucune traduction française vide une fois les indices japonais retirés (%s)' % leak)
+
     print('Données')
     counts = pg.evaluate("""() => ({ kanji: JSON.parse(document.getElementById('kanji-data').textContent).length,
         vocab: JSON.parse(document.getElementById('vocab-data').textContent).length,

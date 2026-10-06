@@ -5480,6 +5480,9 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }, true);
 
 
+
+  /* anti-indices : retire les parenthèses contenant du japonais, qui donneraient la réponse */
+  function noJpHint(s) { return String(s).replace(/\s*[（(][^）)]*[぀-ヿ㐀-鿿][^）)]*[）)]/g, '').replace(/\s+/g, ' ').trim(); }
   /* ── conjugaisons à la demande ── */
   var CJ_GO = { 'う': ['わ', 'い', 'え', 'お'], 'く': ['か', 'き', 'け', 'こ'], 'ぐ': ['が', 'ぎ', 'げ', 'ご'], 'す': ['さ', 'し', 'せ', 'そ'], 'つ': ['た', 'ち', 'て', 'と'], 'ぬ': ['な', 'に', 'ね', 'の'], 'ぶ': ['ば', 'び', 'べ', 'ぼ'], 'む': ['ま', 'み', 'め', 'も'], 'る': ['ら', 'り', 'れ', 'ろ'] };
   var CJ_TE = { 'う': ['って', 'った'], 'つ': ['って', 'った'], 'る': ['って', 'った'], 'く': ['いて', 'いた'], 'ぐ': ['いで', 'いだ'], 'す': ['して', 'した'], 'ぬ': ['んで', 'んだ'], 'ぶ': ['んで', 'んだ'], 'む': ['んで', 'んだ'] };
@@ -5928,8 +5931,11 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         sameFirst(x, pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); })).some(function (c) { add(c[f], false); return out.length >= 4; });
       } else {
         var r = q.w[1]; add(r, true);
-        var words = []; levelPool(curLv()).forEach(function (c) { c.kw.forEach(function (w) { if (w[1] !== r && w[0] !== q.w[0]) words.push({ w: w, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }), d: Math.abs(w[1].length - r.length) }); }); });
-        shuffle(words).sort(function (a, b) { return (a.d > 1) - (b.d > 1) || (b.share - a.share); }).some(function (c) { add(c.w[1], false); return out.length >= 4; });
+        var tail = (q.w[0].match(/[ぁ-ゟ゠-ヿ]+$/) || [''])[0], words = [], wseen = {};
+        var addWords = function (list) { list.forEach(function (c) { c.kw.forEach(function (w) { if (w[1] !== r && w[0] !== q.w[0] && !wseen[w[0]]) { wseen[w[0]] = 1; words.push({ w: w, tl: tail && w[1].slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }), d: Math.abs(w[1].length - r.length) }); } }); }); };
+        addWords(levelPool(curLv()));
+        if (tail && words.filter(function (z) { return z.tl; }).length < 3) addWords(KD);
+        shuffle(words).sort(function (a, b) { return (b.tl - a.tl) || (a.d > 1) - (b.d > 1) || (b.share - a.share); }).some(function (c) { add(c.w[1], false); return out.length >= 4; });
       }
       return shuffle(out);
     }
@@ -6140,12 +6146,12 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       }));
     }
     function options(it) {
-      var x = byI[it.i], key = it.t === 'f2j' ? 'jp' : 'fr', out = [x], seen = {}; seen[x[key]] = 1;
-      var rest = cands(x).filter(function (c) { return !seen[c[key]]; });
+      var x = byI[it.i], key = it.t === 'f2j' ? 'jp' : 'fr', out = [x], seen = {}, kv = function (c) { return key === 'fr' ? noJpHint(c.fr) : c.jp; }; seen[kv(x)] = 1;
+      var rest = cands(x).filter(function (c) { return !seen[kv(c)]; });
       var score = function (c) { return (c.g === x.g ? 0 : c.c === x.c ? 100 : 200) + Math.abs(c[key].length - x[key].length) + Math.random() * 12; };
       rest.sort(function (a, b) { return score(a) - score(b); });
-      rest.some(function (c) { if (seen[c[key]]) return false; seen[c[key]] = 1; out.push(c); return out.length >= 4; });
-      return shuffle(out.map(function (c) { return { v: c[key], ok: c === x, k: c.kk || c.jp }; }));
+      rest.some(function (c) { if (seen[kv(c)]) return false; seen[kv(c)] = 1; out.push(c); return out.length >= 4; });
+      return shuffle(out.map(function (c) { return { v: kv(c), ok: c === x, k: c.kk || c.jp }; }));
     }
 
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
@@ -6198,7 +6204,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
       var ask, big, hint = '';
       if (it.t === 'j2f') { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
-      else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(x.fr) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
+      else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(noJpHint(x.fr)) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
       else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>'; }
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || vtag(x)) + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="v-fb"></div>';
@@ -6367,8 +6373,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var x = byI[it.i];
       if (it.t === 'pick') { var bad = x.p.d[Math.floor(Math.random() * x.p.d.length)]; return shuffle([{ v: fillS(x.p, x.p.a), ok: true, k: fillK(x.p, x.p.a) }, { v: fillS(x.p, bad), ok: false, k: fillK(x.p, bad) }]); }
       if (it.t === 'role') {
-        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: x.p.r, ok: true }], sR = {}; sR[x.p.r] = 1;
-        shuffle(famR.slice()).concat(shuffle([].concat.apply([], GROLES))).forEach(function (r) { if (outR.length < 4 && !sR[r] && !incompat(r, x.p.r)) { sR[r] = 1; outR.push({ v: r, ok: false }); } });
+        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: noJpHint(x.p.r), ok: true }], sR = {}; sR[noJpHint(x.p.r)] = 1;
+        shuffle(famR.slice()).concat(shuffle([].concat.apply([], GROLES))).forEach(function (r) { var n = noJpHint(r); if (outR.length < 4 && !sR[n] && !incompat(r, x.p.r)) { sR[n] = 1; outR.push({ v: n, ok: false }); } });
         return shuffle(outR);
       }
       if (it.t === 'p') return shuffle([{ v: x.p.a, ok: true }].concat(x.p.d.map(function (d) { return { v: d, ok: false }; })));
@@ -6376,6 +6382,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       if (it.t === 'c2f') {
         var ans = v.f[x.l], seen = {}, out = [{ v: ans, ok: true, k: kfa(v, ans) }]; seen[ans] = 1;
         function add(s, vv) { if (s && !seen[s] && out.length < 4) { seen[s] = 1; out.push({ v: s, ok: false, k: kfa(vv || v, s) }); } }
+        if (ans.indexOf(v.v) === 0) { add(v.v); add(v.v + 'か'); }   // la bonne réponse garde le verbe entier (ex. 行くな) : les mauvaises aussi
         wrongForms(v, x.l).slice(0, 1).forEach(add);
         shuffle(Object.keys(v.f).filter(function (l) { return l !== x.l && famOf[l] === x.fam; })).forEach(function (l) { add(v.f[l]); });
         shuffle(ALL.filter(function (o) { return o.c === 'c' && o.l === x.l && o.v !== v && o.v.v !== 'ある'; })).forEach(function (o) { if (out.length < 4) add(o.v.f[x.l], o.v); });
@@ -6386,6 +6393,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       GFAM.forEach(function (f) { if (f.id === x.fam) famLabels = f.f; });
       var cand = shuffle(famLabels.slice()).concat(shuffle(Object.keys(famOf)));
       cand.forEach(function (l) { if (out2.length < 4 && !s2[l] && v.f[l] !== v.f[x.l]) { s2[l] = 1; out2.push({ v: l, ok: false }); } });
+      var neu = function (l) { return l.replace('たら', 'tara').replace('て', 'te').replace('ば', 'ba'); };
+      out2.forEach(function (o) { o.v = neu(o.v); });
       return shuffle(out2);
     }
 
@@ -6967,6 +6976,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     function elig(x, t) {
       if (x.k === 'r') return t === 'rmap';
       if (t === 'rmap') return false;
+      if (t === 'reg' && rl(x.o.r).indexOf(x.o.n) >= 0) return false;
       if ((t === 'cap' || t === 'c2p') && x.o.cap === x.o.n) return false;
       return true;
     }

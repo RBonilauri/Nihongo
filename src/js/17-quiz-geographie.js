@@ -24,6 +24,7 @@
     function elig(x, t) {
       if (x.k === 'r') return t === 'rmap';
       if (t === 'rmap') return false;
+      if (t === 'reg' && rl(x.o.r).indexOf(x.o.n) >= 0) return false;
       if ((t === 'cap' || t === 'c2p') && x.o.cap === x.o.n) return false;
       return true;
     }
