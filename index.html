@@ -5240,7 +5240,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
 
   /* ── état persistant ── */
-  var ST = { fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   function toast(msg, action, fn) {
@@ -5414,6 +5414,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 
   /* ═══════════ RUBRIQUE QUIZ (regroupe tous les quiz) ═══════════ */
   var HK = /[一-鿿々]/;
+  var MIXREG = {};
   function hintBtn(k) { return k ? '<button type="button" class="qhint" aria-label="Voir en kana" title="Voir en kana" data-k="' + esc(k) + '">💡</button>' : ''; }
   function toggleHint(b) {
     var o = b.parentNode.querySelector('.qhint-out');
@@ -5449,6 +5450,17 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     var byK = {}; KD.forEach(function (x) { byK[x.k] = x; });
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
     var Q = null;
+    MIXREG['kanji'] = {
+      label: 'Kanji',
+      count: function () { var sv = cfg; cfg = { lv: 'ALL', types: QT.map(function (t) { return t.id; }), n: 0, wrong: false }; var r = poolSize('ALL', cfg.types, false).q; cfg = sv; return r; },
+      make: function (n) { var sv = cfg; cfg = { lv: 'ALL', types: QT.map(function (t) { return t.id; }), n: n, wrong: false }; var r = buildQuiz(); cfg = sv; return r; },
+      show: function (it, hooks, idx, total) {
+        Q = { items: idx < total ? [it, it] : [it], i: 0, ok: 0, wrongs: [], wrongList: [], t0: Date.now(), mix: hooks, mixTag: '<div class="q-tag q-tag-mix">' + '<b>Kanji</b> › ' + esc(byK[it.k].l) + '</div>' };
+        el.style.zIndex = 95; el.hidden = false; document.body.style.overflow = 'hidden';
+        showQ(); ttl.textContent = 'Quiz général'; prog.textContent = idx + ' / ' + total; barI.style.width = ((idx - 1) / total * 100) + '%'; body.scrollTop = 0;
+      },
+      hide: function () { el.hidden = true; el.style.zIndex = ''; Q = null; paintCard(); }
+    };
 
     var el = document.createElement('div'); el.className = 'quiz'; el.hidden = true;
     el.innerHTML = '<div class="q-top"><button class="x" type="button" aria-label="Fermer">×</button><div class="ttl">Quiz kanji</div><div class="prog"></div></div><div class="q-bar"><i></i></div><div class="q-body" id="q-body"></div>';
@@ -5469,8 +5481,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     function hideQuiz() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideQuiz); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideQuiz); }
     function openQuiz() { open(true); showSetup(); }
-    el.querySelector('.x').addEventListener('click', function () { open(false); paintCard(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) { open(false); paintCard(); } });
+    el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); paintCard(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden && !(Q && Q.mix)) { open(false); paintCard(); } });
 
     /* — utilitaires — */
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
@@ -5571,7 +5583,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (b.id === 'q-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'q-go') { start(buildQuiz()); }
       else if (b.classList.contains('qopt')) answer(b);
-      else if (b.id === 'q-next') { Q.i++; showQ(); }
+      else if (b.id === 'q-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
       else if (b.id === 'q-say') { speak(JSON.parse(b.dataset.say)); }
       else if (b.id === 'q-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
       else if (b.id === 'q-new' || b.id === 'q-back') { showSetup(); }
@@ -5598,7 +5610,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (q.t === 'k2kun') { ask = 'Quelle est la lecture Kun de ce kanji ?'; big = bigKanji(x.k); }
       else { ask = 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; }
       var gl = (opts.length < 2) ? '<p class="conj-note">Pas assez de choix pour ce kanji.</p>' : '';
-      body.innerHTML = '<div class="q-card"><div class="q-ask">' + ask + '</div>' + big + '</div>' + gl +
+      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + '</div>' + gl +
         '<div class="q-opts">' + opts.map(function (o, i) { return '<button type="button" class="qopt' + (q.t === 's2k' ? ' kj' : '') + '" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="q-fb"></div>';
     }
     function answer(b) {
@@ -5643,6 +5655,10 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     'サービスの言葉': 'Vocabulaire du service', '旅行者のための敬語': 'Keigo pour voyageurs', '位置': 'Positions', '副詞': 'Adverbes', '疑問詞': 'Mots interrogatifs',
     '時刻': 'Heures', '曜日': 'Jours de la semaine', '月': 'Mois', '表現': 'Expressions de temps', '体': 'Corps', '動物': 'Animaux', '職業': 'Métiers', '色': 'Couleurs', '食べ物': 'Nourriture',
     'ハイキング': 'Randonnée', 'ホテル': 'Hôtel', 'レストラン': 'Restaurant', '困ったとき': 'En difficulté', '温泉': 'Onsen', '緊急': 'Urgences', '自己紹介': 'Se présenter', '買い物': 'Shopping', '鉄道': 'Train' };
+  function vtag2(x) {
+    var p = x.g.split(':'), sub = p[1] === 'Listes' ? '' : (p[1] === '交通' ? 'Transports' : (VSUB[p[1]] || p[1] || ''));
+    return esc(x.c === 'Vocabulaire' ? sub : x.c + (sub ? ' · ' + sub : ''));
+  }
   function vtag(x) {
     var p = x.g.split(':'), sub = p[1] === 'Listes' ? '' : (p[1] === '交通' ? 'Transports' : (VSUB[p[1]] || p[1] || ''));
     return '<div class="q-tag">' + esc(x.c) + (sub ? ' · ' + esc(sub) : '') + '</div>';
@@ -5659,6 +5675,17 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     cfg.ka = false;
     cfg.types = cfg.types.filter(function (t) { return types.some(function (u) { return u.id === t; }); }); if (!cfg.types.length) cfg.types = types.map(function (t) { return t.id; });
     var Q = null;
+    MIXREG['vocab'] = {
+      label: 'Vocabulaire',
+      count: function () { var sv = cfg; cfg = { cats: VCATS.slice(), types: types.map(function (t) { return t.id; }), n: 0, wrong: false, ka: false }; var r = countAvail().q; cfg = sv; return r; },
+      make: function (n) { var sv = cfg; cfg = { cats: VCATS.slice(), types: types.map(function (t) { return t.id; }), n: n, wrong: false, ka: false }; var r = build(); cfg = sv; return r; },
+      show: function (it, hooks, idx, total) {
+        Q = { items: idx < total ? [it, it] : [it], i: 0, ok: 0, wrongList: [], t0: Date.now(), mix: hooks, mixTag: '<div class="q-tag q-tag-mix">' + '<b>Vocabulaire</b> › ' + vtag2(byI[it.i]) + '</div>' };
+        el.style.zIndex = 95; el.hidden = false; document.body.style.overflow = 'hidden';
+        showQ(); ttl.textContent = 'Quiz général'; prog.textContent = idx + ' / ' + total; barI.style.width = ((idx - 1) / total * 100) + '%'; body.scrollTop = 0;
+      },
+      hide: function () { el.hidden = true; el.style.zIndex = ''; Q = null; paintCard(); }
+    };
     if (!ST.vq) ST.vq = {}; if (!ST.vqs) ST.vqs = { sess: 0, q: 0, ok: 0, ty: {}, cat: {} };
 
     var el = document.createElement('div'); el.className = 'quiz'; el.hidden = true;
@@ -5678,7 +5705,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     quizHost(mainEl).appendChild(card);
     function hideV() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideV); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideV); }
-    el.querySelector('.x').addEventListener('click', function () { open(false); });
+    el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); });
 
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function pool() { return VD.filter(function (x) { return cfg.cats.indexOf(x.c) >= 0 && (!cfg.wrong || (ST.vq[x.i] && ST.vq[x.i].w)); }); }
@@ -5760,7 +5787,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (b.id === 'v-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'v-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
-      else if (b.id === 'v-next') { Q.i++; showQ(); }
+      else if (b.id === 'v-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
       else if (b.id === 'v-say') { sayJp(byI[b.dataset.id]); }
       else if (b.id === 'v-replay') { sayJp(byI[Q.cur.it.i]); }
       else if (b.id === 'v-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
@@ -5782,7 +5809,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       if (it.t === 'j2f') { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
       else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(x.fr) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
       else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>'; }
-      body.innerHTML = '<div class="q-card">' + vtag(x) + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
+      body.innerHTML = '<div class="q-card">' + (Q.mixTag || vtag(x)) + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="v-fb"></div>';
       if (it.t === 'ear') setTimeout(function () { sayJp(x); }, 150);
     }
@@ -5824,7 +5851,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       h += '<div class="q-end"><button type="button" class="qgo" id="v-back">Retour</button><button type="button" class="mini" id="v-reset">Effacer les statistiques</button></div></div>';
       body.innerHTML = h;
     }
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) open(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden && !(Q && Q.mix)) open(false); });
   }
 
   /* ═══════════ QUIZ GRAMMAIRE (conjugaison + particules) ═══════════ */
@@ -5873,6 +5900,17 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     if (!cfg.pg) cfg.pg = GPG.map(function (g) { return g.id; });
     if (!ST[kq]) ST[kq] = {}; if (!ST[ks]) ST[ks] = { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} };
     var Q = null;
+    MIXREG[isC ? 'conj' : 'part'] = {
+      label: isC ? 'Conjugaison' : 'Particules',
+      count: function () { var sv = cfg; cfg = { types: TT.map(function (t) { return t.id; }), fams: GFAM.map(function (f) { return f.id; }), pg: GPG.map(function (g) { return g.id; }), n: 0, wrong: false, ka: false }; var r = avail().q; cfg = sv; return r; },
+      make: function (n) { var sv = cfg; cfg = { types: TT.map(function (t) { return t.id; }), fams: GFAM.map(function (f) { return f.id; }), pg: GPG.map(function (g) { return g.id; }), n: n, wrong: false, ka: false }; var r = build(); cfg = sv; return r; },
+      show: function (it, hooks, idx, total) {
+        Q = { items: idx < total ? [it, it] : [it], i: 0, ok: 0, wrongList: [], t0: Date.now(), mix: hooks, mixTag: '<div class="q-tag q-tag-mix">' + (isC ? '<b>Conjugaison</b>' + (it.t === 'c2f' ? ' › ' + esc((GFAM.filter(function (f) { return f.id === byI[it.i].fam; })[0] || { label: '' }).label) : '') : '<b>Particules</b> › ' + esc((GPG.filter(function (g) { return g.id === byI[it.i].p.g; })[0] || { label: '' }).label)) + '</div>' };
+        el.style.zIndex = 95; el.hidden = false; document.body.style.overflow = 'hidden';
+        showQ(); ttl.textContent = 'Quiz général'; prog.textContent = idx + ' / ' + total; barI.style.width = ((idx - 1) / total * 100) + '%'; body.scrollTop = 0;
+      },
+      hide: function () { el.hidden = true; el.style.zIndex = ''; Q = null; paintCard(); }
+    };
 
     var el = document.createElement('div'); el.className = 'quiz'; el.hidden = true;
     el.innerHTML = '<div class="q-top"><button class="x" type="button" aria-label="Fermer">×</button><div class="ttl">' + TITLE + '</div><div class="prog"></div></div><div class="q-bar"><i></i></div><div class="q-body"></div>';
@@ -5891,8 +5929,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     quizHost(mainEl).appendChild(card);
     function hideG() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideG); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideG); }
-    el.querySelector('.x').addEventListener('click', function () { open(false); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) open(false); });
+    el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden && !(Q && Q.mix)) open(false); });
 
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function typesFor(x) {
@@ -5991,7 +6029,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (b.id === 'g-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'g-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
-      else if (b.id === 'g-next') { Q.i++; showQ(); }
+      else if (b.id === 'g-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
       else if (b.id === 'g-say') { speakItem(byI[b.dataset.id]); }
       else if (b.id === 'g-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
       else if (b.id === 'g-new' || b.id === 'g-back') { showSetup(); }
@@ -6016,7 +6054,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (it.t === 'role') { ask = 'Quel est le rôle de la particule en gras ?'; big = '<div class="q-big vq gq-sent">' + (function () { var pp = (cfg.ka && x.p.k ? x.p.k : x.p.s).replace(/（.*）/, '').split('＿＿'); return esc(pp[0]) + '<b class="gq-hl">' + esc(x.p.a) + '</b>' + esc(pp[1] || ''); })() + '</div><div class="gq-sub">' + esc(x.p.fr) + '</div>'; hint = hintBtn(x.p.k && HK.test(x.p.s) ? fillK(x.p, x.p.a) : ''); }
       else { ask = 'Quelle particule manque ?'; big = '<div class="q-big vq gq-sent">' + esc(cfg.ka && x.p.k ? x.p.k : x.p.s) + '</div><div class="gq-sub">' + esc(x.p.fr) + '</div>'; hint = hintBtn(x.p.k && HK.test(x.p.s) ? x.p.k : ''); }
       var short = it.t === 'p';
-      body.innerHTML = '<div class="q-card"><div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts' + (short ? ' gq-two' : '') + '">' +
+      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts' + (short ? ' gq-two' : '') + '">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt' + (short ? ' gq-pt' : '') + '" data-i="' + i + '">' + esc(pshow(o)) + '</button>'; }).join('') + '</div><div id="g-fb"></div>';
     }
     function lineOf(x) { return x.c === 'p' ? x.p.s.replace('＿＿', x.p.a).replace(/（.*）/, '') : x.v.v + ' → ' + x.l + ' : ' + x.v.f[x.l]; }
@@ -6094,6 +6132,17 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     cfg.types = cfg.types.filter(function (t) { return types.some(function (u) { return u.id === t; }); }); if (!cfg.types.length) cfg.types = types.map(function (t) { return t.id; });
     if (!ST.cq) ST.cq = {}; if (!ST.cqs) ST.cqs = { sess: 0, q: 0, ok: 0, ty: {}, ct: {} };
     var Q = null;
+    MIXREG['compt'] = {
+      label: 'Compteurs',
+      count: function () { var sv = cfg; cfg = { types: types.map(function (t) { return t.id; }), groups: CG.map(function (g) { return g.id; }), n: 0, wrong: false, ka: false }; var r = avail().q; cfg = sv; return r; },
+      make: function (n) { var sv = cfg; cfg = { types: types.map(function (t) { return t.id; }), groups: CG.map(function (g) { return g.id; }), n: n, wrong: false, ka: false }; var r = build(); cfg = sv; return r; },
+      show: function (it, hooks, idx, total) {
+        Q = { items: idx < total ? [it, it] : [it], i: 0, ok: 0, wrongList: [], t0: Date.now(), mix: hooks, mixTag: '<div class="q-tag q-tag-mix">' + '<b>Compteurs</b> › ' + esc((CG.filter(function (g) { return g.id === byI[it.i].g; })[0] || { label: '' }).label) + '</div>' };
+        el.style.zIndex = 95; el.hidden = false; document.body.style.overflow = 'hidden';
+        showQ(); ttl.textContent = 'Quiz général'; prog.textContent = idx + ' / ' + total; barI.style.width = ((idx - 1) / total * 100) + '%'; body.scrollTop = 0;
+      },
+      hide: function () { el.hidden = true; el.style.zIndex = ''; Q = null; paintCard(); }
+    };
 
     var el = document.createElement('div'); el.className = 'quiz'; el.hidden = true;
     el.innerHTML = '<div class="q-top"><button class="x" type="button" aria-label="Fermer">×</button><div class="ttl">Quiz compteurs</div><div class="prog"></div></div><div class="q-bar"><i></i></div><div class="q-body"></div>';
@@ -6112,8 +6161,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     quizHost(mainEl).appendChild(card);
     function hideC() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideC); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideC); }
-    el.querySelector('.x').addEventListener('click', function () { open(false); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) open(false); });
+    el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden && !(Q && Q.mix)) open(false); });
 
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function typesFor(x) {
@@ -6190,7 +6239,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (b.id === 'k-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'k-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
-      else if (b.id === 'k-next') { Q.i++; showQ(); }
+      else if (b.id === 'k-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
       else if (b.id === 'k-say') { var t = sayText(byI[b.dataset.id]); if (t && canSpeak) speak([t]); }
       else if (b.id === 'k-replay') { var t2 = sayText(byI[Q.cur.it.i]); if (t2 && canSpeak) speak([t2]); }
       else if (b.id === 'k-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
@@ -6214,7 +6263,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (it.t === 'ear') { ask = 'Écoute, puis choisis l’écriture'; big = '<button type="button" class="qgo vq-ear" id="k-replay">🔊 Réécouter</button>'; }
       else if (it.t === 'ct') { ask = 'Quel compteur pour :'; big = '<div class="q-big vq">' + esc(x.w[0]) + '</div><div class="gq-sub">' + esc(x.w[1]) + '</div>'; hint = hintBtn(HK.test(x.w[0]) || opts.some(function (o) { return HK.test(o.v); }) ? (x.w[2] || x.w[0]) + '\n' + opts.map(function (o) { return o.k || o.v; }).join(' · ') : ''); }
       else { ask = 'À quoi sert ce compteur ?'; big = '<div class="q-big vq">' + esc(x.c.k) + '</div><div class="gq-sub">' + esc(x.c.ro) + '</div>'; hint = hintBtn(HK.test(x.c.k) ? x.c.b : ''); }
-      body.innerHTML = '<div class="q-card"><div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts' + (it.t === 'ct' || it.t === 'ear' ? ' gq-two' : '') + '">' +
+      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts' + (it.t === 'ct' || it.t === 'ear' ? ' gq-two' : '') + '">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt' + (it.t === 'ct' || it.t === 'ear' ? ' gq-pt' : '') + '" data-i="' + i + '">' + esc(cfg.ka && o.k ? o.k : o.v) + '</button>'; }).join('') + '</div><div id="k-fb"></div>';
       if (it.t === 'ear' && canSpeak) setTimeout(function () { speak([x.r.y]); }, 150);
     }
@@ -6268,6 +6317,84 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     }
   }
 
+  function initMix(mainEl) {
+    var keys = ['kanji', 'vocab', 'conj', 'part', 'compt'].filter(function (k) { return MIXREG[k]; });
+    if (keys.length < 2) return;
+    var NS = [10, 25, 50, 100, 150, 200];
+    var cfg = ST.mqc || { themes: keys.slice(), n: 25 };
+    cfg.themes = cfg.themes.filter(function (k) { return keys.indexOf(k) >= 0; }); if (!cfg.themes.length) cfg.themes = keys.slice();
+    var S = null;
+    var el = document.createElement('div'); el.className = 'quiz'; el.hidden = true;
+    el.innerHTML = '<div class="q-top"><button class="x" type="button" aria-label="Fermer">×</button><div class="ttl">Quiz général</div><div class="prog"></div></div><div class="q-bar"><i></i></div><div class="q-body"></div>';
+    document.body.appendChild(el);
+    var body = el.querySelector('.q-body'), prog = el.querySelector('.prog'), barI = el.querySelector('.q-bar i');
+    var card = document.createElement('button'); card.type = 'button'; card.className = 'quizcard';
+    card.innerHTML = '<span class="qc-jp">総合</span><span class="qc-t">Quiz général<small>Tous les thèmes mélangés · à la carte</small></span><span class="qc-go">›</span>';
+    quizHost(mainEl).appendChild(card);
+    function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function hideMix() { if (S && S.cur) { S.cur.hide(); S.cur = null; } el.hidden = true; document.body.style.overflow = ''; }
+    function open(v) { if (v) { if (el.hidden) bkPush(hideMix); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideMix); }
+    card.addEventListener('click', function () { open(true); showSetup(); });
+    el.querySelector('.x').addEventListener('click', function () { open(false); });
+    function counts() { var c = {}, t = 0; cfg.themes.forEach(function (k) { c[k] = MIXREG[k].count(); t += c[k]; }); return { c: c, t: t }; }
+    function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
+    function showSetup() {
+      S = null; el.querySelector('.ttl').textContent = 'Quiz général'; prog.textContent = ''; barI.style.width = '0';
+      var all = {}; keys.forEach(function (k) { all[k] = MIXREG[k].count(); });
+      var ct = counts(); if (cfg.n !== 0 && cfg.n > ct.t) cfg.n = 0;
+      var h = '<div class="q-sec"><h4>Thèmes</h4><div class="qchips">' + keys.map(function (k) { return chip(MIXREG[k].label + ' · ' + all[k], cfg.themes.indexOf(k) >= 0, 'data-th="' + k + '"'); }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + NS.filter(function (n) { return n <= ct.t; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + ct.t, cfg.n === 0, 'data-n="0"', ct.t === 0) + '</div></div>';
+      h += '<p class="conj-note">Les questions sont tirées au hasard dans chaque thème, avec les réglages par défaut (tous les types, tous les niveaux). Chaque réponse compte dans les statistiques du quiz d’origine.</p>';
+      h += '<button type="button" class="qgo" id="m-go"' + (ct.t ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? ct.t : Math.min(cfg.n, ct.t)) + ' questions</button>';
+      body.innerHTML = h;
+    }
+    function persist() { ST.mqc = cfg; save(); }
+    function plan() {
+      var ct = counts(), N = cfg.n === 0 ? ct.t : Math.min(cfg.n, ct.t), left = {}, quota = {}, act = cfg.themes.slice(), rem = N;
+      cfg.themes.forEach(function (k) { left[k] = ct.c[k]; quota[k] = 0; });
+      while (rem > 0 && act.length) {
+        var per = Math.max(1, Math.floor(rem / act.length)), next = [];
+        act.forEach(function (k) { var g = Math.min(per, left[k], rem); quota[k] += g; left[k] -= g; rem -= g; if (left[k] > 0) next.push(k); });
+        act = next;
+      }
+      var items = [];
+      cfg.themes.forEach(function (k) { if (quota[k] > 0) MIXREG[k].make(quota[k]).forEach(function (it) { items.push({ k: k, it: it }); }); });
+      return shuffle(items);
+    }
+    function start() {
+      var items = plan(); if (!items.length) return;
+      S = { items: items, i: 0, ok: 0, res: {}, cur: null, t0: Date.now() };
+      cfg.themes.forEach(function (k) { S.res[k] = { n: 0, ok: 0 }; });
+      step();
+    }
+    var hooks = {
+      next: function (ok) { var q = S.items[S.i], r = S.res[q.k]; r.n++; if (ok) { r.ok++; S.ok++; } S.i++; step(); },
+      quit: function () { open(false); }
+    };
+    function step() {
+      if (S.i >= S.items.length) return finish();
+      var q = S.items[S.i], prev = S.cur, m = MIXREG[q.k]; S.cur = m;
+      m.show(q.it, hooks, S.i + 1, S.items.length);
+      if (prev && prev !== m) prev.hide();
+    }
+    function finish() {
+      if (S.cur) { S.cur.hide(); S.cur = null; }
+      var n = S.items.length, secs = Math.round((Date.now() - S.t0) / 1000), pct = Math.round(S.ok / n * 100);
+      prog.textContent = ''; barI.style.width = '100%';
+      var rows = Object.keys(S.res).filter(function (k) { return S.res[k].n; }).map(function (k) { var r = S.res[k], p = Math.round(r.ok / r.n * 100); return '<div class="qs-row"><div class="qs-l"><span>' + MIXREG[k].label + '</span><span><b>' + r.ok + ' / ' + r.n + '</b> · ' + p + ' %</span></div><div class="qs-bar"><i style="width:' + p + '%"></i></div></div>'; }).join('');
+      body.innerHTML = '<div class="q-score"><div class="n">' + S.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div><h4 class="q-h">Par thème</h4><div class="qs-types">' + rows + '</div>' +
+        '<div class="q-end"><button type="button" class="qgo" id="m-again">Rejouer</button><button type="button" class="mini" id="m-new">Nouveau quiz</button><button type="button" class="mini" id="m-close">Fermer</button></div>';
+      body.scrollTop = 0;
+    }
+    body.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b || b.disabled) return;
+      if (b.dataset.th) { var i = cfg.themes.indexOf(b.dataset.th); if (i >= 0) { if (cfg.themes.length > 1) cfg.themes.splice(i, 1); } else cfg.themes.push(b.dataset.th); persist(); showSetup(); }
+      else if (b.dataset.n !== undefined) { cfg.n = +b.dataset.n; persist(); showSetup(); }
+      else if (b.id === 'm-go' || b.id === 'm-again') start();
+      else if (b.id === 'm-new') showSetup();
+      else if (b.id === 'm-close') open(false);
+    });
+  }
   function features() {
     var mainEl = document.querySelector('main');
     // étoiles + bouton Réviser dans chaque sous-section
@@ -6284,7 +6411,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       }
     });
     var hint = mainEl.querySelector('.hint'); mainEl.insertBefore(home, (hint ? hint.nextSibling : mainEl.querySelector('details.sec')));
-    initQuiz(mainEl); initVocab(mainEl); initGrammar(mainEl, 'c'); initGrammar(mainEl, 'p'); initCounters(mainEl); renderHome(); syncFavButtons(); buildSettings();
+    initQuiz(mainEl); initVocab(mainEl); initGrammar(mainEl, 'c'); initGrammar(mainEl, 'p'); initCounters(mainEl); initMix(mainEl); renderHome(); syncFavButtons(); buildSettings();
     document.body.appendChild(deck);
     applyPrefs();
     // ouverture depuis l'adresse (#s2-3)
