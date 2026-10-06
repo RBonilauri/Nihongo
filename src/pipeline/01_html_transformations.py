@@ -1,6 +1,34 @@
 # Transformations du HTML de base : furigana/romaji, empilement, conjugaison inline
 # Exécuté par build.py dans un espace de noms partagé (variables main, css, js…).
 from bs4 import BeautifulSoup as _BS
+def unsplit_tables(html):
+    """Tableaux en deux blocs côte à côte (8 colonnes : heures, mois, jours du mois) → 4 colonnes
+    empilées : plus de défilement horizontal sur téléphone."""
+    soup = _BS(html, 'html.parser')
+    for t in soup.select('table'):
+        hs = t.select('thead th')
+        h = [x.get_text(strip=True) for x in hs]
+        if len(h) != 8 or h[:4] != h[4:]: continue
+        for x in hs[4:]: x.extract()
+        body = t.find('tbody')
+        rows = body.find_all('tr'); lefts, rights, notes = [], [], []
+        for tr in rows:
+            c = tr.find_all('td', recursive=False)
+            if len(c) == 8:
+                lefts.append(c[:4])
+                if any(x.get_text(strip=True) for x in c[4:]): rights.append(c[4:])
+            elif len(c) == 5 and c[4].get('colspan'):
+                lefts.append(c[:4]); notes.append(c[4])
+            else: lefts.append(c)
+        for tr in rows: tr.extract()
+        for cells in lefts + rights:
+            tr = soup.new_tag('tr')
+            for x in cells: tr.append(x.extract())
+            body.append(tr)
+        for x in notes:
+            tr = soup.new_tag('tr'); x['colspan'] = '4'; tr.append(x.extract()); body.append(tr)
+    return str(soup)
+main = unsplit_tables(main)
 def stackify(html):
     soup = _BS(html, 'html.parser')
     n = 0
