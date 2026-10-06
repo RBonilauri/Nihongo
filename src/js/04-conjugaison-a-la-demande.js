@@ -37,13 +37,14 @@
   }
   function cjFill(d) {
     var b = d.querySelector('.cjb'); if (!b || b.firstChild) return;
-    var k = d.dataset.k, ka = d.dataset.ka, ty = d.dataset.t, A = cjForms(k, ty, false), B = k === ka ? null : cjForms(ka, ty, true);
+    var k = d.dataset.k, ka = d.dataset.ka, ty = d.dataset.t, fr = d.dataset.fr || '', A = cjForms(k, ty, false), B = k === ka ? null : cjForms(ka, ty, true);
+    var KM = { 'Poli': ['Polie, présent', 'Polie, négatif'], 'Poli, passé': ['Polie, passé', 'Polie, passé négatif'], 'Neutre (dico)': ['DICO', 'Négatif simple'], 'Neutre, passé': ['Passé simple', 'Passé négatif simple'], 'Forme て': ['Forme en て', 'て négatif'], 'Envie (〜たい)': ['Désidératif', 'Désidératif négatif'], 'Potentiel': ['Potentiel', 'Potentiel négatif'], 'Passif': ['Passif'], 'Causatif': ['Causatif'], 'Volitif (on y va)': ['Volitif'], 'Volitif poli': ['Volitif'], 'Impératif': ['Impératif', 'Interdiction'], 'Conditionnel ば': ['Conditionnel ば', 'Si négatif'], 'Conditionnel たら': ['Conditionnel たら', 'Quand négatif'], 'En cours (〜ている)': ['En cours', 'En cours négatif'], 'Demande (〜ください)': ['Demande', 'Demande négatif'] };
     var h = '<div class="cj"><div class="cj-row cj-h"><span>Forme</span><span>Affirmatif</span><span>Négatif</span></div>';
     A.forEach(function (r, n) {
-      var cell = function (j) { var v = r[j]; if (v === '—') return '<span>—</span>'; var kk = B && B[n][j] !== v ? '<span class="cj-r">' + B[n][j] + '</span>' : ''; return '<span><span class="cj-j">' + v + '</span>' + kk + '</span>'; };
+      var cell = function (j) { var v = r[j]; if (v === '—') return '<span>—</span>'; var kk = B && B[n][j] !== v ? '<span class="cj-r">' + B[n][j] + '</span>' : ''; var km = KM[r[0]], t1 = km && km[j - 1] ? FRV.tr(fr, km[j - 1])[0] : ''; return '<span><span class="cj-j">' + v + '</span>' + kk + (t1 ? '<span class="cj-fr">' + esc(t1) + '</span>' : '') + '</span>'; };
       h += '<div class="cj-row"><span class="cj-l">' + r[0] + '</span>' + cell(1) + cell(2) + '</div>';
     });
-    b.innerHTML = h + '</div><p class="cj-n">Les formes passif et causatif existent pour tous les verbes mais servent surtout avec des verbes d’action ; « — » = forme non utilisée.</p>';
+    b.innerHTML = h + '</div><p class="cj-n">Les formes passif et causatif existent pour tous les verbes mais servent surtout avec des verbes d’action ; « — » = forme non utilisée. Traductions françaises approximatives.</p>';
   }
   document.addEventListener('toggle', function (e) { var d = e.target; if (d.matches && d.matches('details.cjd') && d.open) cjFill(d); }, true);
 

@@ -174,6 +174,7 @@
       else if (b.id === 'g-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
       else if (b.id === 'g-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
+      else if (b.id === 'g-tr') { var tb = $('g-trb'); if (tb) tb.hidden = false; b.hidden = true; }
       else if (b.id === 'g-say') { speakItem(byI[b.dataset.id]); }
       else if (b.id === 'g-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
       else if (b.id === 'g-new' || b.id === 'g-back') { showSetup(); }
@@ -216,7 +217,9 @@
       var last = Q.i + 1 >= Q.items.length, h = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div><div class="vq-ans">';
       if (x.c === 'p') h += '<div class="vq-jp">' + esc(x.p.s.replace('＿＿', x.p.a).replace(/（.*）/, '')) + '</div><div>' + esc(x.p.fr) + '</div><div class="vq-ro">' + esc(x.p.n) + '</div>';
       else h += '<div class="vq-jp">' + esc(x.v.f[x.l]) + '</div>' + (x.v.r[x.l] ? '<div>' + esc(x.v.r[x.l]) + '</div>' : '') + '<div><b>' + esc(x.l) + '</b> de ' + esc(x.v.v) + ' (' + esc(x.v.fr) + ')</div><div class="vq-ro">' + esc(x.v.g) + '</div>';
-      h += '</div><div class="fbb">' + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + esc(x.i) + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
+      var trv = x.c === 'c' ? FRV.tr(x.v.fr, x.l) : [];
+      if (trv.length) h += '<div class="vq-tr" id="g-trb" hidden><small>Traduction approximative</small>' + trv.map(esc).join('<br>') + '</div>';
+      h += '</div><div class="fbb">' + (trv.length ? '<button type="button" class="mini" id="g-tr">👁 Traduction</button>' : '') + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + esc(x.i) + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('g-fb').innerHTML = h;
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }

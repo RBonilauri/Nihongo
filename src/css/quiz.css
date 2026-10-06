@@ -77,3 +77,13 @@
   .q-end { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
   .q-end .qgo { flex: 1 0 100%; }
   .q-end .mini { flex: 1; }
+
+  .vq-tr { margin: .5rem 0; padding: .5rem .7rem; border-left: 3px solid var(--gold); background: var(--aged); border-radius: 0 8px 8px 0; font-size: .95rem; line-height: 1.5; }
+  .vq-tr[hidden] { display: none; }
+  .vq-tr small { display: block; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .15rem; }
+  .cj-fr { display: block; margin-top: .1rem; font-size: .66rem; line-height: 1.3; color: var(--muted); font-style: italic; }
+  /* trois boutons (Traduction, Écouter, Suivant) : retour à la ligne, « Suivant » pleine largeur */
+  .q-fb .fbb { flex-wrap: wrap; }
+  .q-fb .fbb .mini { flex: 1 1 auto; }
+  .q-fb .fbb:has(.mini + .mini) .qgo { flex: 1 1 100%; }
+  .mini[hidden] { display: none !important; }

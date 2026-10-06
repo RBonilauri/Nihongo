@@ -80,7 +80,7 @@ def conjify(html):
             ty = 'suru' if g.startswith('する') else 'irr' if g.startswith('Irr') else 'ru' if g.startswith('G2') else 'u'
             cls = td[4].get('class')
             td[4].clear()
-            d = soup.new_tag('details', attrs={'class': 'cjd', 'data-k': k, 'data-ka': ka, 'data-t': ty})
+            d = soup.new_tag('details', attrs={'class': 'cjd', 'data-k': k, 'data-ka': ka, 'data-t': ty, 'data-fr': td[3].get_text(' ', strip=True)})
             sm = soup.new_tag('summary')
             parts = [x.strip() for x in txt.split('·')]
             i1 = soup.new_tag('span', attrs={'class': 'cj-info'})
