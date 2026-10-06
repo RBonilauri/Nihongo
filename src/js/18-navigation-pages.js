@@ -40,8 +40,7 @@
     } else if (v === 'stats') { title = ['日本語', 'Ma progression']; h = statsHtml();
     } else if (v === 'learn') {
       title = ['日本語', 'Apprendre'];
-      h = POLES.map(function (p) { var ss = p.secs.map(function (j) { return secBy[j]; }).filter(Boolean); return '<button type="button" class="npole" data-p="' + p.id + '"><span class="ni">' + p.jp + '</span><span class="nt">' + esc(p.label) + '<small>' + ss.map(secLb).map(esc).join(' · ') + '</small></span><span class="ch">›</span></button>'; }).join('') +
-        '<button type="button" class="npole" data-act="quiz"><span class="ni">試</span><span class="nt">Quiz<small>Tous les quiz · Quiz général</small></span><span class="ch">›</span></button>';
+      h = POLES.map(function (p) { var ss = p.secs.map(function (j) { return secBy[j]; }).filter(Boolean); return '<button type="button" class="npole" data-p="' + p.id + '"><span class="ni">' + p.jp + '</span><span class="nt">' + esc(p.label) + '<small>' + ss.map(secLb).map(esc).join(' · ') + '</small></span><span class="ch">›</span></button>'; }).join('') ;
     } else if (v === 'pole') {
       var P = POLES.filter(function (p) { return p.id === st.p; })[0]; title = [P.jp, P.label];
       h = P.secs.map(function (j) { return secBy[j]; }).filter(Boolean).map(function (s) { var n = subsOf(s).length; return '<button type="button" class="nsec" data-sj="' + esc(secJp(s)) + '"><span class="nj">' + esc(secJp(s)) + '</span><span class="nt">' + esc(secLb(s)) + '<small>' + (n ? n + ' sous-rubrique' + (n > 1 ? 's' : '') : 'contenu direct') + '</small></span><span class="ch">›</span></button>'; }).join('');
