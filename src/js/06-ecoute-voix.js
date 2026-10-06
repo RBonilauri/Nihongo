@@ -28,7 +28,7 @@
   });
   document.addEventListener('click', function (e) {
     if (!listening) return;
-    if (e.target.closest('button, a, summary, input, label, .fab, .res, .deck, .toast, .searchbar')) return;
+    if (e.target.closest('button, a, summary, .kjd, input, label, .fab, .res, .deck, .toast, .searchbar')) return;
     var one = e.target.closest('.cj-row:not(.cj-h) > span:not(.cj-l), .ex-s');
     if (one) { /* conjugaison / exemple : on lit uniquement la forme cliquée (pas la lecture en kana) */
       var jpEl = one.classList.contains('ex-s') ? one.querySelector('.ex-jp') : one.querySelector('.cj-j');

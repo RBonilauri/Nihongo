@@ -3,6 +3,18 @@
 print('grammar verbs', len(_GV), 'forms', sum(len(v['f']) for v in _GV.values()), 'parts', len(_PARTS))
 
 main = add_romaji(main)
+# Menu « Kanji » : sens de chaque kanji, un par un, pour les mots à plusieurs kanji
+import re as _re, json as _jj, kanji_gloss as _kg
+_KC = _re.compile('[一-鿿々]')
+_nkd = [0]
+def _kjd(m):
+    t = _re.sub(r'<[^>]+>', '', m.group(2)).strip()
+    if len(_KC.findall(t)) < 2 or len(t) > 12 or _re.search('[。、！？ ]', t): return m.group(0)
+    _nkd[0] += 1
+    return m.group(1) + m.group(2) + '<details class="kjd" data-w="' + t + '"><summary><span>Kanji</span><span class="kj-btn"></span></summary><div class="kjb"></div></details>' + m.group(3)
+main = _re.sub(r'(<td[^>]*data-label="Kanji"[^>]*>)(.*?)(</td>)', _kjd, main)
+_GLJ = _jj.dumps(_kg.G, ensure_ascii=False)
+print('mots avec menu Kanji', _nkd[0])
 main = search_html + main
 # searchbar must sit after the header so it sticks at the very top of main: keep as first child
 
@@ -32,7 +44,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 </head>
 <body>
 ''' 
-html = head + main + '\n<script type="application/json" id="kanji-data">' + _KJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="vocab-data">' + _VJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="grammar-data">' + _GJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="map-data">' + open(os.path.join(HERE, 'data', 'japanmap.json'), encoding='utf-8').read().replace('</', '<\\/') + '</script>\n<script type="application/json" id="counter-data">' + _CJ.replace('</', '<\\/') + '</script>\n<script>' + js + '</script>\n</body>\n</html>\n'
+html = head + main + '\n<script type="application/json" id="kanji-data">' + _KJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="kanji-gloss">' + _GLJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="vocab-data">' + _VJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="grammar-data">' + _GJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="map-data">' + open(os.path.join(HERE, 'data', 'japanmap.json'), encoding='utf-8').read().replace('</', '<\\/') + '</script>\n<script type="application/json" id="counter-data">' + _CJ.replace('</', '<\\/') + '</script>\n<script>' + js + '</script>\n</body>\n</html>\n'
 open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf-8').write(html)
 print(len(html))
 

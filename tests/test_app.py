@@ -215,6 +215,13 @@ with sync_playwright() as p:
     pg.evaluate("document.querySelector('.fab').click()")
     check(said[0] == [said[1], said[2]], 'écoute : une conjugaison / un exemple = une seule lecture %s' % said)
 
+    print('Menu Kanji un par un')
+    kj = pg.evaluate("""() => { let n = 0, miss = [], wrong = 0; document.querySelectorAll('details.kjd').forEach(d => { d.open = true; d.dispatchEvent(new Event('toggle')); n++;
+        const cs = [...new Set(d.dataset.w.match(/[一-鿿]/g))]; const rs = [...d.querySelectorAll('.kj-r')];
+        if (rs.length !== cs.length) wrong++; rs.forEach(r => { if (r.querySelector('.kj-m').textContent.trim() === '—') miss.push(r.querySelector('.kj-c').textContent); }); });
+        return [n, wrong, miss.slice(0, 10)]; }""")
+    check(kj[0] >= 700 and kj[1] == 0 and not kj[2], 'chaque mot à plusieurs kanji a son menu, chaque kanji a un sens %s' % kj)
+
     print('Données')
     counts = pg.evaluate("""() => ({ kanji: JSON.parse(document.getElementById('kanji-data').textContent).length,
         vocab: JSON.parse(document.getElementById('vocab-data').textContent).length,
