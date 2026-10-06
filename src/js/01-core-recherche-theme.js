@@ -66,31 +66,77 @@
   }
   var results = [], drBody = document.getElementById('dr-body');
   function setRes(v) { box.hidden = !v; drBody.hidden = v; }
-  function run() {
-    var raw = q.value.trim(); clr.hidden = !raw;
-    if (!raw) { setRes(false); box.innerHTML = ''; return; }
-    var toks = fold(raw).split(/\s+/).filter(Boolean).map(function (t) { var k = r2k(t); return k && k !== t ? [t, k] : [t]; });
+  /* mots uniques de l'index (pour la correction d'une faute de frappe) */
+  var vocabW = null;
+  function lev1(a, b) { // vrai si distance d'édition ≤ 1
+    var la = a.length, lb = b.length; if (Math.abs(la - lb) > 1) return false;
+    var i = 0; while (i < la && i < lb && a.charAt(i) === b.charAt(i)) i++;
+    if (la === lb) return a.slice(i + 1) === b.slice(i + 1) || (a.charAt(i) === b.charAt(i + 1) && a.charAt(i + 1) === b.charAt(i) && a.slice(i + 2) === b.slice(i + 2));
+    return la > lb ? a.slice(i + 1) === b.slice(i) : b.slice(i + 1) === a.slice(i);
+  }
+  function fixTok(t) {
+    if (!vocabW) { var m = {}; index.forEach(function (it) { (it.norm.match(/[a-z0-9]{4,}/g) || []).forEach(function (w) { m[w] = (m[w] || 0) + 1; }); }); vocabW = Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }); }
+    var out = []; for (var i = 0; i < vocabW.length && out.length < 6; i++) if (lev1(t, vocabW[i])) out.push(vocabW[i]);
+    return out;
+  }
+  function altTok(t) { // variantes : kana (romaji), singulier français
+    var a = [t], k = r2k(t); if (k && k !== t) a.push(k);
+    if (t.length >= 4 && /[sx]$/.test(t)) a.push(t.slice(0, -1));
+    return a;
+  }
+  function search(toks) {
     var hits = [];
     for (var i = 0; i < index.length; i++) {
       var it = index[i], ok = true, score = 0;
-      for (var j = 0; j < toks.length; j++) { var p = -1; for (var a = 0; a < toks[j].length; a++) { var pa = it.norm.indexOf(toks[j][a]); if (pa >= 0 && (p < 0 || pa < p)) p = pa; } if (p < 0) { ok = false; break; } score += p === 0 ? 3 : 1; }
+      for (var j = 0; j < toks.length; j++) {
+        var p = -1, ws = false;
+        for (var a = 0; a < toks[j].length; a++) {
+          var tk = toks[j][a], pa = it.norm.indexOf(tk);
+          if (pa >= 0 && (p < 0 || pa < p)) p = pa;
+          if (pa >= 0 && !ws) { var q0 = pa; while (q0 >= 0) { if (q0 === 0 || !/[a-z0-9]/.test(it.norm.charAt(q0 - 1))) { ws = true; break; } q0 = it.norm.indexOf(tk, q0 + 1); } }
+        }
+        if (p < 0) { ok = false; break; }
+        score += (ws ? 1.5 : 0) - Math.min(p, 200) / 400;
+      }
       if (!ok) continue;
       if (it.el.tagName === 'SUMMARY' || it.el.classList.contains('section-title')) score += 4;
       score -= Math.min(it.text.length, 400) / 200;
       hits.push({ it: it, s: score });
     }
     hits.sort(function (a, b) { return b.s - a.s; });
+    return hits;
+  }
+  function renderHist() {
+    var h = document.getElementById('shist'), l = (ST.sh || []);
+    if (!h) return;
+    if (!l.length || q.value.trim()) { h.hidden = true; return; }
+    h.innerHTML = '<div class="count">Recherches récentes <button type="button" class="shx" data-x="1">effacer</button></div>' + l.map(function (w, i) { return '<button type="button" class="chip" data-w="' + i + '">' + esc(w) + '</button>'; }).join('');
+    h.hidden = false;
+  }
+  function remember(w) { w = w.trim(); if (w.length < 2) return; ST.sh = [w].concat((ST.sh || []).filter(function (x) { return x !== w; })).slice(0, 6); save(); }
+  function run() {
+    var raw = q.value.trim(); clr.hidden = !raw;
+    if (!raw) { setRes(false); box.innerHTML = ''; renderHist(); return; }
+    renderHist();
+    var toks = fold(raw).replace(/\b(?:l|d|j|qu|c|s|t|m)['’]/g, '').split(/\s+/).filter(Boolean).map(altTok);
+    var hits = search(toks), fixed = '';
+    if (!hits.length) {
+      var t2 = toks.map(function (alts, j) { var base = alts[0]; if (base.length < 4 || !/^[a-z0-9]+$/.test(base)) return alts; var f = fixTok(base); return f.length ? alts.concat(f) : alts; });
+      var h2 = search(t2);
+      if (h2.length) { hits = h2; toks = t2; fixed = t2.map(function (a) { return a[0]; }).join(' '); }
+    }
     var flat = []; toks.forEach(function (t) { t.forEach(function (x) { flat.push(x); }); });
     results = hits.slice(0, 60).map(function (h) { return h.it; });
     var html = '<div class="count">' + hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + (hits.length > 60 ? ' (60 affichés)' : '') + '</div>';
-    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' ». Essaie un seul mot, en français ou en japonais.</div>';
+    if (fixed && results.length) html += '<div class="empty">Aucun résultat exact pour « ' + esc(raw) + ' » — résultats proches.</div>';
+    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' ». Essaie un seul mot, en français, en romaji ou en japonais.</div>';
     results.forEach(function (it, k) {
       html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, flat) + '</span></button>';
     });
     box.innerHTML = html; setRes(true);
   }
   function go(it) {
-    setRes(false); closeNav();
+    remember(q.value); setRes(false); closeNav();
     setTimeout(function () {
       navOpen(it.sec, it.sub);
       var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 80);
@@ -102,6 +148,11 @@
   q.addEventListener('focus', function () { if (q.value.trim() && results.length) setRes(true); });
   q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && results[0]) go(results[0]); if (e.key === 'Escape') { q.value = ''; run(); } });
   clr.addEventListener('click', function () { q.value = ''; run(); q.focus(); });
+  document.getElementById('shist').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.x) { ST.sh = []; save(); renderHist(); return; }
+    q.value = (ST.sh || [])[+b.dataset.w] || ''; run(); q.focus();
+  });
   // thème : clair (défaut) / sombre / auto
   var root = document.documentElement, meta = document.querySelector('meta[name="theme-color"]'), seg = document.getElementById('seg-theme');
   function getPref() { try { return localStorage.getItem('jp-theme') || 'light'; } catch (e) { return 'light'; } }
@@ -131,7 +182,7 @@
   var drawer = document.getElementById('drawer'), menuBtn = document.getElementById('menu');
   function openNav(focusSearch) {
     if (!document.body.classList.contains('nav-open')) bkPush(hideNav);
-    document.body.classList.add('nav-open'); drawer.setAttribute('aria-hidden', 'false'); menuBtn.setAttribute('aria-expanded', 'true');
+    renderHist(); document.body.classList.add('nav-open'); drawer.setAttribute('aria-hidden', 'false'); menuBtn.setAttribute('aria-expanded', 'true');
     if (focusSearch) setTimeout(function () { q.focus(); }, 240);
   }
   function closeNav() { bkClose(hideNav); }

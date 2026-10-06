@@ -171,3 +171,9 @@
   .sw[aria-checked="true"] i { transform: translateX(20px); }
   .dr-set { display: none; }
   .empty { color: var(--muted); font-size: .85rem; padding: 1.2rem .2rem; }
+
+  .shist { margin: 0 0 .6rem; }
+  .shist .chips, .shist { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+  .shist .count { width: 100%; font-size: .72rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; padding: .3rem 0; }
+  .shist[hidden] { display: none; }
+  .shx { float: right; border: 0; background: none; color: var(--gold); font: inherit; font-size: .72rem; text-transform: none; cursor: pointer; padding: 0 .2rem; }

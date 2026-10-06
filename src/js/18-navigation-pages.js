@@ -34,7 +34,9 @@
     if (st.d) { st.d.open = true; st.d.classList.add('cur'); var rid = Object.keys(subMap).filter(function (k) { return subMap[k].sub === st.d; })[0]; if (rid) { ST.rec = [rid].concat(ST.rec.filter(function (x) { return x !== rid; })).slice(0, 3); save(); renderHome(); } }
     if (v === 'home') {
       h = dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
-        '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>';
+        '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>' +
+        '<button type="button" class="nstats" data-act="stats"><i>📈</i>Ma progression<small>Réussite, jours actifs, points faibles</small></button>';
+    } else if (v === 'stats') { title = ['日本語', 'Ma progression']; h = statsHtml();
     } else if (v === 'learn') {
       title = ['日本語', 'Apprendre'];
       h = POLES.map(function (p) { var ss = p.secs.map(function (j) { return secBy[j]; }).filter(Boolean); return '<button type="button" class="npole" data-p="' + p.id + '"><span class="ni">' + p.jp + '</span><span class="nt">' + esc(p.label) + '<small>' + ss.map(secLb).map(esc).join(' · ') + '</small></span><span class="ch">›</span></button>'; }).join('') +
@@ -73,6 +75,7 @@
       else if (b.classList.contains('nsec')) navPush({ v: 'sec', s: secBy[b.dataset.sj] });
       else if (b.dataset.act === 'learn') navReset('learn');
       else if (b.dataset.act === 'quiz') navReset('quiz');
+      else if (b.dataset.act === 'stats') navPush({ v: 'stats' });
       else if (b.dataset.act === 'mix') launchQuiz('Quiz général');
     });
     // une sous-rubrique affichée comme page reste ouverte

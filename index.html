@@ -638,6 +638,12 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .dr-set { display: none; }
   .empty { color: var(--muted); font-size: .85rem; padding: 1.2rem .2rem; }
 
+  .shist { margin: 0 0 .6rem; }
+  .shist .chips, .shist { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+  .shist .count { width: 100%; font-size: .72rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; padding: .3rem 0; }
+  .shist[hidden] { display: none; }
+  .shx { float: right; border: 0; background: none; color: var(--gold); font: inherit; font-size: .72rem; text-transform: none; cursor: pointer; padding: 0 .2rem; }
+
   /* ═══ NAVIGATION PAR PAGES ═══ */
   html.js .drawer { left: auto; right: 0; transform: translateX(104%); }
   html.js body.nav-open .drawer { transform: none; }
@@ -687,6 +693,43 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .nday .nd-bar { height: 10px; border-radius: 6px; background: var(--border); margin: .5rem 0; overflow: hidden; }
   .nday .nd-bar i { display: block; height: 100%; background: var(--gold); border-radius: 6px; transition: width .3s; }
   .nday small { color: var(--muted); font-size: .72rem; }
+
+  .nstats { display: flex; align-items: center; gap: .7rem; width: 100%; margin-top: .6rem; padding: .8rem .9rem; font: inherit; text-align: left; border: 1px solid var(--border); background: var(--surface); color: var(--ink); border-radius: 12px; cursor: pointer; min-height: 52px; }
+  .nstats i { font-style: normal; font-size: 1.3rem; }
+  .nstats small { display: block; color: var(--muted); font-size: .72rem; }
+  .pg-sum { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; margin-bottom: .4rem; }
+  .pg-sum div { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: .6rem .3rem; text-align: center; }
+  .pg-sum b { display: block; font-size: 1.15rem; font-family: 'DM Mono', monospace; }
+  .pg-sum small { color: var(--muted); font-size: .66rem; }
+  .pg-t { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 400; margin: 1.1rem 0 .5rem; display: flex; justify-content: space-between; }
+  .pg-t small { text-transform: none; letter-spacing: 0; color: var(--muted); font-size: .72rem; }
+  .pg-week { display: flex; gap: .4rem; align-items: flex-end; height: 120px; border: 1px solid var(--border); background: var(--surface); border-radius: 12px; padding: .6rem .6rem .4rem; }
+  .pg-d { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+  .pg-col { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+  .pg-col i { display: block; width: 100%; min-height: 2px; background: var(--gold); border-radius: 4px 4px 0 0; opacity: .75; }
+  .pg-d.today .pg-col i { opacity: 1; }
+  .pg-d.today .pg-l { color: var(--ink); font-weight: 700; }
+  .pg-n { font-size: .66rem; color: var(--ink); height: 1em; font-family: 'DM Mono', monospace; }
+  .pg-l { font-size: .66rem; color: var(--muted); }
+  .pg-card { border: 1px solid var(--border); background: var(--surface); border-radius: 12px; padding: .7rem .8rem; margin-bottom: .5rem; }
+  .pg-h { display: flex; align-items: center; gap: .5rem; font-size: .9rem; }
+  .pg-i { font-family: 'Noto Serif JP', serif; width: 1.7rem; height: 1.7rem; display: grid; place-items: center; background: var(--panel); color: var(--on-panel); border-radius: 8px; font-size: .95rem; }
+  .pg-p { margin-left: auto; color: var(--muted); font-size: .72rem; }
+  .pg-bar { display: flex; height: 10px; border-radius: 6px; background: var(--border); overflow: hidden; margin: .55rem 0; }
+  .pg-bar i, .pg-leg i { display: block; height: 100%; }
+  .pg-bar .m, .pg-leg .m { background: #0072B2; }
+  .pg-bar .w, .pg-leg .w { background: #E69F00; }
+  .pg-bar .o, .pg-leg .o { background: #999; }
+  .pg-k { display: flex; flex-wrap: wrap; gap: .2rem .9rem; font-size: .72rem; color: var(--muted); }
+  .pg-k b { color: var(--ink); font-family: 'DM Mono', monospace; }
+  .pg-leg { font-size: .68rem; color: var(--muted); margin: .4rem 0; }
+  .pg-leg i { display: inline-block; width: .8rem; height: .8rem; border-radius: 3px; vertical-align: -1px; margin: 0 .2rem 0 .5rem; }
+  .pg-weak { list-style: none; margin: 0; padding: 0; }
+  .pg-weak li { display: flex; align-items: baseline; gap: .6rem; padding: .5rem 0; border-bottom: 1px dashed var(--border); }
+  .pg-wt { font-family: 'Noto Serif JP', serif; font-size: 1.05rem; }
+  .pg-wd { color: var(--muted); font-size: .78rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pg-wx { color: var(--gold); font-size: .7rem; font-family: 'DM Mono', monospace; white-space: nowrap; }
+  .pg-empty { color: var(--muted); font-size: .85rem; }
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -815,6 +858,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true"><div class="dr-head"><span class="dr-logo">日本語 <small>Référence</small></span><button class="tb-btn" id="dr-close" type="button" aria-label="Fermer le menu">×</button></div>
 <div class="dr-scroll"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div>
+<div class="shist" id="shist" hidden></div>
 <div class="results" id="results" hidden></div>
 <div class="dr-body" id="dr-body">
 <section class="dr-card"><h4>Apparence</h4>
@@ -5161,31 +5205,77 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
   var results = [], drBody = document.getElementById('dr-body');
   function setRes(v) { box.hidden = !v; drBody.hidden = v; }
-  function run() {
-    var raw = q.value.trim(); clr.hidden = !raw;
-    if (!raw) { setRes(false); box.innerHTML = ''; return; }
-    var toks = fold(raw).split(/\s+/).filter(Boolean).map(function (t) { var k = r2k(t); return k && k !== t ? [t, k] : [t]; });
+  /* mots uniques de l'index (pour la correction d'une faute de frappe) */
+  var vocabW = null;
+  function lev1(a, b) { // vrai si distance d'édition ≤ 1
+    var la = a.length, lb = b.length; if (Math.abs(la - lb) > 1) return false;
+    var i = 0; while (i < la && i < lb && a.charAt(i) === b.charAt(i)) i++;
+    if (la === lb) return a.slice(i + 1) === b.slice(i + 1) || (a.charAt(i) === b.charAt(i + 1) && a.charAt(i + 1) === b.charAt(i) && a.slice(i + 2) === b.slice(i + 2));
+    return la > lb ? a.slice(i + 1) === b.slice(i) : b.slice(i + 1) === a.slice(i);
+  }
+  function fixTok(t) {
+    if (!vocabW) { var m = {}; index.forEach(function (it) { (it.norm.match(/[a-z0-9]{4,}/g) || []).forEach(function (w) { m[w] = (m[w] || 0) + 1; }); }); vocabW = Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }); }
+    var out = []; for (var i = 0; i < vocabW.length && out.length < 6; i++) if (lev1(t, vocabW[i])) out.push(vocabW[i]);
+    return out;
+  }
+  function altTok(t) { // variantes : kana (romaji), singulier français
+    var a = [t], k = r2k(t); if (k && k !== t) a.push(k);
+    if (t.length >= 4 && /[sx]$/.test(t)) a.push(t.slice(0, -1));
+    return a;
+  }
+  function search(toks) {
     var hits = [];
     for (var i = 0; i < index.length; i++) {
       var it = index[i], ok = true, score = 0;
-      for (var j = 0; j < toks.length; j++) { var p = -1; for (var a = 0; a < toks[j].length; a++) { var pa = it.norm.indexOf(toks[j][a]); if (pa >= 0 && (p < 0 || pa < p)) p = pa; } if (p < 0) { ok = false; break; } score += p === 0 ? 3 : 1; }
+      for (var j = 0; j < toks.length; j++) {
+        var p = -1, ws = false;
+        for (var a = 0; a < toks[j].length; a++) {
+          var tk = toks[j][a], pa = it.norm.indexOf(tk);
+          if (pa >= 0 && (p < 0 || pa < p)) p = pa;
+          if (pa >= 0 && !ws) { var q0 = pa; while (q0 >= 0) { if (q0 === 0 || !/[a-z0-9]/.test(it.norm.charAt(q0 - 1))) { ws = true; break; } q0 = it.norm.indexOf(tk, q0 + 1); } }
+        }
+        if (p < 0) { ok = false; break; }
+        score += (ws ? 1.5 : 0) - Math.min(p, 200) / 400;
+      }
       if (!ok) continue;
       if (it.el.tagName === 'SUMMARY' || it.el.classList.contains('section-title')) score += 4;
       score -= Math.min(it.text.length, 400) / 200;
       hits.push({ it: it, s: score });
     }
     hits.sort(function (a, b) { return b.s - a.s; });
+    return hits;
+  }
+  function renderHist() {
+    var h = document.getElementById('shist'), l = (ST.sh || []);
+    if (!h) return;
+    if (!l.length || q.value.trim()) { h.hidden = true; return; }
+    h.innerHTML = '<div class="count">Recherches récentes <button type="button" class="shx" data-x="1">effacer</button></div>' + l.map(function (w, i) { return '<button type="button" class="chip" data-w="' + i + '">' + esc(w) + '</button>'; }).join('');
+    h.hidden = false;
+  }
+  function remember(w) { w = w.trim(); if (w.length < 2) return; ST.sh = [w].concat((ST.sh || []).filter(function (x) { return x !== w; })).slice(0, 6); save(); }
+  function run() {
+    var raw = q.value.trim(); clr.hidden = !raw;
+    if (!raw) { setRes(false); box.innerHTML = ''; renderHist(); return; }
+    renderHist();
+    var toks = fold(raw).replace(/\b(?:l|d|j|qu|c|s|t|m)['’]/g, '').split(/\s+/).filter(Boolean).map(altTok);
+    var hits = search(toks), fixed = '';
+    if (!hits.length) {
+      var t2 = toks.map(function (alts, j) { var base = alts[0]; if (base.length < 4 || !/^[a-z0-9]+$/.test(base)) return alts; var f = fixTok(base); return f.length ? alts.concat(f) : alts; });
+      var h2 = search(t2);
+      if (h2.length) { hits = h2; toks = t2; fixed = t2.map(function (a) { return a[0]; }).join(' '); }
+    }
     var flat = []; toks.forEach(function (t) { t.forEach(function (x) { flat.push(x); }); });
     results = hits.slice(0, 60).map(function (h) { return h.it; });
     var html = '<div class="count">' + hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + (hits.length > 60 ? ' (60 affichés)' : '') + '</div>';
-    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' ». Essaie un seul mot, en français ou en japonais.</div>';
+    if (fixed && results.length) html += '<div class="empty">Aucun résultat exact pour « ' + esc(raw) + ' » — résultats proches.</div>';
+    if (!results.length) html += '<div class="empty">Aucun résultat pour « ' + esc(raw) + ' ». Essaie un seul mot, en français, en romaji ou en japonais.</div>';
     results.forEach(function (it, k) {
       html += '<button class="res" data-k="' + k + '"><span class="path">' + esc(it.path) + '</span><span class="snip">' + snippet(it, flat) + '</span></button>';
     });
     box.innerHTML = html; setRes(true);
   }
   function go(it) {
-    setRes(false); closeNav();
+    remember(q.value); setRes(false); closeNav();
     setTimeout(function () {
       navOpen(it.sec, it.sub);
       var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 80);
@@ -5197,6 +5287,11 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   q.addEventListener('focus', function () { if (q.value.trim() && results.length) setRes(true); });
   q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && results[0]) go(results[0]); if (e.key === 'Escape') { q.value = ''; run(); } });
   clr.addEventListener('click', function () { q.value = ''; run(); q.focus(); });
+  document.getElementById('shist').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.x) { ST.sh = []; save(); renderHist(); return; }
+    q.value = (ST.sh || [])[+b.dataset.w] || ''; run(); q.focus();
+  });
   // thème : clair (défaut) / sombre / auto
   var root = document.documentElement, meta = document.querySelector('meta[name="theme-color"]'), seg = document.getElementById('seg-theme');
   function getPref() { try { return localStorage.getItem('jp-theme') || 'light'; } catch (e) { return 'light'; } }
@@ -5226,7 +5321,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   var drawer = document.getElementById('drawer'), menuBtn = document.getElementById('menu');
   function openNav(focusSearch) {
     if (!document.body.classList.contains('nav-open')) bkPush(hideNav);
-    document.body.classList.add('nav-open'); drawer.setAttribute('aria-hidden', 'false'); menuBtn.setAttribute('aria-expanded', 'true');
+    renderHist(); document.body.classList.add('nav-open'); drawer.setAttribute('aria-hidden', 'false'); menuBtn.setAttribute('aria-expanded', 'true');
     if (focusSearch) setTimeout(function () { q.focus(); }, 240);
   }
   function closeNav() { bkClose(hideNav); }
@@ -5263,7 +5358,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
 
   /* ── état persistant ── */
-  var ST = { day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -5271,6 +5366,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   function dayState() { var k = dkey(); if (!ST.day || ST.day.d !== k) ST.day = { d: k, n: 0, ok: 0 }; return ST.day; }
   function dayHit(good) {
     var D = dayState(); D.n++; if (good) D.ok++;
+    ST.hist = ST.hist || {}; ST.hist[D.d] = { n: D.n, ok: D.ok }; var hk = Object.keys(ST.hist).sort(); while (hk.length > 60) delete ST.hist[hk.shift()];
     if (D.n === ST.goal) {
       var y = dkey(Date.now() - 864e5);
       ST.strk = { last: D.d, n: ST.strk.last === y ? ST.strk.n + 1 : (ST.strk.last === D.d ? ST.strk.n : 1) };
@@ -6775,7 +6871,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var o = cur.opts[+b.dataset.i], it = cur.it, x = byI[it.i], good = !!o.ok;
       body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
       var st = ST.gq[x.i] || { n: 0, st: 0, w: false }; st.n++;
-      dayHit(good); if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
+      dayHit(good); if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.gq[x.i] = st; save();
       var last = Q.i + 1 >= Q.items.length;
       $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
@@ -6844,7 +6940,9 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     if (st.d) { st.d.open = true; st.d.classList.add('cur'); var rid = Object.keys(subMap).filter(function (k) { return subMap[k].sub === st.d; })[0]; if (rid) { ST.rec = [rid].concat(ST.rec.filter(function (x) { return x !== rid; })).slice(0, 3); save(); renderHome(); } }
     if (v === 'home') {
       h = dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
-        '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>';
+        '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>' +
+        '<button type="button" class="nstats" data-act="stats"><i>📈</i>Ma progression<small>Réussite, jours actifs, points faibles</small></button>';
+    } else if (v === 'stats') { title = ['日本語', 'Ma progression']; h = statsHtml();
     } else if (v === 'learn') {
       title = ['日本語', 'Apprendre'];
       h = POLES.map(function (p) { var ss = p.secs.map(function (j) { return secBy[j]; }).filter(Boolean); return '<button type="button" class="npole" data-p="' + p.id + '"><span class="ni">' + p.jp + '</span><span class="nt">' + esc(p.label) + '<small>' + ss.map(secLb).map(esc).join(' · ') + '</small></span><span class="ch">›</span></button>'; }).join('') +
@@ -6883,6 +6981,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (b.classList.contains('nsec')) navPush({ v: 'sec', s: secBy[b.dataset.sj] });
       else if (b.dataset.act === 'learn') navReset('learn');
       else if (b.dataset.act === 'quiz') navReset('quiz');
+      else if (b.dataset.act === 'stats') navPush({ v: 'stats' });
       else if (b.dataset.act === 'mix') launchQuiz('Quiz général');
     });
     // une sous-rubrique affichée comme page reste ouverte
@@ -6895,6 +6994,51 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     document.getElementById('tb-back').addEventListener('click', function () { if (pushed > 0) history.back(); else { NAV = [NAV[0]]; navRender(); } });
     navRender();
     if (window.__deep) { var dp = window.__deep; window.__deep = null; openTo(dp); }
+  }
+
+  /* ═══════════ PAGE « MA PROGRESSION » ═══════════ */
+  function statsHtml() {
+    function J(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } }
+    var KD = J('kanji-data') || [], VD = J('vocab-data') || [], GD = J('grammar-data') || { verbs: [], parts: [] }, MD = J('map-data') || { p: [] }, CD = J('counter-data') || { counters: [] };
+    var vById = {}; VD.forEach(function (x) { vById[x.i] = x; });
+    var QZ = [
+      { n: 'Kanji', ic: '漢', it: ST.kq, s: ST.kqs, tot: KD.length },
+      { n: 'Vocabulaire & phrases', ic: '語', it: ST.vq, s: ST.vqs, tot: VD.length },
+      { n: 'Conjugaison', ic: '動', it: ST.gq_c, s: ST.gqs_c, tot: 0 },
+      { n: 'Particules', ic: '助', it: ST.gq_p, s: ST.gqs_p, tot: GD.parts.length },
+      { n: 'Compteurs', ic: '数', it: ST.cq, s: ST.cqs, tot: 0 },
+      { n: 'Géographie', ic: '地', it: ST.gq, s: ST.gqs, tot: MD.p.length }
+    ];
+    var tq = 0, tok = 0;
+    var cards = QZ.map(function (z) {
+      var it = z.it || {}, ks = Object.keys(it), seen = ks.length, mast = 0, wr = 0;
+      ks.forEach(function (k) { var v = it[k]; if (v.w) wr++; else if (v.st >= 3) mast++; });
+      var q = (z.s && z.s.q) || 0, ok = (z.s && z.s.ok) || 0;
+      if (!z.s) { ks.forEach(function (k) { q += it[k].n || 0; ok += (it[k].n || 0) - (it[k].x || 0); }); }
+      tq += q; tok += ok;
+      var pct = q ? Math.round(ok * 100 / q) : 0, tot = z.tot && z.tot >= seen ? z.tot : 0;
+      var den = tot || Math.max(seen, 1);
+      return '<div class="pg-card"><div class="pg-h"><span class="pg-i">' + z.ic + '</span><b>' + esc(z.n) + '</b><span class="pg-p">' + (q ? pct + ' % de réussite' : 'pas encore joué') + '</span></div>' +
+        '<div class="pg-bar" title="maîtrisés / à revoir / en cours"><i class="m" style="width:' + (mast * 100 / den) + '%"></i><i class="w" style="width:' + (wr * 100 / den) + '%"></i><i class="o" style="width:' + (Math.max(0, seen - mast - wr) * 100 / den) + '%"></i></div>' +
+        '<div class="pg-k"><span><b>' + seen + '</b>' + (tot ? ' / ' + tot : '') + ' vus</span><span><b>' + mast + '</b> maîtrisés</span><span><b>' + wr + '</b> à revoir</span><span><b>' + q + '</b> réponses</span></div></div>';
+    }).join('');
+    // 7 derniers jours
+    var days = [], mx = 1, H = ST.hist || {}, DN = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+    for (var i = 6; i >= 0; i--) { var t = Date.now() - i * 864e5, k = dkey(t), v = H[k] || { n: 0, ok: 0 }; mx = Math.max(mx, v.n); days.push({ l: DN[new Date(t).getDay()], n: v.n, ok: v.ok, today: i === 0 }); }
+    var week = days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 100 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('');
+    var wk = days.reduce(function (a, d) { return a + d.n; }, 0), act = Object.keys(H).filter(function (k) { return H[k].n > 0; }).length;
+    var D = dayState(), y = dkey(Date.now() - 864e5), strk = (ST.strk.last === D.d || ST.strk.last === y) ? ST.strk.n : 0;
+    // points faibles (kanji + vocabulaire)
+    var weak = [];
+    Object.keys(ST.kq || {}).forEach(function (k) { var v = ST.kq[k]; if (v.x > 0) weak.push({ x: v.x, n: v.n, t: k, d: (KD.filter(function (z) { return z.k === k; })[0] || {}).s || '' }); });
+    Object.keys(ST.vq || {}).forEach(function (k) { var v = ST.vq[k], w = vById[k]; if (v.x > 0 && w) weak.push({ x: v.x, n: v.n, t: w.jp || w.fr, d: w.jp ? w.fr : '' }); });
+    weak.sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); });
+    var wh = weak.slice(0, 10).map(function (w) { return '<li><span class="pg-wt">' + esc(w.t) + '</span><span class="pg-wd">' + esc(w.d) + '</span><span class="pg-wx">' + w.x + '/' + w.n + ' ratés</span></li>'; }).join('');
+    return '<div class="pg"><div class="pg-sum"><div><b>' + tq + '</b><small>réponses</small></div><div><b>' + (tq ? Math.round(tok * 100 / tq) : 0) + ' %</b><small>réussite</small></div><div><b>' + act + '</b><small>jours actifs</small></div><div><b>' + strk + '</b><small>série 🔥</small></div></div>' +
+      '<h3 class="pg-t">7 derniers jours <small>' + wk + ' réponses</small></h3><div class="pg-week">' + week + '</div>' +
+      '<h3 class="pg-t">Par quiz</h3>' + cards +
+      '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div>' +
+      '<h3 class="pg-t">Points faibles</h3>' + (wh ? '<ul class="pg-weak">' + wh + '</ul>' : '<p class="pg-empty">Rien à signaler pour l’instant : les mots ratés apparaîtront ici.</p>') + '</div>';
   }
 
   var ready = function () { build(); features(); selAllInit(); jpMapInit(); navInit(); };

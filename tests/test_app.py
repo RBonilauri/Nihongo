@@ -61,6 +61,21 @@ with sync_playwright() as p:
     pg.click('.res >> nth=0'); pg.wait_for_timeout(800)
     check('Verbes' in title() or '語彙' in title(), 'un résultat ouvre la bonne page')
 
+    print('Recherche avancée')
+    def hits(txt):
+        pg.fill('#q', ''); pg.fill('#q', txt); pg.wait_for_timeout(450)
+        return pg.evaluate("document.querySelectorAll('.res').length")
+    pg.click('#tabbar [data-srch]'); pg.wait_for_timeout(300)
+    check(hits('eau') > 0 and hits('éau') > 0, 'accents indifférents')
+    check(hits('toukyou') > 0, 'romaji « toukyou » trouve')
+    check(hits('particules') > 0 and hits('particule') > 0, 'singulier / pluriel')
+    check(hits('conjugasion') > 0, 'faute de frappe corrigée (« conjugasion »)')
+    check(hits("l'eau") > 0, 'élision « l\'eau »')
+    pg.click('.res >> nth=0'); pg.wait_for_timeout(700)
+    pg.click('#tabbar [data-srch]'); pg.wait_for_timeout(300); pg.fill('#q', ''); pg.wait_for_timeout(200)
+    check(pg.evaluate("!document.getElementById('shist').hidden && document.querySelectorAll('#shist .chip').length") >= 1, 'recherches récentes affichées')
+    pg.evaluate("document.getElementById('dr-close').click()"); pg.wait_for_timeout(300)
+
     print('Quiz')
     pg.click('#tabbar [data-tab=quiz]'); pg.wait_for_timeout(200)
     cards = pg.evaluate("[...document.querySelectorAll('.quizlist .quizcard')].map(e=>e.querySelector('.qc-t').firstChild.textContent)")
@@ -85,6 +100,15 @@ with sync_playwright() as p:
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
     check(pg.evaluate("!!document.querySelector('.nday .nd-bar i')"), 'carte objectif du jour sur l’accueil')
     check(pg.evaluate("(document.querySelector('.nday .nd-h span')||{}).textContent") .startswith('%d / 20' % min(st['n'], 20)), 'compteur affiché cohérent')
+
+    print('Ma progression')
+    pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
+    pg.click('.nstats'); pg.wait_for_timeout(300)
+    check('progression' in title().lower(), 'page « Ma progression » ouverte')
+    check(pg.evaluate("document.querySelectorAll('.pg-card').length") == 6 and pg.evaluate("document.querySelectorAll('.pg-d').length") == 7, '6 quiz et 7 jours affichés')
+    check(pg.evaluate("document.querySelector('.pg-sum b').textContent") != '0', 'réponses totales comptées')
+    pg.click('#tb-back'); pg.wait_for_timeout(300)
+    check('Référence' in title() or 'REF' in title().upper(), 'retour à l’accueil')
 
     print('Données')
     counts = pg.evaluate("""() => ({ kanji: JSON.parse(document.getElementById('kanji-data').textContent).length,
