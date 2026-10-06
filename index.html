@@ -5718,7 +5718,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var score = function (c) { return (c.g === x.g ? 0 : c.c === x.c ? 100 : 200) + Math.abs(c[key].length - x[key].length) + Math.random() * 12; };
       rest.sort(function (a, b) { return score(a) - score(b); });
       rest.some(function (c) { if (seen[c[key]]) return false; seen[c[key]] = 1; out.push(c); return out.length >= 4; });
-      return shuffle(out.map(function (c) { return { v: c[key] + (key === 'jp' && c.ka ? '（' + c.ka + '）' : ''), ok: c === x, k: c.kk || c.jp }; }));
+      return shuffle(out.map(function (c) { return { v: c[key], ok: c === x, k: c.kk || c.jp }; }));
     }
 
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
