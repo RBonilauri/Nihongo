@@ -641,6 +641,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .qchip:disabled { opacity: .35; }
   .qgo { width: 100%; min-height: 50px; padding: 0 1rem; font: inherit; font-weight: 600; color: var(--on-panel); background: var(--panel); border: 0; border-radius: 25px; cursor: pointer; }
   .qgo:disabled { opacity: .4; }
+  .q-tag { display: inline-block; margin: 0 0 .6rem; padding: .18rem .65rem; border: 1px solid var(--border); border-radius: 12px; font-size: .72rem; color: var(--muted); background: var(--bg); }
   .qhint { display: block; margin: .55rem auto 0; width: 40px; height: 36px; border: 1px solid var(--border); background: var(--bg); border-radius: 18px; font-size: 1rem; cursor: pointer; line-height: 1; }
   .qhint.on { background: var(--aged); }
   .qhint-out { margin: .7rem auto 0; max-width: 30rem; white-space: pre-line; font-size: 1.05rem; line-height: 1.6; color: var(--ink); background: var(--aged); border-radius: 10px; padding: .55rem .8rem; }
@@ -5638,6 +5639,14 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     { id: 'f2j', label: 'Français → japonais' },
     { id: 'ear', label: '🔊 Écoute → français' }
   ];
+  var VSUB = { 'つなぎ言葉': 'Mots de liaison', '会話を続ける': 'Relancer la conversation', '同意・断り': 'Accord et refus', '接続詞': 'Connecteurs', '文型': 'Structures de phrase', '相づち': 'Réactions',
+    'サービスの言葉': 'Vocabulaire du service', '旅行者のための敬語': 'Keigo pour voyageurs', '位置': 'Positions', '副詞': 'Adverbes', '疑問詞': 'Mots interrogatifs',
+    '時刻': 'Heures', '曜日': 'Jours de la semaine', '月': 'Mois', '表現': 'Expressions de temps', '体': 'Corps', '動物': 'Animaux', '職業': 'Métiers', '色': 'Couleurs', '食べ物': 'Nourriture',
+    'ハイキング': 'Randonnée', 'ホテル': 'Hôtel', 'レストラン': 'Restaurant', '困ったとき': 'En difficulté', '温泉': 'Onsen', '緊急': 'Urgences', '自己紹介': 'Se présenter', '買い物': 'Shopping', '鉄道': 'Train' };
+  function vtag(x) {
+    var p = x.g.split(':'), sub = p[1] === 'Listes' ? '' : (p[1] === '交通' ? 'Transports' : (VSUB[p[1]] || p[1] || ''));
+    return '<div class="q-tag">' + esc(x.c) + (sub ? ' · ' + esc(sub) : '') + '</div>';
+  }
   var VCATS = ['Voyage', 'Conversation', 'Keigo', 'Vocabulaire', 'Temps', 'Adjectifs', 'Outils'];
   var VN = [10, 25, 50, 100];
   function initVocab(mainEl) {
@@ -5773,7 +5782,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       if (it.t === 'j2f') { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
       else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(x.fr) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
       else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>'; }
-      body.innerHTML = '<div class="q-card"><div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
+      body.innerHTML = '<div class="q-card">' + vtag(x) + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="v-fb"></div>';
       if (it.t === 'ear') setTimeout(function () { sayJp(x); }, 150);
     }
