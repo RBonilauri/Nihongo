@@ -5828,17 +5828,14 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     { id: 's2k', label: 'Sens → kanji', short: 'Kanji' },
     { id: 'k2on', label: 'Kanji → lecture On', short: 'On' },
     { id: 'k2kun', label: 'Kanji → lecture Kun', short: 'Kun' },
-    { id: 'w2r', label: 'Mot → lecture', short: 'Mot' },
-    { id: 'w2s', label: 'Mot → traduction', short: 'Trad.' },
-    { id: 'r2w', label: 'Lecture → mot', short: 'Lect.→mot' },
-    { id: 's2w', label: 'Traduction → mot', short: 'Trad.→mot' }
+    { id: 'w2r', label: 'Mot → lecture', short: 'Mot' }
   ];
-  var WT = ['w2r', 'w2s', 'r2w', 's2w'];
+  var WT = ['w2r'], WMAX = 8;
   var QPRESETS = [
-    { label: 'Tout', types: ['k2s', 's2k', 'k2on', 'k2kun', 'w2r', 'w2s', 'r2w', 's2w'] },
-    { label: 'Mots', types: WT },
+    { label: 'Tout', types: ['k2s', 's2k', 'k2on', 'k2kun', 'w2r'] },
+    { label: 'Mots', types: ['w2r'] },
     { label: 'Sans les mots', types: ['k2s', 's2k', 'k2on', 'k2kun'] },
-    { label: 'Lectures', types: ['k2on', 'k2kun', 'w2r', 'r2w'] },
+    { label: 'Lectures', types: ['k2on', 'k2kun', 'w2r'] },
     { label: 'Sens', types: ['k2s', 's2k'] }
   ];
   var QN = [10, 25, 50, 100, 150, 200];
@@ -5850,7 +5847,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     try {
       var VD = JSON.parse(document.getElementById('vocab-data').textContent), HKJ = /[一-鿿々]/;
       VD.forEach(function (v) {
-        if (!HKJ.test(v.jp) || v.jp.length > 6 || /[。？！、 ・\/]/.test(v.jp) || !v.kk || v.kk === v.jp) return;
+        if (!HKJ.test(v.jp) || v.jp.length > 6 || v.jp.length < 2 || /[。？！、 ・\/]/.test(v.jp) || !v.kk || v.kk === v.jp) return;
         var w = [v.jp, v.kk.split('・')[0], noJpHint(v.fr)];
         if (!w[2]) return;
         v.jp.split('').filter(function (ch, i, a) { return a.indexOf(ch) === i && byK[ch]; }).forEach(function (ch) {
@@ -5859,7 +5856,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       });
     } catch (e) {}
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
-    if (cfg.types.indexOf('w2r') >= 0 && cfg.types.indexOf('w2s') < 0) cfg.types = cfg.types.concat(['w2s', 'r2w', 's2w']);
+    cfg.types = cfg.types.filter(function (t) { return QT.some(function (z) { return z.id === t; }); });
     var Q = null;
     [['N5', 'kanji5'], ['N4', 'kanji4'], ['N3', 'kanji3']].forEach(function (pr) {
       var LV = pr[0];
@@ -5913,7 +5910,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var n = 0, kanji = 0;
       levelPool(lv).forEach(function (x) {
         if (onlyWrong && !(ST.kq[x.k] && ST.kq[x.k].w)) return;
-        var c = types.filter(function (t) { return elig(x, t); }).length; if (c) { n += c; kanji++; }
+        var c = types.filter(function (t) { return elig(x, t); }).length; if (c && types.indexOf('w2r') >= 0 && x.kw.length) c += Math.min(x.kw.length, WMAX) - 1; if (c) { n += c; kanji++; }
       });
       return { q: n, k: kanji };
     }
@@ -5923,7 +5920,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     function buildQuiz() {
       var pool = levelPool(cfg.lv).filter(function (x) { return !cfg.wrong || (ST.kq[x.k] && ST.kq[x.k].w); });
       var order = shuffle(pool.slice()).sort(function (a, b) { return bucket(a.k) - bucket(b.k); });
-      var left = {}; order.forEach(function (x) { left[x.k] = shuffle(cfg.types.filter(function (t) { return elig(x, t); })); });
+      var left = {}, wl = {}; order.forEach(function (x) { left[x.k] = shuffle(cfg.types.filter(function (t) { return elig(x, t); })); var nw = left[x.k].indexOf('w2r') >= 0 ? Math.min(x.kw.length, WMAX) : 0; for (var z = 1; z < nw; z++) left[x.k].push('w2r'); left[x.k] = shuffle(left[x.k]); wl[x.k] = shuffle(x.kw.slice()); });
       var tot = 0; order.forEach(function (x) { tot += left[x.k].length; });
       var items = [], target = cfg.n === 0 ? tot : Math.min(cfg.n, tot), guard = 0;
       while (items.length < target && guard++ < 50) {
@@ -5932,7 +5929,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         if (!round.length) break;
         items = items.concat(shuffle(round));
       }
-      return items.map(function (q) { return { k: q.x.k, t: q.t, w: WT.indexOf(q.t) >= 0 ? shuffle(q.x.kw.slice())[0] : null }; });
+      return items.map(function (q) { return { k: q.x.k, t: q.t, w: WT.indexOf(q.t) >= 0 ? wl[q.x.k].pop() : null }; });
     }
 
     /* — options (distracteurs plausibles) — */
