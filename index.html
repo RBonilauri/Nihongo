@@ -6922,9 +6922,11 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     var tb = document.querySelector('.tb-title'); tb.innerHTML = '<span>' + esc(title[0]) + '</span><small>' + esc(title[1]) + '</small>';
     document.getElementById('tb-back').hidden = NAV.length < 2;
     [].slice.call(document.querySelectorAll('#tabbar button[data-tab]')).forEach(function (b) { b.classList.toggle('on', b.dataset.tab === TAB); });
-    window.scrollTo(0, 0);
+    navTop();
   }
+  function navTop() { window.scrollTo(0, 0); requestAnimationFrame(function () { window.scrollTo(0, 0); setTimeout(function () { if (!NAV[NAV.length - 1].keep) window.scrollTo(0, 0); }, 60); }); }
   function navInit() {
+    try { history.scrollRestoration = 'manual'; } catch (e) {}
     navMain = document.querySelector('main');
     navPage = document.createElement('div'); navPage.id = 'navpage'; navMain.insertBefore(navPage, navMain.querySelector('.home') || navMain.querySelector('details.sec'));
     [].slice.call(navMain.querySelectorAll(':scope > details.sec')).forEach(function (s) { secBy[secJp(s)] = s; });
