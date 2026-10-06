@@ -234,8 +234,8 @@
   table.stack:not(.stack-kanji) td, table.stack:not(.stack-kanji) td:first-child { grid-template-columns: 4.3rem minmax(0, 1fr); gap: .45rem; padding: .22rem 0; font-size: .82rem; line-height: 1.3; }
   table.stack:not(.stack-kanji) td:first-child { grid-template-columns: 1fr; font-size: .92rem; padding: .3rem 0 .2rem; }
   table.stack:not(.stack-kanji) td::before { font-size: .58rem; }
-  table.stack:not(.stack-kanji) td[data-label="Kanji"] { font-size: 1.75rem !important; line-height: 1.2; padding: .1rem 0; }
-  table.stack:not(.stack-kanji) td[data-label="Kanji"] > .kjd { font-size: .8rem; }
+  table.stack:not(.stack-kanji) td[data-k] { font-size: 1.75rem !important; line-height: 1.2; padding: .1rem 0; }
+  table.stack:not(.stack-kanji) td[data-k] > .kjd { font-size: .8rem; }
   table.stack:not(.stack-kanji) td .kana { font-size: .95rem; }
   table.stack:not(.stack-kanji) td.desc { font-size: .78rem; }
   .kjd { margin-top: .15rem; }
@@ -246,3 +246,5 @@
   .kj-m { font-size: .78rem; }
   .kj-y { font-size: .62rem; }
 }
+
+@media (max-width: 700px) { table.stack td.kdup { display: none !important; } }

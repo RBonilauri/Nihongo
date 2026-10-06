@@ -29,7 +29,7 @@ def unsplit_tables(html):
             tr = soup.new_tag('tr'); x['colspan'] = '4'; tr.append(x.extract()); body.append(tr)
     return str(soup)
 main = unsplit_tables(main)
-_reord = [0]
+_reord = [0]; _kdup = [0]
 def stackify(html):
     soup = _BS(html, 'html.parser')
     n = 0
@@ -52,11 +52,17 @@ def stackify(html):
             heads = [h.get_text(' ', strip=True) for h in t.select('thead th')]
             _reord[0] += 1
         t['class'] = (t.get('class') or []) + ['stack'] + (['stack-kanji'] if heads[0] == 'Kanji' and len(heads) >= 4 else [])
+        _voc = _sj in ('語彙', '時間', '地理', '形容詞', '敬語') and '人間関係' not in _st and not _st.startswith('動詞') and 'stack-kanji' not in t['class'] and 'Kanji' in heads and 'Kana' in heads
+        _ik, _ia = (heads.index('Kanji'), heads.index('Kana')) if _voc else (-1, -1)
         for tr in t.select('tbody tr'):
-            for i, td in enumerate(tr.find_all('td', recursive=False)):
-                if i < len(heads): td['data-label'] = heads[i]
+            tds = tr.find_all('td', recursive=False)
+            for i, td in enumerate(tds):
+                if i < len(heads): td['data-label'] = '日本語' if i == _ik else heads[i]
+                if i == _ik: td['data-k'] = '1'
+            if _voc and len(tds) > max(_ik, _ia) and tds[_ik].get_text(strip=True) == tds[_ia].get_text(strip=True):
+                tds[_ia]['class'] = (tds[_ia].get('class') or []) + ['kdup']; _kdup[0] += 1
         n += 1
-    print('stacked tables', n, 'réordonnées', _reord[0])
+    print('stacked tables', n, 'réordonnées', _reord[0], 'kana masqués', _kdup[0])
     return str(soup)
 
 import pykakasi as _pk, re as _re

@@ -12,7 +12,7 @@ def _kjd(m):
     if len(_KC.findall(t)) < 2 or len(t) > 12 or _re.search('[。、！？ ]', t): return m.group(0)
     _nkd[0] += 1
     return m.group(1) + m.group(2) + '<details class="kjd" data-w="' + t + '"><summary><span>Kanji</span><span class="kj-btn"></span></summary><div class="kjb"></div></details>' + m.group(3)
-main = _re.sub(r'(<td[^>]*data-label="Kanji"[^>]*>)(.*?)(</td>)', _kjd, main)
+main = _re.sub(r'(<td[^>]*(?:data-k="1"|data-label="Kanji")[^>]*>)(.*?)(</td>)', _kjd, main)
 _GLJ = _jj.dumps(_kg.G, ensure_ascii=False)
 print('mots avec menu Kanji', _nkd[0])
 main = search_html + main
