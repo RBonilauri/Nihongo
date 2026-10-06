@@ -87,3 +87,9 @@
   .q-fb .fbb .mini { flex: 1 1 auto; }
   .q-fb .fbb:has(.mini + .mini) .qgo { flex: 1 1 100%; }
   .mini[hidden] { display: none !important; }
+
+/* mot du quiz kanji : traduction mise en avant dans la réponse */
+.fbw { margin: .1rem 0 .7rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .7rem; }
+.fbw b { font-size: 1.7rem; font-weight: 600; }
+.fbw span { font-size: 1.05rem; color: var(--ink-soft, inherit); }
+.fbw em { flex-basis: 100%; font-style: normal; font-size: 1.1rem; font-weight: 600; }

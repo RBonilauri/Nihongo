@@ -900,6 +900,12 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .q-fb .fbb .mini { flex: 1 1 auto; }
   .q-fb .fbb:has(.mini + .mini) .qgo { flex: 1 1 100%; }
   .mini[hidden] { display: none !important; }
+
+/* mot du quiz kanji : traduction mise en avant dans la réponse */
+.fbw { margin: .1rem 0 .7rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .7rem; }
+.fbw b { font-size: 1.7rem; font-weight: 600; }
+.fbw span { font-size: 1.05rem; color: var(--ink-soft, inherit); }
+.fbw em { flex-basis: 100%; font-style: normal; font-size: 1.1rem; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -5822,12 +5828,17 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     { id: 's2k', label: 'Sens → kanji', short: 'Kanji' },
     { id: 'k2on', label: 'Kanji → lecture On', short: 'On' },
     { id: 'k2kun', label: 'Kanji → lecture Kun', short: 'Kun' },
-    { id: 'w2r', label: 'Mot → lecture', short: 'Mot' }
+    { id: 'w2r', label: 'Mot → lecture', short: 'Mot' },
+    { id: 'w2s', label: 'Mot → traduction', short: 'Trad.' },
+    { id: 'r2w', label: 'Lecture → mot', short: 'Lect.→mot' },
+    { id: 's2w', label: 'Traduction → mot', short: 'Trad.→mot' }
   ];
+  var WT = ['w2r', 'w2s', 'r2w', 's2w'];
   var QPRESETS = [
-    { label: 'Tout', types: ['k2s', 's2k', 'k2on', 'k2kun', 'w2r'] },
+    { label: 'Tout', types: ['k2s', 's2k', 'k2on', 'k2kun', 'w2r', 'w2s', 'r2w', 's2w'] },
+    { label: 'Mots', types: WT },
     { label: 'Sans les mots', types: ['k2s', 's2k', 'k2on', 'k2kun'] },
-    { label: 'Lectures', types: ['k2on', 'k2kun', 'w2r'] },
+    { label: 'Lectures', types: ['k2on', 'k2kun', 'w2r', 'r2w'] },
     { label: 'Sens', types: ['k2s', 's2k'] }
   ];
   var QN = [10, 25, 50, 100, 150, 200];
@@ -5835,7 +5846,20 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     var KD = []; try { KD = JSON.parse(document.getElementById('kanji-data').textContent); } catch (e) {}
     if (!KD.length) return;
     var byK = {}; KD.forEach(function (x) { byK[x.k] = x; });
+    /* mots utiles : on complète les mots de chaque kanji avec ceux du vocabulaire (lecture + traduction) */
+    try {
+      var VD = JSON.parse(document.getElementById('vocab-data').textContent), HKJ = /[一-鿿々]/;
+      VD.forEach(function (v) {
+        if (!HKJ.test(v.jp) || v.jp.length > 6 || /[。？！、 ・\/]/.test(v.jp) || !v.kk || v.kk === v.jp) return;
+        var w = [v.jp, v.kk.split('・')[0], noJpHint(v.fr)];
+        if (!w[2]) return;
+        v.jp.split('').filter(function (ch, i, a) { return a.indexOf(ch) === i && byK[ch]; }).forEach(function (ch) {
+          var kw = byK[ch].kw; if (kw.length < 8 && !kw.some(function (z) { return z[0] === w[0]; })) kw.push(w);
+        });
+      });
+    } catch (e) {}
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
+    if (cfg.types.indexOf('w2r') >= 0 && cfg.types.indexOf('w2s') < 0) cfg.types = cfg.types.concat(['w2s', 'r2w', 's2w']);
     var Q = null;
     [['N5', 'kanji5'], ['N4', 'kanji4'], ['N3', 'kanji3']].forEach(function (pr) {
       var LV = pr[0];
@@ -5880,7 +5904,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function levelPool(lv) { return KD.filter(function (x) { return lv === 'ALL' || x.l === lv; }); }
     function elig(x, t) {
-      return t === 'k2s' || t === 's2k' || (t === 'k2on' && x.on) || (t === 'k2kun' && x.kun) || (t === 'w2r' && x.kw.length);
+      return t === 'k2s' || t === 's2k' || (t === 'k2on' && x.on) || (t === 'k2kun' && x.kun) || (WT.indexOf(t) >= 0 && x.kw.length);
     }
     function parts(cell) { return cell.split(/[・･]/).map(function (p) { return p.replace(/[()（）]/g, '').trim(); }).filter(Boolean); }
     function senseToks(sn) { return sn.toLowerCase().split(/\s*[\/,;]\s*/).map(function (t) { return t.replace(/\(.*?\)/g, '').trim(); }).filter(Boolean); }
@@ -5908,7 +5932,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         if (!round.length) break;
         items = items.concat(shuffle(round));
       }
-      return items.map(function (q) { return { k: q.x.k, t: q.t, w: q.t === 'w2r' ? shuffle(q.x.kw.slice())[0] : null }; });
+      return items.map(function (q) { return { k: q.x.k, t: q.t, w: WT.indexOf(q.t) >= 0 ? shuffle(q.x.kw.slice())[0] : null }; });
     }
 
     /* — options (distracteurs plausibles) — */
@@ -5918,7 +5942,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     }
     function options(q) {
       var x = byK[q.k], pool = levelPool(curLv()).filter(function (c) { return c.k !== x.k; }), out = [], seen = {};
-      function add(v, ok) { if (!v || seen[v]) return false; seen[v] = 1; out.push({ v: v, ok: ok }); return true; }
+      function add(v, ok, k) { if (!v || seen[v]) return false; seen[v] = 1; out.push({ v: v, ok: ok, k: k }); return true; }
       if (q.t === 'k2s') {
         add(x.s, true); var tx = senseToks(x.s);
         sameFirst(x, pool.filter(function (c) { return disjoint(tx, senseToks(c.s)); })).some(function (c) { add(c.s, false); return out.length >= 4; });
@@ -5930,12 +5954,25 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         add(x[f], true);
         sameFirst(x, pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); })).some(function (c) { add(c[f], false); return out.length >= 4; });
       } else {
-        var r = q.w[1]; add(r, true);
-        var tail = (q.w[0].match(/[ぁ-ゟ゠-ヿ]+$/) || [''])[0], words = [], wseen = {};
-        var addWords = function (list) { list.forEach(function (c) { c.kw.forEach(function (w) { if (w[1] !== r && w[0] !== q.w[0] && !wseen[w[0]]) { wseen[w[0]] = 1; words.push({ w: w, tl: tail && w[1].slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }), d: Math.abs(w[1].length - r.length) }); } }); }); };
+        var r = q.w[1], tail = (q.w[0].match(/[ぁ-ゟ゠-ヿ]+$/) || [''])[0], words = [], wseen = {}, wt = q.t;
+        var fk = function (w) { return wt === 'w2r' ? w[1] : wt === 'w2s' ? w[2] : w[0]; };
+        var okv = fk(q.w); add(okv, true, q.w[1]);
+        var ft = function (t) { return t.toLowerCase().split(/[^a-zàâçéèêëîïôûùüÿœ]+/).filter(function (z) { return z.length > 3; }).map(function (z) { return z.slice(0, 3); }); };
+        var tk = ft(q.w[2]);
+        var addWords = function (list) { list.forEach(function (c) { c.kw.forEach(function (w) {
+          if (fk(w) === okv || w[0] === q.w[0] || wseen[w[0]] || wseen[fk(w)]) return;
+          if (wt === 'w2s' && !disjoint(tk, ft(w[2]))) return;
+          wseen[w[0]] = 1;
+          words.push({ w: w, ov: wt === 'r2w' && w[0].split('').some(function (ch, i) { return i < w[0].length - 1 && r.indexOf(w[0].slice(i, i + 2)) >= 0; }) ? 1 : 0, tl: tail && (wt === 'w2r' ? w[1] : w[0]).slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }) ? 1 : 0, d: Math.abs(w[1].length - r.length) });
+        }); }); };
         addWords(levelPool(curLv()));
-        if (tail && words.filter(function (z) { return z.tl; }).length < 3) addWords(KD);
-        shuffle(words).sort(function (a, b) { return (b.tl - a.tl) || (a.d > 1) - (b.d > 1) || (b.share - a.share); }).some(function (c) { add(c.w[1], false); return out.length >= 4; });
+        var tn = function () { return words.filter(function (z) { return z.tl; }).length; };
+        if ((tail && tn() < 3) || words.length < 6) addWords(KD);
+        var kana = wt === 'w2r' || wt === 'r2w';
+        shuffle(words).sort(function (a, b) {
+          if (kana) return (b.ov - a.ov) || (b.tl - a.tl) || (a.d > 1) - (b.d > 1) || (b.share - a.share);
+          return (a.d > 2) - (b.d > 2) || (b.share - a.share);
+        }).some(function (c) { add(fk(c.w), false, c.w[1]); return out.length >= 4; });
       }
       return shuffle(out);
     }
@@ -5972,6 +6009,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     function persist() { ST.kqc = cfg; save(); }
     body.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b || b.disabled) return;
+      if (b.classList.contains('qhint')) { toggleHint(b); return; }
       if (b.dataset.lv) { cfg.lv = b.dataset.lv; persist(); showSetup(); }
       else if (b.dataset.t) { var i = cfg.types.indexOf(b.dataset.t); if (i >= 0) cfg.types.splice(i, 1); else cfg.types.push(b.dataset.t); persist(); showSetup(); }
       else if (b.dataset.p) { cfg.types = QPRESETS[+b.dataset.p].types.slice(); persist(); showSetup(); }
@@ -5999,14 +6037,16 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var q = Q.items[Q.i], x = byK[q.k], opts = options(q); Q.cur = { q: q, opts: opts, done: false };
       ttl.textContent = 'Quiz kanji · ' + (cfg.lv === 'ALL' ? 'N5 + N4 + N3' : cfg.lv);
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
-      var ask = '', big = '';
+      var ask = '', big = '', hint = '';
       if (q.t === 'k2s') { ask = 'Que signifie ce kanji ?'; big = bigKanji(x.k); }
       else if (q.t === 's2k') { ask = 'Quel kanji correspond à ce sens ?'; big = '<div class="q-big sens">' + esc(x.s) + '</div>'; }
       else if (q.t === 'k2on') { ask = 'Quelle est la lecture On de ce kanji ?'; big = bigKanji(x.k); }
       else if (q.t === 'k2kun') { ask = 'Quelle est la lecture Kun de ce kanji ?'; big = bigKanji(x.k); }
-      else { ask = 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; }
+      else if (q.t === 'r2w') { ask = 'Quel est ce mot ?'; big = '<div class="q-big word">' + esc(q.w[1]) + '</div>'; }
+      else if (q.t === 's2w') { ask = 'Comment s’écrit ce mot ?'; big = '<div class="q-big sens">' + esc(q.w[2]) + '</div>'; if (opts.length > 1) hint = hintBtn(opts.map(function (o) { return o.k; }).join('\n')); }
+      else { ask = q.t === 'w2s' ? 'Que signifie ce mot ?' : 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; }
       var gl = (opts.length < 2) ? '<p class="conj-note">Pas assez de choix pour ce kanji.</p>' : '';
-      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + '</div>' + gl +
+      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div>' + gl +
         '<div class="q-opts">' + opts.map(function (o, i) { return '<button type="button" class="qopt' + (q.t === 's2k' ? ' kj' : '') + '" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="q-fb"></div>';
     }
     function answer(b) {
@@ -6018,13 +6058,13 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (Q.wrongs.indexOf(x.k) < 0) { Q.wrongs.push(x.k); Q.wrongList.push({ k: x.k, t: q.t, w: q.w }); } }
       ST.kq[x.k] = st; save();
       var say = [];
-      if (q.t === 'w2r') say = [q.w[1]]; else { if (x.on) say = say.concat(parts(x.on)); if (x.kun) say = say.concat(parts(x.kun)); }
+      if (WT.indexOf(q.t) >= 0) say = [q.w[1]]; else { if (x.on) say = say.concat(parts(x.on)); if (x.kun) say = say.concat(parts(x.kun)); }
       var kw = x.kw.slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
       var last = Q.i + 1 >= Q.items.length;
       document.getElementById('q-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
+        (WT.indexOf(q.t) >= 0 ? '<div class="fbw"><b>' + esc(q.w[0]) + '</b><span>' + esc(q.w[1]) + '</span><em>' + esc(q.w[2]) + '</em></div>' : '') +
         '<div class="fbk">' + esc(x.k) + '</div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
-        (q.t === 'w2r' ? '<div><b>Mot</b> ' + esc(q.w[0]) + ' (' + esc(q.w[1]) + ') ' + esc(q.w[2]) + '</div>' : '') +
-        (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' +
+                (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' +
         '<div class="fbb"><button type="button" class="mini" id="q-say" data-say=\'' + esc(JSON.stringify(say)) + '\'>🔊 Écouter</button><button type="button" class="qgo" id="q-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       document.getElementById('q-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
