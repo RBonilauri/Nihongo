@@ -114,9 +114,9 @@
       var x = byI[it.i], t = it.t, out;
       if (t === 'rmap') out = [{ v: rl(x.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
       else if (t === 'reg') out = [{ v: rl(x.o.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.o.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
-      else if (t === 'cap') out = [{ v: x.o.cap, ok: true }].concat(pickPrefs(x, 3, 'cap').map(function (o) { return { v: o.cap, ok: false }; }));
+      else if (t === 'cap') out = [{ v: x.o.cap, k: x.o.capk, ok: true }].concat(pickPrefs(x, 3, 'cap').map(function (o) { return { v: o.cap, k: o.capk, ok: false }; }));
       else if (t === 'rd') out = [{ v: x.o.k, ok: true }].concat(pickPrefs(x, 3, 'k').map(function (o) { return { v: o.k, ok: false }; }));
-      else out = [{ v: x.o.n, ok: true }].concat(pickPrefs(x, 3, 'n').map(function (o) { return { v: o.n, ok: false }; }));
+      else out = [{ v: x.o.n, k: x.o.k, ok: true }].concat(pickPrefs(x, 3, 'n').map(function (o) { return { v: o.n, k: o.k, ok: false }; }));
       return shuffle(out);
     }
     function setOf(x) { return x.k === 'r' ? M.p.filter(function (o) { return o.r === x.r; }).map(function (o) { return o.n; }) : [x.o.n]; }
@@ -129,7 +129,7 @@
       if (Q.i >= Q.items.length) return showResult();
       var it = Q.items[Q.i], x = byI[it.i], opts = options(it); Q.cur = { it: it, opts: opts, done: false };
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
-      var ask, big;
+      var ask, big, hint = '';
       if (it.t === 'map') { ask = 'Quelle est cette préfecture ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'rmap') { ask = 'Quelle est cette région ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'reg') { ask = 'Dans quelle région se trouve cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
@@ -137,7 +137,13 @@
       else if (it.t === 'c2p') { ask = 'De quelle préfecture est-ce le chef-lieu ?'; big = '<div class="q-big word vq">' + esc(x.o.cap) + '</div>'; }
       else if (it.t === 'rd') { ask = 'Comment se lit ce nom ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
       else { ask = 'Écoute, puis choisis la préfecture'; big = '<button type="button" class="qgo vq-ear" id="g-replay">🔊 Réécouter</button>'; }
-      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '<div class="q-tag">Géographie</div>') + '<div class="q-ask">' + ask + '</div>' + big + '</div><div class="q-opts">' +
+      var hl = [];
+      if (it.t === 'reg' || it.t === 'cap') hl.push(x.o.k);
+      else if (it.t === 'c2p') hl.push(x.o.capk);
+      opts.forEach(function (o) { if (o.k && HK.test(o.v) && o.k !== o.v) hl.push(o.v + ' → ' + o.k); });
+      hl = hl.filter(function (z) { return z && !(z === x.o.n || z === x.o.cap); });
+      if (hl.length) hint = hintBtn(hl.join('\n'));
+      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '<div class="q-tag">Géographie</div>') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="g-fb"></div>';
       if (it.t === 'ear') setTimeout(function () { sayG(x); }, 150);
     }
@@ -178,6 +184,7 @@
     body.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b || b.disabled) return;
       var d = b.dataset;
+      if (b.classList.contains('qhint')) { toggleHint(b); return; }
       if (d.r) { toggle(cfg.regs, d.r); persist(); showSetup(); }
       else if (d.t) { toggle(cfg.types, d.t); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
