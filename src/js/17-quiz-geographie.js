@@ -97,9 +97,9 @@
       h += qsExtra('g', ST.gq, ALL.length);
       h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + GTY.map(function (t) { return row(esc(t.label), (S.ty || {})[t.id]); }).join('') + '</div>';
       h += '<h4 class="q-h">Par région</h4><div class="qs-types">' + M.ids.map(function (r) { return row(esc(M.reg[r][0]), (S.rg || {})[r]); }).join('') + '</div>';
-      var worst = Object.keys(ST.gq).map(function (k) { var v = ST.gq[k]; return { k: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.k]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
+      var worst = Object.keys(ST.gq).map(function (k) { var v = ST.gq[k]; return { k: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.k]; }).sort(missSort);
       h += '<h4 class="q-h">Les plus ratés</h4>';
-      h += worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { var x = byI[v.k]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.n) + '</span><span>' + esc(x.k === 'r' ? M.reg[x.r][1] : x.o.ro) + '</span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté pour l’instant.</p>';
+      h += worst.length ? missBlock(worst.map(function (v) { var x = byI[v.k]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.n) + '</span><span>' + esc(x.k === 'r' ? M.reg[x.r][1] : x.o.ro) + '</span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; })) : '<p class="conj-note">Aucun raté pour l’instant.</p>';
       h += '<div class="q-end"><button type="button" class="qgo" id="g-back">Retour</button><button type="button" class="mini" id="g-reset">Effacer les statistiques</button></div></div>';
       body.innerHTML = h; body.scrollTop = 0;
     }

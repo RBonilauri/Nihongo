@@ -239,8 +239,8 @@
       h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + TT.map(function (t) { return row(t.label, S.ty[t.id] || { n: 0, ok: 0 }); }).join('') + '</div>';
       var sl = isC ? sorted(S.lab) : []; if (sl.length) h += '<h4 class="q-h">Formes (les plus difficiles d’abord)</h4><div class="qs-types">' + sl.map(function (k) { return row(esc(k), S.lab[k]); }).join('') + '</div>';
       var sp = !isC ? sorted(S.pt) : []; if (sp.length) h += '<h4 class="q-h">Particules (les plus difficiles d’abord)</h4><div class="qs-types">' + sp.map(function (k) { return row(esc(k), S.pt[k]); }).join('') + '</div>';
-      var worst = Object.keys(ST[kq]).map(function (k) { var v = ST[kq][k]; return { i: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.i]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
-      h += '<h4 class="q-h">Les plus ratés</h4>' + (worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { var x = byI[v.i]; return '<div class="q-miss"><span>' + esc(lineOf(x)) + '<small>' + esc(x.c === 'p' ? x.p.fr : x.v.fr) + '</small></span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>');
+      var worst = Object.keys(ST[kq]).map(function (k) { var v = ST[kq][k]; return { i: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.i]; }).sort(missSort);
+      h += '<h4 class="q-h">Les plus ratés</h4>' + (worst.length ? missBlock(worst.map(function (v) { var x = byI[v.i]; return '<div class="q-miss"><span>' + esc(lineOf(x)) + '<small>' + esc(x.c === 'p' ? x.p.fr : x.v.fr) + '</small></span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; })) : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>');
       h += '<div class="q-end"><button type="button" class="qgo" id="g-back">Retour</button><button type="button" class="mini" id="g-reset">Effacer les statistiques</button></div></div>';
       body.innerHTML = h; body.scrollTop = 0;
     }

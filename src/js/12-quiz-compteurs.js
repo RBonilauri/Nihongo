@@ -209,8 +209,8 @@
       h += qsExtra('n', ST.cq, ALL.length);
       h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + CT.map(function (t) { return row(t.label, S.ty[t.id] || { n: 0, ok: 0 }); }).join('') + '</div>';
       if (cts.length) h += '<h4 class="q-h">Par compteur (les plus difficiles d’abord)</h4><div class="qs-types">' + cts.map(function (k) { return row(esc(k) + (cinfo[k] ? ' · ' + esc(cinfo[k].ro) : ''), S.ct[k]); }).join('') + '</div>';
-      var worst = Object.keys(ST.cq).map(function (k) { var v = ST.cq[k]; return { i: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.i]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
-      h += '<h4 class="q-h">Les plus ratés</h4>' + (worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { return '<div class="q-miss"><span>' + esc(lineOf(byI[v.i])) + '</span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>');
+      var worst = Object.keys(ST.cq).map(function (k) { var v = ST.cq[k]; return { i: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.i]; }).sort(missSort);
+      h += '<h4 class="q-h">Les plus ratés</h4>' + (worst.length ? missBlock(worst.map(function (v) { return '<div class="q-miss"><span>' + esc(lineOf(byI[v.i])) + '</span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; })) : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>');
       h += '<div class="q-end"><button type="button" class="qgo" id="k-back">Retour</button><button type="button" class="mini" id="k-reset">Effacer les statistiques</button></div></div>';
       body.innerHTML = h; body.scrollTop = 0;
     }

@@ -121,6 +121,19 @@ with sync_playwright() as p:
     gq = pg.evaluate("Object.keys(JSON.parse(localStorage.getItem('jp-state')).gq||{}).length")
     check(gq > 0, 'progression géographie conservée après rechargement (%d)' % gq)
 
+    print('Tri des plus ratés')
+    import json as _j
+    kq = {k: {'n': n, 'st': 0, 'w': True, 'x': x} for k, (x, n) in zip('一二三四五六七八', [(2, 2), (1, 5), (2, 4), (1, 1), (2, 3), (1, 2), (3, 3), (1, 3)])}
+    st0 = pg.evaluate("localStorage.getItem('jp-state')")
+    pg.evaluate("s=>localStorage.setItem('jp-state',s)", _j.dumps(dict(_j.loads(st0), kq=kq))); pg.reload(); pg.wait_for_timeout(800)
+    pg.click('#tabbar [data-tab=quiz]'); pg.evaluate("document.querySelectorAll('.quizlist .quizcard')[0].click()"); pg.wait_for_timeout(300)
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .qstat-btn').click()"); pg.wait_for_timeout(300)
+    order = pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) .q-miss .qs-cnt')].map(e=>e.textContent)")
+    check(order == ['3 / 3', '2 / 2', '2 / 3', '2 / 4', '1 / 1', '1 / 2', '1 / 3', '1 / 5'], 'ordre erreurs puis taux : %s' % order)
+    check(pg.evaluate("document.querySelectorAll('.quiz:not([hidden]) .q-stats > .q-miss-list .q-miss').length") == 5 and pg.evaluate("!!document.querySelector('.quiz:not([hidden]) details.q-more')"), '5 visibles + menu déroulant pour le reste')
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
+    pg.evaluate("s=>localStorage.setItem('jp-state',s)", st0); pg.reload(); pg.wait_for_timeout(800)
+
     print('Objectif du jour')
     st = pg.evaluate("JSON.parse(localStorage.getItem('jp-state')).day")
     check(st and st['n'] >= 6, 'les réponses de quiz sont comptées (%s)' % st)

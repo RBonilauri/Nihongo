@@ -35,13 +35,13 @@
     var weak = [];
     Object.keys(ST.kq || {}).forEach(function (k) { var v = ST.kq[k]; if (v.x > 0) weak.push({ x: v.x, n: v.n, t: k, d: (KD.filter(function (z) { return z.k === k; })[0] || {}).s || '' }); });
     Object.keys(ST.vq || {}).forEach(function (k) { var v = ST.vq[k], w = vById[k]; if (v.x > 0 && w) weak.push({ x: v.x, n: v.n, t: w.jp || w.fr, d: w.jp ? w.fr : '' }); });
-    weak.sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); });
-    var wh = weak.slice(0, 10).map(function (w) { return '<li><span class="pg-wt">' + esc(w.t) + '</span><span class="pg-wd">' + esc(w.d) + '</span><span class="pg-wx">' + w.x + '/' + w.n + ' ratés</span></li>'; }).join('');
+    weak.sort(missSort);
+    var wh = weak.map(function (w) { return '<li><span class="pg-wt">' + esc(w.t) + '</span><span class="pg-wd">' + esc(w.d) + '</span><span class="pg-wx">' + w.x + '/' + w.n + ' ratés</span></li>'; });
     return '<div class="pg"><div class="pg-sum"><div><b>' + tq + '</b><small>réponses</small></div><div><b>' + (tq ? Math.round(tok * 100 / tq) : 0) + ' %</b><small>réussite</small></div><div><b>' + act + '</b><small>jours actifs</small></div><div><b>' + strk + '</b><small>série 🔥</small></div></div>' +
       '<h3 class="pg-t">7 derniers jours <small>' + wk + ' réponses</small></h3><div class="pg-week">' + week + '</div>' +
       '<h3 class="pg-t">Par quiz</h3>' + cards +
       '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div>' +
-      '<h3 class="pg-t">Points faibles</h3>' + (wh ? '<ul class="pg-weak">' + wh + '</ul>' : '<p class="pg-empty">Rien à signaler pour l’instant : les mots ratés apparaîtront ici.</p>') + '</div>';
+      '<h3 class="pg-t">Points faibles</h3>' + (wh.length ? missBlock(wh, 'pg-weak', 'ul')  : '<p class="pg-empty">Rien à signaler pour l’instant : les mots ratés apparaîtront ici.</p>') + '</div>';
   }
 
   /* bloc commun aux écrans « Statistiques » de chaque quiz : avancement, 7 jours, tendance */
@@ -64,4 +64,14 @@
       days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 100 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('') + '</div>';
     if (trend) h += '<p class="pg-trend">' + trend + '</p>';
     return h;
+  }
+
+  /* classement des « plus ratés » : erreurs décroissantes, puis taux d'erreur, puis nb d'essais */
+  function missSort(a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n) || b.n - a.n; }
+  /* 5 premiers visibles, le reste dans un menu déroulant */
+  function missBlock(rows, cls, tag) {
+    cls = cls || 'q-miss-list'; tag = tag || 'div';
+    var top = '<' + tag + ' class="' + cls + '">' + rows.slice(0, 5).join('') + '</' + tag + '>';
+    if (rows.length <= 5) return top;
+    return top + '<details class="q-more"><summary>Voir les ' + (rows.length - 5) + ' autres</summary><' + tag + ' class="' + cls + '">' + rows.slice(5).join('') + '</' + tag + '></details>';
   }

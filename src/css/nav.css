@@ -90,3 +90,9 @@
   .pg-trend { font-size: .78rem; color: var(--muted); margin: .4rem 0 0; }
   .q-stats .pg-card { background: var(--surface); }
   .pg-trend { margin-bottom: .8rem; }
+
+  .q-more { margin-top: .4rem; }
+  .q-more > summary { cursor: pointer; padding: .6rem .2rem; font-size: .8rem; color: var(--gold); list-style: none; min-height: 44px; display: flex; align-items: center; }
+  .q-more > summary::-webkit-details-marker { display: none; }
+  .q-more > summary::before { content: '▸'; margin-right: .5rem; transition: transform .15s; }
+  .q-more[open] > summary::before { transform: rotate(90deg); }
