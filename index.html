@@ -5902,7 +5902,9 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         order.forEach(function (x) {
           if (items.length + round.length >= target) return;
           var ok = typesFor(x).filter(function (t) { return !(used[x.i] && used[x.i][t]); }); if (!ok.length) return;
-          var t = ok[Math.floor(Math.random() * ok.length)]; (used[x.i] = used[x.i] || {})[t] = 1; round.push({ i: x.i, t: t });
+          var WT = { p: 3, role: 2, pick: 1 }, tot = ok.reduce(function (a, z) { return a + (WT[z] || 1); }, 0), rr = Math.random() * tot, t = ok[ok.length - 1];
+          for (var zi = 0; zi < ok.length; zi++) { rr -= (WT[ok[zi]] || 1); if (rr < 0) { t = ok[zi]; break; } }
+           (used[x.i] = used[x.i] || {})[t] = 1; round.push({ i: x.i, t: t });
         });
         if (!round.length) break; items = items.concat(shuffle(round));
       }
