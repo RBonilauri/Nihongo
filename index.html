@@ -5875,6 +5875,14 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   document.addEventListener('click', function (e) {
     if (!listening) return;
     if (e.target.closest('button, a, summary, input, label, .fab, .res, .deck, .toast, .searchbar')) return;
+    var one = e.target.closest('.cj-row:not(.cj-h) > span:not(.cj-l), .ex-s');
+    if (one) { /* conjugaison / exemple : on lit uniquement la forme cliquée (pas la lecture en kana) */
+      var jpEl = one.classList.contains('ex-s') ? one.querySelector('.ex-jp') : one.querySelector('.cj-j');
+      if (!jpEl) return;
+      var tx = jpEl.textContent.replace(/[。]/g, '').trim(); if (!tx) return;
+      one.classList.add('speaking'); setTimeout(function () { one.classList.remove('speaking'); }, 1400);
+      speak([tx]); return;
+    }
     var el = e.target.closest('td, th, li, .example, .cec-sentence, .tc-ex, .dc-example, .kana, .cec-verb, .sd-cell, .gc-pill, .fs-arrow, p, .ex-answer .ex-body');
     if (!el) return;
     var clean = el.textContent.replace(/[(（]([\u3040-\u30ff\u3400-\u9fff々ー]+)[)）]/g, '$1');

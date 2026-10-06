@@ -204,6 +204,17 @@ with sync_playwright() as p:
         return [n, bad, document.querySelectorAll('details.vgrp').length]; }""")
     check(ex[0] >= 300 and ex[1] == 0 and ex[2] >= 10, 'exemples (>=2 phrases par verbe) et rubriques repliables %s' % ex)
 
+    print('Écoute ciblée')
+    pg.evaluate("""() => { window.__said = []; window.SpeechSynthesisUtterance = function (t) { window.__said.push(t); }; speechSynthesis.speak = () => {}; speechSynthesis.cancel = () => {};
+        document.querySelector('.fab').click();
+        const d = document.querySelector('details.cjd'); d.open = true; d.dispatchEvent(new Event('toggle')); const e = document.querySelector('details.exd'); e.open = true; e.dispatchEvent(new Event('toggle'));
+        window.__a = d.querySelector('.cj-row:not(.cj-h) > span:not(.cj-l) .cj-j'); window.__b = e.querySelector('.ex-s'); window.__a.dispatchEvent(new MouseEvent('click', { bubbles: true })); }""")
+    pg.wait_for_timeout(300)
+    pg.evaluate("() => window.__b.querySelector('.ex-fr').dispatchEvent(new MouseEvent('click', { bubbles: true }))"); pg.wait_for_timeout(300)
+    said = pg.evaluate("() => [window.__said, window.__a.textContent, window.__b.querySelector('.ex-jp').textContent.replace('。', '')]")
+    pg.evaluate("document.querySelector('.fab').click()")
+    check(said[0] == [said[1], said[2]], 'écoute : une conjugaison / un exemple = une seule lecture %s' % said)
+
     print('Données')
     counts = pg.evaluate("""() => ({ kanji: JSON.parse(document.getElementById('kanji-data').textContent).length,
         vocab: JSON.parse(document.getElementById('vocab-data').textContent).length,
