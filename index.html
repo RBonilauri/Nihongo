@@ -638,6 +638,48 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .dr-set { display: none; }
   .empty { color: var(--muted); font-size: .85rem; padding: 1.2rem .2rem; }
 
+  /* ═══ NAVIGATION PAR PAGES ═══ */
+  html.js .drawer { left: auto; right: 0; transform: translateX(104%); }
+  html.js body.nav-open .drawer { transform: none; }
+  .tb-btn[hidden] { display: none; }
+  html.js .fab { bottom: calc(82px + env(safe-area-inset-bottom, 0px)); width: 46px; height: 46px; }
+  html.js .toast { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar { display: none; }
+  html.js .tabbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; background: var(--surface); border-top: 1px solid var(--border); padding: 6px 4px calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0 2px; font: inherit; font-size: .68rem; color: var(--muted); background: none; border: 0; cursor: pointer; position: relative; }
+  .tabbar button i { font-style: normal; font-size: 1.3rem; line-height: 1.2; filter: grayscale(1); }
+  .tabbar button.on { color: var(--ink); font-weight: 700; } .tabbar button.on i { filter: none; }
+  .tabbar button.on::after { content: ""; width: 24px; height: 3px; border-radius: 2px; background: var(--red); margin-top: 3px; }
+  main.nv { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  main.nv > .doc-head, main.nv > .hint { display: none; }
+  main.nv > details.sec { display: none; }
+  main.nv > details.sec.cur { display: block; border: 0; background: none; margin: 0; }
+  main.nv > details.sec.cur > summary { display: none; }
+  main.nv > details.sec.cur > .sec-body { padding: 0; border: 0; }
+  main.nv:not(.v-home) > .home { display: none; }
+  main.nv .navsubs { display: none; }
+  main.v-sec .sec.cur .navsubs { display: block; margin: .6rem 0 1rem; }
+  main.v-sec .sec.cur details.sub, main.v-sub .sec.cur .navsubs { display: none; }
+  main.v-sub .sec.cur .sec-body > :not(details.sub.cur) { display: none; }
+  main.v-sub details.sub.cur { display: block; border: 0; }
+  main.v-sub details.sub.cur > summary { position: static; cursor: default; font-weight: 700; font-size: 1rem; padding: .7rem 0; background: none; }
+  main.v-sub details.sub.cur > summary::-webkit-details-marker { display: none; } main.v-sub details.sub.cur > summary::marker { content: ''; }
+  main.v-sub details.sub.cur > summary::after { display: none; }
+  #navpage:empty { display: none; }
+  #navpage { padding-top: .6rem; }
+  .nhero { background: var(--panel); color: var(--on-panel); border-radius: 16px; padding: 1.1rem 1.1rem 1.2rem; margin-bottom: .8rem; }
+  .nh-t { font-size: .7rem; letter-spacing: .14em; opacity: .7; } .nh-b { font-family: 'Noto Serif JP', serif; font-size: 1.5rem; margin: .2rem 0 .3rem; } .nhero p { font-size: .82rem; opacity: .85; margin-bottom: .8rem; }
+  .ngo { font: inherit; font-weight: 700; padding: .6rem 1.2rem; border: 0; border-radius: 22px; background: var(--bg); color: var(--ink); cursor: pointer; }
+  .nrow { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
+  .nrow button { font: inherit; padding: .9rem; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--ink); cursor: pointer; font-weight: 700; } .nrow i { font-style: normal; margin-right: .4rem; }
+  .npole, .nsec, .nsub { display: flex; align-items: center; gap: .9rem; width: 100%; font: inherit; text-align: left; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: .6rem; cursor: pointer; }
+  .npole { padding: .9rem 1rem; } .nsec { padding: .8rem 1rem; } .nsub { padding: .7rem 1rem; }
+  .ni { flex: none; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; background: var(--panel); color: var(--on-panel); font-family: 'Noto Serif JP', serif; font-size: 1.35rem; }
+  .nj { flex: none; min-width: 3.4rem; font-family: 'Noto Serif JP', serif; font-size: 1.15rem; color: var(--red); }
+  .nt { flex: 1; min-width: 0; font-weight: 700; } .npole .nt { font-size: 1.02rem; } .nt small { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; margin-top: .15rem; }
+  .ch { color: var(--muted); font-size: 1.3rem; }
+  .nquiz { display: block; width: 100%; font: inherit; font-weight: 700; padding: .75rem 1rem; margin-bottom: .8rem; border: 0; border-radius: 14px; background: var(--panel); color: var(--on-panel); cursor: pointer; }
+
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -761,7 +803,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 </style>
 </head>
 <body>
-<header class="topbar"><button class="tb-btn" id="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="drawer">☰</button><div class="tb-title"><span>日本語</span><small>Référence</small></div><button class="tb-btn" id="tb-search" type="button" aria-label="Rechercher">⌕</button></header>
+<header class="topbar"><button class="tb-btn" id="tb-back" type="button" aria-label="Retour" hidden>‹</button><div class="tb-title"><span>日本語</span><small>Référence</small></div><button class="tb-btn" id="menu" type="button" aria-label="Réglages" aria-expanded="false" aria-controls="drawer">⚙</button></header>
+<nav class="tabbar" id="tabbar" aria-label="Navigation"><button type="button" data-tab="home"><i>🏠</i>Accueil</button><button type="button" data-tab="learn"><i>📚</i>Apprendre</button><button type="button" data-tab="quiz"><i>❓</i>Quiz</button><button type="button" data-srch="1"><i>🔍</i>Recherche</button></nav>
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true"><div class="dr-head"><span class="dr-logo">日本語 <small>Référence</small></span><button class="tb-btn" id="dr-close" type="button" aria-label="Fermer le menu">×</button></div>
 <div class="dr-scroll"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div>
@@ -5223,11 +5266,12 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     box.innerHTML = html; setRes(true);
   }
   function go(it) {
-    it.sec.open = true; if (it.sub) { it.sub.open = true; try { history.replaceState(null, '', '#' + it.sub.dataset.id); } catch (e) {} }
     setRes(false); closeNav();
-    var el = it.el; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
-    setTimeout(function () { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60);
-    setTimeout(function () { el.classList.remove('flash'); }, 2600);
+    setTimeout(function () {
+      navOpen(it.sec, it.sub);
+      var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 80);
+      setTimeout(function () { el.classList.remove('flash'); }, 2600);
+    }, 160);
   }
   box.addEventListener('click', function (e) { var b = e.target.closest('.res'); if (b) go(results[+b.dataset.k]); });
   var t; q.addEventListener('input', function () { clearTimeout(t); t = setTimeout(run, 90); });
@@ -5256,7 +5300,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
   window.addEventListener('popstate', function () {
     if (bkSkip > 0) { bkSkip--; return; }
-    var fn = BK.pop(); if (fn) fn();
+    var fn = BK.pop(); if (fn) { fn(); return; }
+    if (NAV.length > 1) { NAV.pop(); pushed = Math.max(0, pushed - 1); navRender(); }
   });
   // menu latéral
   var drawer = document.getElementById('drawer'), menuBtn = document.getElementById('menu');
@@ -5268,7 +5313,6 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   function closeNav() { bkClose(hideNav); }
   function hideNav() { document.body.classList.remove('nav-open'); drawer.setAttribute('aria-hidden', 'true'); menuBtn.setAttribute('aria-expanded', 'false'); q.blur(); }
   menuBtn.addEventListener('click', function () { document.body.classList.contains('nav-open') ? closeNav() : openNav(false); });
-  document.getElementById('tb-search').addEventListener('click', function () { openNav(true); });
   document.getElementById('dr-close').addEventListener('click', closeNav);
   document.getElementById('scrim').addEventListener('click', closeNav);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('nav-open')) closeNav(); });
@@ -5309,13 +5353,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     if (action) t.querySelector('button').addEventListener('click', function () { fn(); t.remove(); });
     document.body.appendChild(t); setTimeout(function () { t.remove(); }, action ? 12000 : 2600);
   }
-  function openTo(rec) {
-    rec.sec.open = true; rec.sub.open = true;
-    var sm = rec.sub.querySelector(':scope > summary'); sm.classList.remove('flash'); void sm.offsetWidth; sm.classList.add('flash');
-    try { history.replaceState(null, '', '#' + rec.sub.dataset.id); } catch (e) {}
-    setTimeout(function () { sm.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 60);
-    setTimeout(function () { sm.classList.remove('flash'); }, 2600);
-  }
+  function openTo(rec) { navOpen(rec.sec, rec.sub); }
 
   /* ── favoris & récents ── */
   var home = document.createElement('div'); home.className = 'home';
@@ -5817,7 +5855,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       card.innerHTML = '<span class="qc-jp">言葉</span><span class="qc-t">Quiz vocabulaire &amp; phrases<small>' + VD.length + ' mots et phrases · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
     }
     paintCard();
-    card.addEventListener('click', function () { open(true); showSetup(); });
+    card.addEventListener('click', function () { if (window.QPRE && window.QPRE.cats) { cfg.cats = window.QPRE.cats.slice(); window.QPRE = null; persist(); } open(true); showSetup(); });
     quizHost(mainEl).appendChild(card);
     function hideV() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
     function open(v) { if (v) { if (el.hidden) bkPush(hideV); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideV); }
@@ -6534,7 +6572,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     applyPrefs();
     // ouverture depuis l'adresse (#s2-3)
     var h = location.hash.replace('#', '');
-    if (h) { var rec = Object.keys(subMap).map(function (k) { return subMap[k]; }).filter(function (r) { return r.sub.dataset.id === h; })[0]; if (rec) openTo(rec); }
+    if (h) { window.__deep = Object.keys(subMap).map(function (k) { return subMap[k]; }).filter(function (r) { return r.sub.dataset.id === h; })[0]; }
   }
 
   /* ── bouton « tout / aucun » sur les choix multiples des quiz ── */
@@ -6834,8 +6872,94 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (b.id === 'g-close') { open(false); }
     });
   }
+  /* ═══════════ NAVIGATION PAR PAGES ═══════════ */
+  var POLES = [
+    { id: 'bases', jp: '仮', label: 'Bases', secs: ['仮名', '発音', '漢字'] },
+    { id: 'gram', jp: '文', label: 'Grammaire', secs: ['助詞', '動詞', '形容詞', '助数詞', '表現', '道具'] },
+    { id: 'voc', jp: '語', label: 'Vocabulaire', secs: ['語彙', '時間', '地理'] },
+    { id: 'parl', jp: '話', label: 'Parler', secs: ['会話', '旅行', '敬語'] }
+  ];
+  var QMAP = { '助詞': ['Quiz particules'], '動詞': ['Quiz conjugaison'], '漢字': ['Quiz kanji'], '助数詞': ['Quiz compteurs'], '地理': ['Quiz géographie'],
+    '語彙': ['Quiz vocabulaire', ['Vocabulaire', 'Verbes']], '時間': ['Quiz vocabulaire', ['Temps']], '形容詞': ['Quiz vocabulaire', ['Adjectifs']], '表現': ['Quiz vocabulaire', ['Expressions']],
+    '旅行': ['Quiz vocabulaire', ['Voyage']], '会話': ['Quiz vocabulaire', ['Conversation']], '敬語': ['Quiz vocabulaire', ['Keigo']], '道具': ['Quiz vocabulaire', ['Outils']] };
+  var NAV = [{ v: 'home' }], TAB = 'home', pushed = 0, secBy = {}, subById = {}, navMain = null, navPage = null;
+  function secJp(s) { return s.querySelector(':scope > summary .jp').textContent.trim(); }
+  function secLb(s) { return s.querySelector(':scope > summary .lbl').textContent.trim(); }
+  function subsOf(s) { return [].slice.call(s.querySelectorAll(':scope > .sec-body > details.sub')); }
+  function splitT(t) { var p = t.split(' — '); return p.length > 1 ? { jp: p[0], fr: p.slice(1).join(' — ') } : { jp: '', fr: t }; }
+  function poleOf(jp) { for (var i = 0; i < POLES.length; i++) if (POLES[i].secs.indexOf(jp) >= 0) return POLES[i]; return null; }
+  function launchQuiz(name, cats) {
+    if (cats) window.QPRE = { cats: cats };
+    var card = [].slice.call(document.querySelectorAll('.quizlist .quizcard')).filter(function (c) { return c.textContent.indexOf(name) >= 0; })[0];
+    if (card) card.click(); else window.QPRE = null;
+  }
+  function navPush(st) { NAV.push(st); try { history.pushState({ nv: 1 }, ''); } catch (e) {} pushed++; navRender(); }
+  function navReset(tab) {
+    if (pushed > 0) { bkSkip++; try { history.go(-pushed); } catch (e) { bkSkip--; } pushed = 0; }
+    TAB = tab; NAV = [tab === 'quiz' ? { v: 'sec', s: secBy['クイズ'] } : { v: tab }]; navRender();
+  }
+  function navOpen(sec, sub) { navPush(sub ? { v: 'sub', s: sec, d: sub } : { v: 'sec', s: sec }); }
+  function navRender() {
+    var st = NAV[NAV.length - 1], v = st.v, h = '', title = ['日本語', 'Référence'];
+    navMain.className = navMain.className.replace(/\bv-\w+\b/g, '').trim() + ' nv v-' + v;
+    Object.keys(secBy).forEach(function (k) { secBy[k].classList.remove('cur'); });
+    Object.keys(subById).forEach(function (k) { subById[k].classList.remove('cur'); });
+    if (st.s) { st.s.open = true; st.s.classList.add('cur'); }
+    if (st.d) { st.d.open = true; st.d.classList.add('cur'); var rid = Object.keys(subMap).filter(function (k) { return subMap[k].sub === st.d; })[0]; if (rid) { ST.rec = [rid].concat(ST.rec.filter(function (x) { return x !== rid; })).slice(0, 3); save(); renderHome(); } }
+    if (v === 'home') {
+      h = '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
+        '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>';
+    } else if (v === 'learn') {
+      title = ['日本語', 'Apprendre'];
+      h = POLES.map(function (p) { var ss = p.secs.map(function (j) { return secBy[j]; }).filter(Boolean); return '<button type="button" class="npole" data-p="' + p.id + '"><span class="ni">' + p.jp + '</span><span class="nt">' + esc(p.label) + '<small>' + ss.map(secLb).map(esc).join(' · ') + '</small></span><span class="ch">›</span></button>'; }).join('') +
+        '<button type="button" class="npole" data-act="quiz"><span class="ni">試</span><span class="nt">Quiz<small>Tous les quiz · Quiz général</small></span><span class="ch">›</span></button>';
+    } else if (v === 'pole') {
+      var P = POLES.filter(function (p) { return p.id === st.p; })[0]; title = [P.jp, P.label];
+      h = P.secs.map(function (j) { return secBy[j]; }).filter(Boolean).map(function (s) { var n = subsOf(s).length; return '<button type="button" class="nsec" data-sj="' + esc(secJp(s)) + '"><span class="nj">' + esc(secJp(s)) + '</span><span class="nt">' + esc(secLb(s)) + '<small>' + (n ? n + ' sous-rubrique' + (n > 1 ? 's' : '') : 'contenu direct') + '</small></span><span class="ch">›</span></button>'; }).join('');
+    } else if (v === 'sec') { title = [secJp(st.s), secLb(st.s)]; }
+    else if (v === 'sub') { title = [secJp(st.s), splitT(st.d.querySelector(':scope > summary').firstChild.textContent.trim()).fr]; }
+    navPage.innerHTML = h;
+    var tb = document.querySelector('.tb-title'); tb.innerHTML = '<span>' + esc(title[0]) + '</span><small>' + esc(title[1]) + '</small>';
+    document.getElementById('tb-back').hidden = NAV.length < 2;
+    [].slice.call(document.querySelectorAll('#tabbar button[data-tab]')).forEach(function (b) { b.classList.toggle('on', b.dataset.tab === TAB); });
+    window.scrollTo(0, 0);
+  }
+  function navInit() {
+    navMain = document.querySelector('main');
+    navPage = document.createElement('div'); navPage.id = 'navpage'; navMain.insertBefore(navPage, navMain.querySelector('.home') || navMain.querySelector('details.sec'));
+    [].slice.call(navMain.querySelectorAll(':scope > details.sec')).forEach(function (s) { secBy[secJp(s)] = s; });
+    Object.keys(subMap).forEach(function (k) { subById[subMap[k].sub.dataset.id] = subMap[k].sub; });
+    // listes de sous-rubriques + bouton quiz, dans chaque rubrique
+    Object.keys(secBy).forEach(function (j) {
+      var s = secBy[j], subs = subsOf(s), body = s.querySelector(':scope > .sec-body'), ns = document.createElement('div'); ns.className = 'navsubs';
+      var q = QMAP[j], h = q ? '<button type="button" class="nquiz" data-qj="' + esc(j) + '">❓ Quiz de cette rubrique</button>' : '';
+      h += subs.map(function (d) { var t = splitT(d.querySelector(':scope > summary').firstChild.textContent.trim()); return '<button type="button" class="nsub" data-id="' + esc(d.dataset.id) + '"><span class="nj">' + esc(t.jp) + '</span><span class="nt">' + esc(t.fr) + '</span><span class="ch">›</span></button>'; }).join('');
+      ns.innerHTML = h; if (!h) return;
+      body.insertBefore(ns, subs[0] || body.firstChild);
+    });
+    navMain.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.classList.contains('nsub')) { var d = subById[b.dataset.id], cur = NAV[NAV.length - 1]; navPush({ v: 'sub', s: cur.s, d: d }); }
+      else if (b.classList.contains('nquiz')) { var q = QMAP[b.dataset.qj]; launchQuiz(q[0], q[1]); }
+      else if (b.classList.contains('npole') && b.dataset.p) navPush({ v: 'pole', p: b.dataset.p });
+      else if (b.classList.contains('nsec')) navPush({ v: 'sec', s: secBy[b.dataset.sj] });
+      else if (b.dataset.act === 'learn') navReset('learn');
+      else if (b.dataset.act === 'quiz') navReset('quiz');
+      else if (b.dataset.act === 'mix') launchQuiz('Quiz général');
+    });
+    // une sous-rubrique affichée comme page reste ouverte
+    navMain.addEventListener('click', function (e) { var sm = e.target.closest('details.sub.cur > summary'); if (sm && !e.target.closest('button')) e.preventDefault(); }, true);
+    document.getElementById('tabbar').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.tab) { if (TAB === b.dataset.tab && NAV.length === 1) { window.scrollTo(0, 0); return; } navReset(b.dataset.tab); }
+      else if (b.dataset.srch) openNav(true);
+    });
+    document.getElementById('tb-back').addEventListener('click', function () { if (pushed > 0) history.back(); else { NAV = [NAV[0]]; navRender(); } });
+    navRender();
+    if (window.__deep) { var dp = window.__deep; window.__deep = null; openTo(dp); }
+  }
 
-  var ready = function () { build(); features(); selAllInit(); jpMapInit(); };
+  var ready = function () { build(); features(); selAllInit(); jpMapInit(); navInit(); };
   if ('requestIdleCallback' in window) requestIdleCallback(ready); else setTimeout(ready, 50);
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) { navigator.serviceWorker.register('sw.js').catch(function () {}); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.type === 'update') toast('Nouvelle version disponible.', 'Recharger', function () { location.reload(); }); }); }
 })();
