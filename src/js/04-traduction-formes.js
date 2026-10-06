@@ -20,7 +20,7 @@
       'offrir': ['offre', 'offert', 'a', 'offrons'], 'couvrir': ['couvre', 'couvert', 'a', 'couvrons'], 'cueillir': ['cueille', 'cueilli', 'a', 'cueillons'],
       'bouillir': ['bous', 'bouilli', 'a', 'bouillons'], 'valoir': ['vaux', 'valu', 'a', 'valons'], 'vaincre': ['vaincs', 'vaincu', 'a', 'vainquons'],
       'coudre': ['couds', 'cousu', 'a', 'cousons'], 'résoudre': ['résous', 'résolu', 'a', 'résolvons'], 'inclure': ['inclus', 'inclus', 'a', 'incluons'],
-      'frire': ['fris', 'frit', 'a', null], 'taire': ['tais', 'tu', 'a', 'taisons'], 'suffire': ['suffis', 'suffi', 'a', 'suffisons'],
+      'frire': ['fris', 'frit', 'a', null], 'pleuvoir': ['pleus', 'plu', 'a', null], 'taire': ['tais', 'tu', 'a', 'taisons'], 'suffire': ['suffis', 'suffi', 'a', 'suffisons'],
       'cuire': ['cuis', 'cuit', 'a', 'cuisons'], 'paraître': ['parais', 'paru', 'a', 'paraissons'], 'connaître': ['connais', 'connu', 'a', 'connaissons']
     };
     // composés : dérivés d'un irréguliers (préfixe + base)
@@ -35,12 +35,13 @@
     function conj(v) {
       var t = IRR[v], i, b;
       if (!t && /cevoir$/.test(v)) { var s0 = v.slice(0, -6); return { pres: s0 + 'çois', pp: s0 + 'çu', aux: 'a', nous: s0 + 'cevons', imp: s0 + 'çois' }; }
-      if (!t) for (i = 0; i < BASES.length && !t; i++) { b = BASES[i]; if (v.length > b.length && v.slice(-b.length) === b) { var pre = v.slice(0, -b.length), tb = IRR[b]; t = [pre + tb[0], pre + tb[1], tb[2], tb[3] ? pre + tb[3] : null, tb[4] ? pre + tb[4] : null]; if (AUX_E[v]) t[2] = 'e'; else if (b !== 'venir' && b !== 'partir' && b !== 'sortir' && b !== 'mourir' && b !== 'naître') t[2] = 'a'; } }
+      if (!t) for (i = 0; i < BASES.length && !t; i++) { b = BASES[i]; if (v.length > b.length && v.slice(-b.length) === b) { var pre = v.slice(0, -b.length), tb = IRR[b]; t = [pre + tb[0], pre + tb[1], tb[2] === 'e' ? 'a' : tb[2], tb[3] ? pre + tb[3] : null, tb[4] ? pre + tb[4] : null]; if (AUX_E[v]) t[2] = 'e'; else if (b !== 'venir' && b !== 'partir' && b !== 'sortir' && b !== 'mourir' && b !== 'naître') t[2] = 'a'; } }
       if (t) return { pres: t[0], pp: t[1], aux: AUX_E[v] ? 'e' : t[2], nous: t[3], imp: t[4] || t[0] };
       var st = v.slice(0, -2), r;
       if (/er$/.test(v)) {
         st = v.slice(0, -2); var p = st;
         if (/(el|et)$/.test(st) && !GRAVE[v]) p = st + st.slice(-1);                      // appeler → appelle, jeter → jette
+        else if (/é[bcdfgpt][lr]$/.test(st)) p = st.replace(/é([bcdfgpt][lr])$/, 'è$1');                                   // régler → règle
         else if (new RegExp('[eé]' + CONS + '$').test(st) && !/(ll|tt)$/.test(st)) p = st.replace(new RegExp('[eé](' + CONS + ')$'), 'è$1'); // lever → lève
         else if (/[ou]yer$/.test(v) || /ayer$/.test(v)) p = st.slice(0, -1) + 'i';       // nettoyer → nettoie, payer → paie
         var nous = /ger$/.test(v) ? st + 'eons' : /cer$/.test(v) ? st.slice(0, -1) + 'çons' : st + 'ons';
@@ -85,6 +86,55 @@
       return o;
     }
 
+
+    /* ── phrases complètes (exemples des verbes) ── */
+    var SP3 = { 'être': 'est', 'avoir': 'a', 'aller': 'va', 'pouvoir': 'peut', 'vouloir': 'veut', 'valoir': 'vaut' };
+    var IMPST = { 'être': 'ét', 'avoir': 'av', 'pouvoir': 'pouv', 'savoir': 'sav', 'vouloir': 'voul', 'devoir': 'dev', 'pleuvoir': 'pleuv' };
+    function third(p, v) {
+      if (SP3[v]) return SP3[v];
+      if (/aître$/.test(v)) return p.replace(/ais$/, 'aît');
+      if (/[eé]$/.test(p)) return p;
+      if (/x$/.test(p)) return p.slice(0, -1) + 't';
+      if (/[dt]s$/.test(p) && !/^(vois|dis|lis|suis|vis|ris|fuis)$/.test(p)) return p.slice(0, -1);
+      if (/s$/.test(p)) return p.slice(0, -1) + 't';
+      return p;
+    }
+    function elide(tokens) {
+      var out = '';
+      tokens.filter(Boolean).forEach(function (t, i, a) {
+        var nx = a[i + 1];
+        if (nx && /^(je|ne|me|se|te)$/.test(t) && VOW.test(nx)) { out += t.charAt(0) + '’'; }
+        else out += t + (nx ? ' ' : '');
+      });
+      return out;
+    }
+    // renvoie la phrase française, ou null si le verbe n’est pas conjugable
+    function sent(fv, comp, negc, subj, tense) {
+      var o = get(fv); if (!o || !o.c) return null;
+      var fem = /\*$/.test(subj || ''); subj = (subj || '').replace(/\*$/, '');
+      var je = !subj, S = je ? 'je' : subj, c = o.c, pr = o.pr, e = pr || c.aux === 'e';
+      var refl = pr ? (je ? 'me' : 'se') : '';
+      var pres = je ? c.pres : third(c.pres, o.v);
+      var pp = c.pp + (fem && e && !/s$/.test(c.pp) ? 'e' : '');
+      var ax = e ? (je ? 'suis' : 'est') : (je ? 'ai' : 'a');
+      var cm = comp || '', ng = negc || comp || '';
+      var imp = null;
+      if (IMPST[o.v] || c.nous) imp = (IMPST[o.v] || c.nous.replace(/ons$/, '')) + (je ? 'ais' : 'ait');
+      var T = {
+        pres: [S, refl, pres, cm],
+        neg: [S, 'ne', refl, pres, 'pas', ng],
+        pc: [S, refl, ax, pp, cm],
+        pcneg: [S, 'ne', refl, ax, 'pas', pp, ng],
+        imp: imp ? [S, refl, imp, cm] : null,
+        impneg: imp ? [S, 'ne', refl, imp, 'pas', ng] : null,
+        en: [S, je ? 'suis' : 'est', 'en train de', pr ? (je ? 'me' : 'se') : '', o.v, cm],
+        des: je ? [S, 'veux', pr ? 'me' : '', o.v, cm] : null
+      }[tense];
+      if (!T) return null;
+      var r = elide(T); r = r.charAt(0).toUpperCase() + r.slice(1);
+      return r.replace(/\s+/g, ' ').replace(/\bde ([aeiouyéèêhœ])/g, function (m, x) { return 'd’' + x; }).replace(/ de d’/g, ' d’') + '.';
+    }
+
     var cache = {};
     function get(fr) { if (!(fr in cache)) cache[fr] = parse(fr); return cache[fr]; }
     var Q = function (s) { return '« ' + s + ' »'; };
@@ -124,6 +174,7 @@
       // variantes de traduction pour (sens français du verbe, forme) ; [] si on ne sait pas
       tr: function (fr, label) { var o = get(fr), f = F[label]; if (!o || !f) return []; try { return f(o); } catch (e) { return []; } },
       ok: function (fr) { return !!get(fr); },
+      sent: sent,
       exact: function (fr) { var o = get(fr); return !!(o && o.c); }
     };
   })();

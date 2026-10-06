@@ -199,6 +199,11 @@ with sync_playwright() as p:
     check(gn[0] and gn[1] and gn[0][0] >= 8 and gn[1][0] >= 8 and gn[0][1] >= 60 and gn[1][1] >= 70, 'pages Grammaire N4 et N3 présentes %s' % gn)
     check(pg.evaluate("[...document.querySelectorAll('.quizcard')].length") >= 6, 'quiz inchangés')
 
+    print('Exemples de verbes')
+    ex = pg.evaluate("""() => { let n = 0, bad = 0; document.querySelectorAll('details.exd').forEach(d => { d.open = true; d.dispatchEvent(new Event('toggle')); n++; if (d.querySelectorAll('.ex-s').length < 2) bad++; });
+        return [n, bad, document.querySelectorAll('details.vgrp').length]; }""")
+    check(ex[0] >= 300 and ex[1] == 0 and ex[2] >= 10, 'exemples (>=2 phrases par verbe) et rubriques repliables %s' % ex)
+
     print('Données')
     counts = pg.evaluate("""() => ({ kanji: JSON.parse(document.getElementById('kanji-data').textContent).length,
         vocab: JSON.parse(document.getElementById('vocab-data').textContent).length,

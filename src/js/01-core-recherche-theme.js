@@ -165,7 +165,8 @@
   function go(it) {
     remember(q.value); q.blur();
     navOpen(it.sec, it.sub);
-    var el = it.el; setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 120);
+    var el = it.el; for (var an = el.parentElement; an; an = an.parentElement) if (an.tagName === 'DETAILS') an.open = true;
+    setTimeout(function () { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }, 120);
     setTimeout(function () { el.classList.remove('flash'); }, 2800);
   }
   box.addEventListener('click', function (e) { var b = e.target.closest('.res'); if (!b) return; if (b.dataset.more) { shown += 40; paint(); return; } go(results[+b.dataset.k]); });

@@ -67,6 +67,9 @@ def add_romaji(html):
     print('rows with romaji', n)
     return str(soup)
 main = stackify(main)
+import json as _json, verbes_exemples as _vx
+_EX = _vx.frames()
+nex = [0]
 def conjify(html):
     soup = _BS(html, 'html.parser'); n = 0
     for t in soup.select('table'):
@@ -91,8 +94,35 @@ def conjify(html):
             sm.append(i1); sm.append(bt)
             d.append(sm); d.append(soup.new_tag('div', attrs={'class': 'cjb'}))
             td[4].append(d); n += 1
-    print('conjugaisons', n)
+            fr_ = _EX.get(k)
+            if fr_:
+                pk = ''.join(x['hira'] for x in _kks.convert(fr_['p'])) if fr_['p'] else ''
+                ex = soup.new_tag('details', attrs={'class': 'exd', 'data-k': k, 'data-ka': ka, 'data-t': ty, 'data-ex': _json.dumps([fr_['p'], pk, fr_['v'], fr_['c'], fr_['s'], fr_['n'], fr_['o']], ensure_ascii=False, separators=(',', ':'))})
+                sm2 = soup.new_tag('summary'); lb = soup.new_tag('span', attrs={'class': 'ex-l'}); lb.string = 'Phrases d’exemple'; bt2 = soup.new_tag('span', attrs={'class': 'cj-btn'}); bt2.string = 'Exemple'
+                sm2.append(lb); sm2.append(bt2); ex.append(sm2); ex.append(soup.new_tag('div', attrs={'class': 'exb'}))
+                td[4].append(ex); nex[0] += 1
+    print('conjugaisons', n, 'exemples', nex[0])
     return str(soup)
 main = _re.sub(r'<p class="conj-intro">\[\[JPMAP\]\]</p>', '<div class="jpmap-host"></div>', main)
 main = conjify(main)
+def foldify(html):
+    """Verbes courants : chaque thème (Vie quotidienne, Déplacements…) devient un bloc repliable."""
+    soup = _BS(html, 'html.parser'); n = 0
+    sub = [d for d in soup.select('details.sub') if d.summary.get_text().startswith('動詞 — Verbes courants')]
+    if not sub: return html
+    body = sub[0].select_one('.sub-body')
+    for h in list(body.select(':scope > .section-title')):
+        grp = soup.new_tag('details', attrs={'class': 'vgrp'})
+        sm = soup.new_tag('summary'); t = soup.new_tag('span', attrs={'class': 'vg-t'}); t.string = h.get_text(' ', strip=True); sm.append(t)
+        grp.append(sm)
+        nxt = h.find_next_sibling(); moved = []
+        while nxt is not None and 'section-title' not in (nxt.get('class') or []):
+            moved.append(nxt); nxt = nxt.find_next_sibling()
+        h.insert_before(grp); h.extract()
+        for m in moved: grp.append(m.extract())
+        cnt = len(grp.select('details.cjd'))
+        c = soup.new_tag('span', attrs={'class': 'vg-n'}); c.string = str(cnt) + ' verbes'; sm.append(c); n += 1
+    print('thèmes repliables', n)
+    return str(soup)
+main = foldify(main)
 
