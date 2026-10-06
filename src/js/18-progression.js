@@ -43,3 +43,25 @@
       '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div>' +
       '<h3 class="pg-t">Points faibles</h3>' + (wh ? '<ul class="pg-weak">' + wh + '</ul>' : '<p class="pg-empty">Rien à signaler pour l’instant : les mots ratés apparaîtront ici.</p>') + '</div>';
   }
+
+  /* bloc commun aux écrans « Statistiques » de chaque quiz : avancement, 7 jours, tendance */
+  function qsExtra(key, items, total) {
+    items = items || {};
+    var ks = Object.keys(items), seen = ks.length, mast = 0, wr = 0;
+    ks.forEach(function (k) { var v = items[k]; if (v.w) wr++; else if (v.st >= 3) mast++; });
+    var tot = total && total >= seen ? total : 0, den = tot || Math.max(seen, 1);
+    var QH = (ST.qh || {})[key] || {}, DN = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'], days = [], mx = 1, n7 = 0, ok7 = 0, nP = 0, okP = 0;
+    for (var i = 13; i >= 0; i--) {
+      var t = Date.now() - i * 864e5, v = QH[dkey(t)] || { n: 0, ok: 0 };
+      if (i < 7) { days.push({ l: DN[new Date(t).getDay()], n: v.n, today: i === 0 }); mx = Math.max(mx, v.n); n7 += v.n; ok7 += v.ok; } else { nP += v.n; okP += v.ok; }
+    }
+    var p7 = n7 ? Math.round(ok7 * 100 / n7) : null, pP = nP ? Math.round(okP * 100 / nP) : null, trend = '';
+    if (p7 !== null && pP !== null) { var d = p7 - pP; trend = d > 1 ? '↗ +' + d + ' points' : d < -1 ? '↘ ' + d + ' points' : '→ stable'; trend += ' vs semaine précédente'; }
+    var h = '<h4 class="q-h">Mon avancement</h4><div class="pg-card"><div class="pg-bar"><i class="m" style="width:' + (mast * 100 / den) + '%"></i><i class="w" style="width:' + (wr * 100 / den) + '%"></i><i class="o" style="width:' + (Math.max(0, seen - mast - wr) * 100 / den) + '%"></i></div>' +
+      '<div class="pg-k"><span><b>' + seen + '</b>' + (tot ? ' / ' + tot : '') + ' vus</span><span><b>' + mast + '</b> maîtrisés</span><span><b>' + wr + '</b> à revoir</span>' + (tot ? '<span><b>' + Math.round(mast * 100 / tot) + ' %</b> maîtrisé</span>' : '') + '</div>' +
+      '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div></div>';
+    h += '<h4 class="q-h">7 derniers jours' + (n7 ? ' · ' + n7 + ' réponses' + (p7 !== null ? ' · ' + p7 + ' %' : '') : '') + '</h4><div class="pg-week pg-mini">' +
+      days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 100 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('') + '</div>';
+    if (trend) h += '<p class="pg-trend">' + trend + '</p>';
+    return h;
+  }

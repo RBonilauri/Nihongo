@@ -94,6 +94,33 @@ with sync_playwright() as p:
         check(ok, 'quiz « %s » : lancement et questions' % name)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
 
+    print('Statistiques des quiz')
+    dayn = lambda: pg.evaluate("(JSON.parse(localStorage.getItem('jp-state')).day||{}).n||0")
+    pg.click('#tabbar [data-tab=quiz]'); pg.wait_for_timeout(200)
+    names = pg.evaluate("[...document.querySelectorAll('.quizlist .quizcard')].map(e=>e.querySelector('.qc-t').firstChild.textContent)")
+    for k, name in enumerate(names):
+        if 'général' in name: continue
+        pg.evaluate("document.querySelectorAll('.quizlist .quizcard')[%d].click()" % k); pg.wait_for_timeout(250)
+        Q = '.quiz:not([hidden])'
+        pg.evaluate("document.querySelector('%s .q-body').scrollTop = 400" % Q)
+        pg.evaluate("document.querySelector('%s .qstat-btn').click()" % Q); pg.wait_for_timeout(200)
+        top = pg.evaluate("document.querySelector('%s .q-body').scrollTop" % Q)
+        extra = pg.evaluate("document.querySelectorAll('%s .q-stats .pg-card').length" % Q)
+        check(top == 0 and extra >= 1, '« %s » : stats en haut de page, avec avancement (scroll=%s)' % (name, top))
+        pg.evaluate("document.querySelector('%s .x').click()" % Q); pg.wait_for_timeout(150)
+    n0 = dayn()
+    pg.evaluate("[...document.querySelectorAll('.quizlist .quizcard')].filter(e=>e.textContent.includes('général'))[0].click()"); pg.wait_for_timeout(300)
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .qgo').click()"); pg.wait_for_timeout(300)
+    for _ in range(3):
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(80)
+        pg.evaluate("(document.querySelector('.quiz:not([hidden]) .q-fb .qgo')||{click(){}}).click()"); pg.wait_for_timeout(80)
+    check(dayn() - n0 == 3, 'quiz général : 3 réponses = +3 au compteur du jour (%d)' % (dayn() - n0))
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
+    # la géographie est bien sauvegardée après rechargement
+    pg.reload(); pg.wait_for_timeout(800)
+    gq = pg.evaluate("Object.keys(JSON.parse(localStorage.getItem('jp-state')).gq||{}).length")
+    check(gq > 0, 'progression géographie conservée après rechargement (%d)' % gq)
+
     print('Objectif du jour')
     st = pg.evaluate("JSON.parse(localStorage.getItem('jp-state')).day")
     check(st and st['n'] >= 6, 'les réponses de quiz sont comptées (%s)' % st)

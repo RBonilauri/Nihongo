@@ -85,8 +85,23 @@
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + GN2.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<button type="button" class="mini qstat-btn" id="g-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="g-go"' + (cfg.regs.length && cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
-      body.innerHTML = h;
+      body.innerHTML = h; body.scrollTop = 0;
+    }
+    function showStats() {
+      Q = null; ttl.textContent = 'Statistiques'; prog.textContent = ''; barI.style.width = '0';
+      var S = ST.gqs || { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, pc = function (a, b) { return b ? Math.round(a / b * 100) + ' %' : '—'; };
+      function row(name, T) { T = T || { n: 0, ok: 0 }; var p = T.n ? Math.round(T.ok / T.n * 100) : 0; return '<div class="qs-row"><div class="qs-l"><span>' + name + '</span><span><b>' + T.n + '</b> · ' + pc(T.ok, T.n) + '</span></div><div class="qs-bar"><i style="width:' + p + '%"></i></div></div>'; }
+      var h = '<div class="q-stats"><div class="qs-tiles"><div><b>' + S.sess + '</b><span>quiz terminés</span></div><div><b>' + S.q + '</b><span>questions</span></div><div><b>' + pc(S.ok, S.q) + '</b><span>de réussite</span></div></div>';
+      h += qsExtra('g', ST.gq, ALL.length);
+      h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + GTY.map(function (t) { return row(esc(t.label), (S.ty || {})[t.id]); }).join('') + '</div>';
+      h += '<h4 class="q-h">Par région</h4><div class="qs-types">' + M.ids.map(function (r) { return row(esc(M.reg[r][0]), (S.rg || {})[r]); }).join('') + '</div>';
+      var worst = Object.keys(ST.gq).map(function (k) { var v = ST.gq[k]; return { k: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.k]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
+      h += '<h4 class="q-h">Les plus ratés</h4>';
+      h += worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { var x = byI[v.k]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.n) + '</span><span>' + esc(x.k === 'r' ? M.reg[x.r][1] : x.o.ro) + '</span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté pour l’instant.</p>';
+      h += '<div class="q-end"><button type="button" class="qgo" id="g-back">Retour</button><button type="button" class="mini" id="g-reset">Effacer les statistiques</button></div></div>';
+      body.innerHTML = h; body.scrollTop = 0;
     }
     function pickPrefs(x, n, key) {
       var others = M.p.filter(function (o) { return o.n !== x.o.n; }), same = shuffle(others.filter(function (o) { return o.r === x.o.r; })), rest = shuffle(others.filter(function (o) { return o.r !== x.o.r; }));
@@ -139,7 +154,11 @@
       var o = cur.opts[+b.dataset.i], it = cur.it, x = byI[it.i], good = !!o.ok;
       body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
       var st = ST.gq[x.i] || { n: 0, st: 0, w: false }; st.n++;
-      dayHit(good); if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
+      dayHit(good, 'g');
+      var GS = ST.gqs = ST.gqs || { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }; GS.q++; if (good) GS.ok++;
+      var GT0 = GS.ty[it.t] = GS.ty[it.t] || { n: 0, ok: 0 }; GT0.n++; if (good) GT0.ok++;
+      var rk0 = x.k === 'r' ? x.r : x.o.r, GR = (GS.rg = GS.rg || {})[rk0] = (GS.rg[rk0] || { n: 0, ok: 0 }); GR.n++; if (good) GR.ok++;
+      if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.gq[x.i] = st; save();
       var last = Q.i + 1 >= Q.items.length;
       $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
@@ -147,11 +166,11 @@
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {
-      if (!Q.done) { Q.done = true; save(); }
+      if (!Q.done) { Q.done = true; (ST.gqs = ST.gqs || { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }).sess++; save(); }
       barI.style.width = '100%'; prog.textContent = '';
       var n = Q.items.length, pct = Math.round(Q.ok / n * 100), secs = Math.round((Date.now() - Q.t0) / 1000);
       var list = Q.wrongList.map(function (w) { var x = byI[w.i]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.n) + '</span><span>' + esc(x.k === 'r' ? M.reg[x.r][1] : x.o.ro) + '<small>' + esc(x.k === 'r' ? '' : rl(x.o.r)) + '</small></span></div>'; }).join('');
-      body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
+      body.scrollTop = 0; body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
         (list ? '<h4 class="q-h">À revoir (' + Q.wrongList.length + ')</h4><div class="q-miss-list">' + list + '</div>' : '<p class="conj-note">Sans faute. Bravo.</p>') +
         '<div class="q-end">' + (list ? '<button type="button" class="qgo" id="g-again">Refaire les ratés</button>' : '') + '<button type="button" class="mini" id="g-new">Nouveau quiz</button><button type="button" class="mini" id="g-close">Fermer</button></div>';
     }
@@ -163,6 +182,9 @@
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
       else if (b.id === 'g-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'g-go') { start(build()); }
+      else if (b.id === 'g-stats') { showStats(); }
+      else if (b.id === 'g-back') { showSetup(); }
+      else if (b.id === 'g-reset') { if (confirm('Effacer toutes les statistiques du quiz géographie et les ratés ?')) { ST.gq = {}; ST.gqs = { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }; if (ST.qh) delete ST.qh.g; save(); showStats(); } }
       else if (b.classList.contains('qopt')) answer(b);
       else if (b.id === 'g-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
       else if (b.id === 'g-say') { sayG(byI[d.id]); }

@@ -154,7 +154,7 @@
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       h += '<button type="button" class="mini qstat-btn" id="g-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="g-go"' + (cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
-      body.innerHTML = h;
+      body.innerHTML = h; body.scrollTop = 0;
     }
     function persist() { ST[kc] = cfg; save(); }
     function speakItem(x) {
@@ -209,7 +209,7 @@
       var st = ST[kq][x.i] || { n: 0, st: 0, w: false }; st.n++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST[kq][x.i] = st;
-      var S = ST[ks]; S.q++; if (good) S.ok++; dayHit(good);
+      var S = ST[ks]; S.q++; if (good) S.ok++; dayHit(good, isC ? 'c' : 'p');
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var K = x.c === 'p' ? (S.pt[x.p.a] = S.pt[x.p.a] || { n: 0, ok: 0 }) : (S.lab[x.l] = S.lab[x.l] || { n: 0, ok: 0 }); K.n++; if (good) K.ok++;
       save();
@@ -225,7 +225,7 @@
       barI.style.width = '100%'; prog.textContent = '';
       var n = Q.items.length, pct = Math.round(Q.ok / n * 100), secs = Math.round((Date.now() - Q.t0) / 1000);
       var list = Q.wrongList.map(function (w) { var x = byI[w.i]; return '<div class="q-miss"><span>' + esc(lineOf(x)) + '<small>' + esc(x.c === 'p' ? x.p.fr : x.v.fr) + '</small></span></div>'; }).join('');
-      body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
+      body.scrollTop = 0; body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
         (list ? '<h4 class="q-h">À revoir (' + Q.wrongList.length + ')</h4><div class="q-miss-list">' + list + '</div>' : '<p class="conj-note">Sans faute. Bravo.</p>') +
         '<div class="q-end">' + (list ? '<button type="button" class="qgo" id="g-again">Refaire les ratés</button>' : '') + '<button type="button" class="mini" id="g-new">Nouveau quiz</button><button type="button" class="mini" id="g-close">Fermer</button></div>';
     }
@@ -235,13 +235,14 @@
       function row(name, T) { var p = T.n ? Math.round(T.ok / T.n * 100) : 0; return '<div class="qs-row"><div class="qs-l"><span>' + name + '</span><span><b>' + T.n + '</b> · ' + pc(T.ok, T.n) + '</span></div><div class="qs-bar"><i style="width:' + p + '%"></i></div></div>'; }
       function sorted(map) { return Object.keys(map).filter(function (k) { return map[k].n; }).sort(function (a, b) { return (map[a].ok / map[a].n) - (map[b].ok / map[b].n) || map[b].n - map[a].n; }); }
       var h = '<div class="q-stats"><div class="qs-tiles"><div><b>' + S.sess + '</b><span>quiz terminés</span></div><div><b>' + S.q + '</b><span>questions</span></div><div><b>' + pc(S.ok, S.q) + '</b><span>de réussite</span></div></div>';
+      h += qsExtra(isC ? 'c' : 'p', ST[kq], ALL.length);
       h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + TT.map(function (t) { return row(t.label, S.ty[t.id] || { n: 0, ok: 0 }); }).join('') + '</div>';
       var sl = isC ? sorted(S.lab) : []; if (sl.length) h += '<h4 class="q-h">Formes (les plus difficiles d’abord)</h4><div class="qs-types">' + sl.map(function (k) { return row(esc(k), S.lab[k]); }).join('') + '</div>';
       var sp = !isC ? sorted(S.pt) : []; if (sp.length) h += '<h4 class="q-h">Particules (les plus difficiles d’abord)</h4><div class="qs-types">' + sp.map(function (k) { return row(esc(k), S.pt[k]); }).join('') + '</div>';
       var worst = Object.keys(ST[kq]).map(function (k) { var v = ST[kq][k]; return { i: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.i]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
       h += '<h4 class="q-h">Les plus ratés</h4>' + (worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { var x = byI[v.i]; return '<div class="q-miss"><span>' + esc(lineOf(x)) + '<small>' + esc(x.c === 'p' ? x.p.fr : x.v.fr) + '</small></span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>');
       h += '<div class="q-end"><button type="button" class="qgo" id="g-back">Retour</button><button type="button" class="mini" id="g-reset">Effacer les statistiques</button></div></div>';
-      body.innerHTML = h;
+      body.innerHTML = h; body.scrollTop = 0;
     }
   }
 

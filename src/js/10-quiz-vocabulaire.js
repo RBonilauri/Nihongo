@@ -123,7 +123,7 @@
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       h += '<button type="button" class="mini qstat-btn" id="v-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="v-go"' + (cfg.cats.length && cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
-      body.innerHTML = h;
+      body.innerHTML = h; body.scrollTop = 0;
     }
     function persist() { ST.vqc = cfg; save(); }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
@@ -174,7 +174,7 @@
       var st = ST.vq[x.i] || { n: 0, st: 0, w: false }; st.n++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.vq[x.i] = st;
-      var S = ST.vqs; S.q++; if (good) S.ok++; dayHit(good);
+      var S = ST.vqs; S.q++; if (good) S.ok++; dayHit(good, 'v');
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var C = S.cat[x.c] = S.cat[x.c] || { n: 0, ok: 0 }; C.n++; if (good) C.ok++;
       save();
@@ -189,7 +189,7 @@
       barI.style.width = '100%'; prog.textContent = '';
       var n = Q.items.length, pct = Math.round(Q.ok / n * 100), secs = Math.round((Date.now() - Q.t0) / 1000);
       var list = Q.wrongList.map(function (w) { var x = byI[w.i]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.jp) + '</span><span>' + esc(x.fr) + '<small>' + esc(x.ka || x.ro) + '</small></span></div>'; }).join('');
-      body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
+      body.scrollTop = 0; body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
         (list ? '<h4 class="q-h">À revoir (' + Q.wrongList.length + ')</h4><div class="q-miss-list">' + list + '</div>' : '<p class="conj-note">Sans faute. Bravo.</p>') +
         '<div class="q-end">' + (list ? '<button type="button" class="qgo" id="v-again">Refaire les ratés</button>' : '') + '<button type="button" class="mini" id="v-new">Nouveau quiz</button><button type="button" class="mini" id="v-close">Fermer</button></div>';
     }
@@ -198,12 +198,13 @@
       var S = ST.vqs, pc = function (a, b) { return b ? Math.round(a / b * 100) + ' %' : '—'; };
       function rows(list, get) { return list.map(function (t) { var T = get(t[0]) || { n: 0, ok: 0 }; var p = T.n ? Math.round(T.ok / T.n * 100) : 0; return '<div class="qs-row"><div class="qs-l"><span>' + t[1] + '</span><span><b>' + T.n + '</b> · ' + pc(T.ok, T.n) + '</span></div><div class="qs-bar"><i style="width:' + p + '%"></i></div></div>'; }).join(''); }
       var h = '<div class="q-stats"><div class="qs-tiles"><div><b>' + S.sess + '</b><span>quiz terminés</span></div><div><b>' + S.q + '</b><span>questions</span></div><div><b>' + pc(S.ok, S.q) + '</b><span>de réussite</span></div></div>';
+      h += qsExtra('v', ST.vq, VD.length);
       h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + rows(VT.map(function (t) { return [t.id, t.label]; }), function (k) { return S.ty[k]; }) + '</div>';
       h += '<h4 class="q-h">Par rubrique</h4><div class="qs-types">' + rows(VCATS.map(function (c) { return [c, c]; }), function (k) { return S.cat[k]; }) + '</div>';
       var worst = Object.keys(ST.vq).map(function (k) { var v = ST.vq[k]; return { i: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.i]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
       h += '<h4 class="q-h">Les plus ratés</h4>' + (worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { var x = byI[v.i]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.jp) + '</span><span>' + esc(x.fr) + '<small>' + esc(x.ka || x.ro) + '</small></span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>');
       h += '<div class="q-end"><button type="button" class="qgo" id="v-back">Retour</button><button type="button" class="mini" id="v-reset">Effacer les statistiques</button></div></div>';
-      body.innerHTML = h;
+      body.innerHTML = h; body.scrollTop = 0;
     }
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden && !(Q && Q.mix)) open(false); });
   }

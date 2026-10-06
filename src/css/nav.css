@@ -85,3 +85,8 @@
   .pg-wd { color: var(--muted); font-size: .78rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pg-wx { color: var(--gold); font-size: .7rem; font-family: 'DM Mono', monospace; white-space: nowrap; }
   .pg-empty { color: var(--muted); font-size: .85rem; }
+
+  .pg-mini { height: 100px; }
+  .pg-trend { font-size: .78rem; color: var(--muted); margin: .4rem 0 0; }
+  .q-stats .pg-card { background: var(--surface); }
+  .pg-trend { margin-bottom: .8rem; }
