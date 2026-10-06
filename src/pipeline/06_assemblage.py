@@ -19,6 +19,7 @@ head = '''<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="日本語">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>document.documentElement.classList.add("boot");setTimeout(function(){document.documentElement.classList.remove("boot")},6000)</script>
 <script>try{var t=localStorage.getItem("jp-theme");document.documentElement.setAttribute("data-theme",t==="dark"||t==="light"?t:(t==="auto"?"":"light"));if(!document.documentElement.getAttribute("data-theme"))document.documentElement.removeAttribute("data-theme")}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">

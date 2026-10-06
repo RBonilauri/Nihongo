@@ -110,3 +110,6 @@
   .scopes .chip small { display: inline; margin-left: .25rem; font-size: .68rem; opacity: .75; }
   .scopes .chip.zero { opacity: .45; }
   .shint { color: var(--muted); font-size: .85rem; line-height: 1.5; padding: .6rem .2rem; }
+
+  /* pas d'affichage de la page « brute » pendant le chargement */
+  html.boot main { visibility: hidden; }

@@ -16,7 +16,11 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.add_init_script("window.speechSynthesis.speak=function(){};")
+    pg.add_init_script("document.addEventListener('DOMContentLoaded',function(){window.__v=getComputedStyle(document.querySelector('main')).visibility})")
     pg.goto(APP); pg.wait_for_timeout(900)
+    print('Démarrage')
+    check(pg.evaluate('window.__v') == 'hidden', 'contenu masqué pendant le chargement (%s)' % pg.evaluate('window.__v'))
+    check(pg.evaluate("getComputedStyle(document.querySelector('main')).visibility") == 'visible' and not pg.evaluate("document.documentElement.classList.contains('boot')"), 'contenu visible une fois prêt')
     title = lambda: pg.evaluate("document.querySelector('.tb-title').textContent")
 
     print('Navigation')
