@@ -632,3 +632,6 @@ import compteurs
 _merge(compteurs.counters_subs())
 
 SECTIONS.append(vocab_themes.geo_section())
+import grammaire_n4_n3
+SECTIONS.append(grammaire_n4_n3.SECTION_N3)
+SECTIONS.append(grammaire_n4_n3.SECTION_N4)

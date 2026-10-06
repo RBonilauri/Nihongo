@@ -1,7 +1,7 @@
   /* ═══════════ NAVIGATION PAR PAGES ═══════════ */
   var POLES = [
     { id: 'bases', jp: '仮', label: 'Bases', secs: ['仮名', '発音', '漢字'] },
-    { id: 'gram', jp: '文', label: 'Grammaire', secs: ['助詞', '動詞', '形容詞', '助数詞', '表現', '道具'] },
+    { id: 'gram', jp: '文', label: 'Grammaire', secs: ['助詞', '動詞', 'N4', 'N3', '形容詞', '助数詞', '表現', '道具'] },
     { id: 'voc', jp: '語', label: 'Vocabulaire', secs: ['語彙', '時間', '地理'] },
     { id: 'parl', jp: '話', label: 'Parler', secs: ['会話', '旅行', '敬語'] }
   ];
