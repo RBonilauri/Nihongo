@@ -27,3 +27,8 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# --- Nihongo : sources JS/CSS versionnées, artefacts de build ignorés ---
+!src/js/*.js
+src/build/
+__pycache__/

@@ -1,0 +1,221 @@
+  /* ═══════════ QUIZ KANJI ═══════════ */
+  var QT = [
+    { id: 'k2s', label: 'Kanji → sens', short: 'Sens' },
+    { id: 's2k', label: 'Sens → kanji', short: 'Kanji' },
+    { id: 'k2on', label: 'Kanji → lecture On', short: 'On' },
+    { id: 'k2kun', label: 'Kanji → lecture Kun', short: 'Kun' },
+    { id: 'w2r', label: 'Mot → lecture', short: 'Mot' }
+  ];
+  var QPRESETS = [
+    { label: 'Tout', types: ['k2s', 's2k', 'k2on', 'k2kun', 'w2r'] },
+    { label: 'Sans les mots', types: ['k2s', 's2k', 'k2on', 'k2kun'] },
+    { label: 'Lectures', types: ['k2on', 'k2kun', 'w2r'] },
+    { label: 'Sens', types: ['k2s', 's2k'] }
+  ];
+  var QN = [10, 25, 50, 100, 150, 200];
+  function initQuiz(mainEl) {
+    var KD = []; try { KD = JSON.parse(document.getElementById('kanji-data').textContent); } catch (e) {}
+    if (!KD.length) return;
+    var byK = {}; KD.forEach(function (x) { byK[x.k] = x; });
+    var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
+    var Q = null;
+    [['N5', 'kanji5'], ['N4', 'kanji4'], ['N3', 'kanji3']].forEach(function (pr) {
+      var LV = pr[0];
+      MIXREG[pr[1]] = {
+        label: 'Kanji ' + LV,
+        grp: 'kanji',
+        count: function () { return poolSize(LV, QT.map(function (t) { return t.id; }), false).q; },
+        make: function (n) { var sv = cfg; cfg = { lv: LV, types: QT.map(function (t) { return t.id; }), n: n, wrong: false }; var r = buildQuiz(); cfg = sv; return r; },
+        show: function (it, hooks, idx, total) {
+          Q = { items: idx < total ? [it, it] : [it], i: 0, ok: 0, wrongs: [], wrongList: [], t0: Date.now(), mix: hooks, mixLv: LV, mixTag: '<div class="q-tag q-tag-mix">' + '<b>Kanji ' + LV + '</b></div>' };
+          el.style.zIndex = 95; el.hidden = false; document.body.style.overflow = 'hidden';
+          showQ(); ttl.textContent = 'Quiz général'; prog.textContent = idx + ' / ' + total; barI.style.width = ((idx - 1) / total * 100) + '%'; body.scrollTop = 0;
+        },
+        hide: function () { el.hidden = true; el.style.zIndex = ''; Q = null; paintCard(); }
+      };
+    });
+    function curLv() { return Q && Q.mixLv ? Q.mixLv : cfg.lv; }
+
+    var el = document.createElement('div'); el.className = 'quiz'; el.hidden = true;
+    el.innerHTML = '<div class="q-top"><button class="x" type="button" aria-label="Fermer">×</button><div class="ttl">Quiz kanji</div><div class="prog"></div></div><div class="q-bar"><i></i></div><div class="q-body" id="q-body"></div>';
+    document.body.appendChild(el);
+    var body = el.querySelector('#q-body'), prog = el.querySelector('.prog'), barI = el.querySelector('.q-bar i'), ttl = el.querySelector('.ttl');
+
+    /* — carte d'accès sur l'accueil — */
+    var card = document.createElement('button'); card.type = 'button'; card.className = 'quizcard';
+    function wrongCount() { return Object.keys(ST.kq).filter(function (k) { return ST.kq[k].w; }).length; }
+    function paintCard() {
+      var seen = Object.keys(ST.kq).length, w = wrongCount();
+      card.innerHTML = '<span class="qc-jp">漢字</span><span class="qc-t">Quiz kanji<small>' + KD.length + ' kanji N5 + N4 + N3 · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
+    }
+    paintCard();
+    card.addEventListener('click', function () { openQuiz(); });
+    quizHost(mainEl).appendChild(card);
+
+    function hideQuiz() { el.hidden = true; document.body.style.overflow = ''; paintCard(); }
+    function open(v) { if (v) { if (el.hidden) bkPush(hideQuiz); el.hidden = false; document.body.style.overflow = 'hidden'; } else bkClose(hideQuiz); }
+    function openQuiz() { open(true); showSetup(); }
+    el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); paintCard(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden && !(Q && Q.mix)) { open(false); paintCard(); } });
+
+    /* — utilitaires — */
+    function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function levelPool(lv) { return KD.filter(function (x) { return lv === 'ALL' || x.l === lv; }); }
+    function elig(x, t) {
+      return t === 'k2s' || t === 's2k' || (t === 'k2on' && x.on) || (t === 'k2kun' && x.kun) || (t === 'w2r' && x.kw.length);
+    }
+    function parts(cell) { return cell.split(/[・･]/).map(function (p) { return p.replace(/[()（）]/g, '').trim(); }).filter(Boolean); }
+    function senseToks(sn) { return sn.toLowerCase().split(/\s*[\/,;]\s*/).map(function (t) { return t.replace(/\(.*?\)/g, '').trim(); }).filter(Boolean); }
+    function disjoint(a, b) { return !a.some(function (x) { return b.indexOf(x) >= 0; }); }
+    function poolSize(lv, types, onlyWrong) {
+      var n = 0, kanji = 0;
+      levelPool(lv).forEach(function (x) {
+        if (onlyWrong && !(ST.kq[x.k] && ST.kq[x.k].w)) return;
+        var c = types.filter(function (t) { return elig(x, t); }).length; if (c) { n += c; kanji++; }
+      });
+      return { q: n, k: kanji };
+    }
+
+    /* — sélection des questions — */
+    function bucket(k) { var s = ST.kq[k]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
+    function buildQuiz() {
+      var pool = levelPool(cfg.lv).filter(function (x) { return !cfg.wrong || (ST.kq[x.k] && ST.kq[x.k].w); });
+      var order = shuffle(pool.slice()).sort(function (a, b) { return bucket(a.k) - bucket(b.k); });
+      var left = {}; order.forEach(function (x) { left[x.k] = shuffle(cfg.types.filter(function (t) { return elig(x, t); })); });
+      var tot = 0; order.forEach(function (x) { tot += left[x.k].length; });
+      var items = [], target = cfg.n === 0 ? tot : Math.min(cfg.n, tot), guard = 0;
+      while (items.length < target && guard++ < 50) {
+        var round = [];
+        order.forEach(function (x) { if (items.length + round.length < target && left[x.k].length) round.push({ x: x, t: left[x.k].pop() }); });
+        if (!round.length) break;
+        items = items.concat(shuffle(round));
+      }
+      return items.map(function (q) { return { k: q.x.k, t: q.t, w: q.t === 'w2r' ? shuffle(q.x.kw.slice())[0] : null }; });
+    }
+
+    /* — options (distracteurs plausibles) — */
+    function sameFirst(x, cands) {
+      var same = shuffle(cands.filter(function (c) { return c.g === x.g; })), other = shuffle(cands.filter(function (c) { return c.g !== x.g; }));
+      return same.slice(0, 2).concat(other).concat(same.slice(2));
+    }
+    function options(q) {
+      var x = byK[q.k], pool = levelPool(curLv()).filter(function (c) { return c.k !== x.k; }), out = [], seen = {};
+      function add(v, ok) { if (!v || seen[v]) return false; seen[v] = 1; out.push({ v: v, ok: ok }); return true; }
+      if (q.t === 'k2s') {
+        add(x.s, true); var tx = senseToks(x.s);
+        sameFirst(x, pool.filter(function (c) { return disjoint(tx, senseToks(c.s)); })).some(function (c) { add(c.s, false); return out.length >= 4; });
+      } else if (q.t === 's2k') {
+        add(x.k, true); var ty = senseToks(x.s);
+        sameFirst(x, pool.filter(function (c) { return disjoint(ty, senseToks(c.s)); })).some(function (c) { add(c.k, false); return out.length >= 4; });
+      } else if (q.t === 'k2on' || q.t === 'k2kun') {
+        var f = q.t === 'k2on' ? 'on' : 'kun', px = parts(x[f]);
+        add(x[f], true);
+        sameFirst(x, pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); })).some(function (c) { add(c[f], false); return out.length >= 4; });
+      } else {
+        var r = q.w[1]; add(r, true);
+        var words = []; levelPool(curLv()).forEach(function (c) { c.kw.forEach(function (w) { if (w[1] !== r && w[0] !== q.w[0]) words.push({ w: w, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }), d: Math.abs(w[1].length - r.length) }); }); });
+        shuffle(words).sort(function (a, b) { return (a.d > 1) - (b.d > 1) || (b.share - a.share); }).some(function (c) { add(c.w[1], false); return out.length >= 4; });
+      }
+      return shuffle(out);
+    }
+
+    /* — affichage — */
+    function chipBtn(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
+    function showSetup() {
+      Q = null; ttl.textContent = 'Quiz kanji'; prog.textContent = ''; barI.style.width = '0';
+      var ps = poolSize(cfg.lv, cfg.types, cfg.wrong);
+      if (cfg.n !== 0 && cfg.n > ps.q) cfg.n = 0;
+      var wc = wrongCount(), h = '';
+      h += '<div class="q-sec"><h4>Niveau</h4><div class="seg" id="q-lv">' + [['N5', 'N5 · ' + levelPool('N5').length], ['N4', 'N4 · ' + levelPool('N4').length], ['N3', 'N3 · ' + levelPool('N3').length], ['ALL', 'Tous · ' + KD.length]].map(function (a) { return '<button type="button" data-lv="' + a[0] + '" aria-pressed="' + (cfg.lv === a[0]) + '">' + a[1] + '</button>'; }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + QT.map(function (t) { return chipBtn(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div><div class="qpre">' + QPRESETS.map(function (p, i) { return '<button type="button" class="mini" data-p="' + i + '">' + p.label + '</button>'; }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + QN.filter(function (n) { return n <= ps.q; }).map(function (n) { return chipBtn(n, cfg.n === n, 'data-n="' + n + '"', n > ps.q); }).join('') + chipBtn('Tout · ' + ps.q, cfg.n === 0, 'data-n="0"', ps.q === 0) + '</div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' kanji à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      var can = cfg.types.length && ps.q > 0;
+      h += '<button type="button" class="mini qstat-btn" id="q-stats">📊 Statistiques</button>';
+      h += '<button type="button" class="qgo" id="q-go"' + (can ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? ps.q : Math.min(cfg.n, ps.q)) + ' questions</button>';
+      body.innerHTML = h;
+    }
+    function showStats() {
+      Q = null; ttl.textContent = 'Statistiques'; prog.textContent = ''; barI.style.width = '0';
+      var S = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }, pc = function (a, b) { return b ? Math.round(a / b * 100) + ' %' : '—'; };
+      var h = '<div class="q-stats"><div class="qs-tiles"><div><b>' + S.sess + '</b><span>quiz terminés</span></div><div><b>' + S.q + '</b><span>questions</span></div><div><b>' + pc(S.ok, S.q) + '</b><span>de réussite</span></div></div>';
+      h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + QT.map(function (t) { var T = (S.ty || {})[t.id] || { n: 0, ok: 0 }; var p = T.n ? Math.round(T.ok / T.n * 100) : 0;
+        return '<div class="qs-row"><div class="qs-l"><span>' + t.label + '</span><span><b>' + T.n + '</b> · ' + pc(T.ok, T.n) + '</span></div><div class="qs-bar"><i style="width:' + p + '%"></i></div></div>'; }).join('') + '</div>';
+      var worst = Object.keys(ST.kq).map(function (k) { var v = ST.kq[k]; return { k: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byK[v.k]; }).sort(function (a, b) { return b.x - a.x || (b.x / b.n) - (a.x / a.n); }).slice(0, 15);
+      h += '<h4 class="q-h">Kanji les plus ratés</h4>';
+      h += worst.length ? '<div class="q-miss-list">' + worst.map(function (v) { var x = byK[v.k]; return '<div class="q-miss"><span class="kj">' + esc(v.k) + '</span><span>' + esc(x.s) + '<small>' + esc((x.on || '—') + ' · ' + (x.kun || '—')) + '</small></span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; }).join('') + '</div>' : '<p class="conj-note">Aucun raté enregistré pour l’instant.</p>';
+      h += '<div class="q-end"><button type="button" class="qgo" id="q-back">Retour</button><button type="button" class="mini" id="q-reset">Effacer les statistiques</button></div></div>';
+      body.innerHTML = h;
+    }
+    function persist() { ST.kqc = cfg; save(); }
+    body.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b || b.disabled) return;
+      if (b.dataset.lv) { cfg.lv = b.dataset.lv; persist(); showSetup(); }
+      else if (b.dataset.t) { var i = cfg.types.indexOf(b.dataset.t); if (i >= 0) cfg.types.splice(i, 1); else cfg.types.push(b.dataset.t); persist(); showSetup(); }
+      else if (b.dataset.p) { cfg.types = QPRESETS[+b.dataset.p].types.slice(); persist(); showSetup(); }
+      else if (b.dataset.n !== undefined) { cfg.n = +b.dataset.n; persist(); showSetup(); }
+      else if (b.id === 'q-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
+      else if (b.id === 'q-go') { start(buildQuiz()); }
+      else if (b.classList.contains('qopt')) answer(b);
+      else if (b.id === 'q-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
+      else if (b.id === 'q-say') { speak(JSON.parse(b.dataset.say)); }
+      else if (b.id === 'q-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
+      else if (b.id === 'q-new' || b.id === 'q-back') { showSetup(); }
+      else if (b.id === 'q-stats') { showStats(); }
+      else if (b.id === 'q-reset') { if (confirm('Effacer toutes les statistiques et les kanji ratés ?')) { ST.kq = {}; ST.kqs = { sess: 0, q: 0, ok: 0, ty: {} }; save(); showStats(); } }
+      else if (b.id === 'q-close') { open(false); paintCard(); }
+    });
+
+    function start(items) {
+      if (!items.length) { toast('Aucune question disponible avec ces réglages.'); return; }
+      Q = { items: items, i: 0, ok: 0, wrongs: [], wrongList: [], t0: Date.now(), done: false };
+      showQ();
+    }
+    function bigKanji(t, cls) { return '<div class="q-big ' + (cls || '') + '">' + esc(t) + '</div>'; }
+    function showQ() {
+      if (Q.i >= Q.items.length) return showResult();
+      var q = Q.items[Q.i], x = byK[q.k], opts = options(q); Q.cur = { q: q, opts: opts, done: false };
+      ttl.textContent = 'Quiz kanji · ' + (cfg.lv === 'ALL' ? 'N5 + N4 + N3' : cfg.lv);
+      prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
+      var ask = '', big = '';
+      if (q.t === 'k2s') { ask = 'Que signifie ce kanji ?'; big = bigKanji(x.k); }
+      else if (q.t === 's2k') { ask = 'Quel kanji correspond à ce sens ?'; big = '<div class="q-big sens">' + esc(x.s) + '</div>'; }
+      else if (q.t === 'k2on') { ask = 'Quelle est la lecture On de ce kanji ?'; big = bigKanji(x.k); }
+      else if (q.t === 'k2kun') { ask = 'Quelle est la lecture Kun de ce kanji ?'; big = bigKanji(x.k); }
+      else { ask = 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; }
+      var gl = (opts.length < 2) ? '<p class="conj-note">Pas assez de choix pour ce kanji.</p>' : '';
+      body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + '</div>' + gl +
+        '<div class="q-opts">' + opts.map(function (o, i) { return '<button type="button" class="qopt' + (q.t === 's2k' ? ' kj' : '') + '" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="q-fb"></div>';
+    }
+    function answer(b) {
+      var cur = Q.cur; if (cur.done) return; cur.done = true;
+      var o = cur.opts[+b.dataset.i], q = cur.q, x = byK[q.k], good = !!o.ok;
+      body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
+      var st = ST.kq[x.k] || { n: 0, st: 0, w: false }; st.n++; if (!good) st.x = (st.x || 0) + 1;
+      var S = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S.q++; if (good) S.ok++; var T = S.ty[q.t] = S.ty[q.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
+      if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (Q.wrongs.indexOf(x.k) < 0) { Q.wrongs.push(x.k); Q.wrongList.push({ k: x.k, t: q.t, w: q.w }); } }
+      ST.kq[x.k] = st; save();
+      var say = [];
+      if (q.t === 'w2r') say = [q.w[1]]; else { if (x.on) say = say.concat(parts(x.on)); if (x.kun) say = say.concat(parts(x.kun)); }
+      var kw = x.kw.slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
+      var last = Q.i + 1 >= Q.items.length;
+      document.getElementById('q-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
+        '<div class="fbk">' + esc(x.k) + '</div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
+        (q.t === 'w2r' ? '<div><b>Mot</b> ' + esc(q.w[0]) + ' (' + esc(q.w[1]) + ') ' + esc(q.w[2]) + '</div>' : '') +
+        (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' +
+        '<div class="fbb"><button type="button" class="mini" id="q-say" data-say=\'' + esc(JSON.stringify(say)) + '\'>🔊 Écouter</button><button type="button" class="qgo" id="q-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
+      document.getElementById('q-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+    function showResult() {
+      if (!Q.done) { Q.done = true; var S0 = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S0.sess++; save(); }
+      var n = Q.items.length, pct = Math.round(Q.ok / n * 100), secs = Math.round((Date.now() - Q.t0) / 1000);
+      ttl.textContent = 'Résultat'; prog.textContent = ''; barI.style.width = '100%';
+      var wl = {}; Q.wrongs.forEach(function (k) { wl[k] = 1; });
+      var list = Object.keys(wl).map(function (k) { var x = byK[k]; return '<div class="q-miss"><span class="kj">' + esc(k) + '</span><span>' + esc(x.s) + '<small>' + esc((x.on || '—') + ' · ' + (x.kun || '—')) + '</small></span></div>'; }).join('');
+      body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
+        (list ? '<h4 class="q-h">À revoir (' + Object.keys(wl).length + ')</h4><div class="q-miss-list">' + list + '</div>' : '<p class="conj-note">Sans faute. Bravo.</p>') +
+        '<div class="q-end">' + (list ? '<button type="button" class="qgo" id="q-again">Refaire les ratés</button>' : '') + '<button type="button" class="mini" id="q-new">Nouveau quiz</button><button type="button" class="mini" id="q-close">Fermer</button></div>';
+      paintCard();
+    }
+  }
+

@@ -1,0 +1,43 @@
+
+  /* ═══ NAVIGATION PAR PAGES ═══ */
+  html.js .drawer { left: auto; right: 0; transform: translateX(104%); }
+  html.js body.nav-open .drawer { transform: none; }
+  .tb-btn[hidden] { display: none; }
+  html.js .fab { bottom: calc(82px + env(safe-area-inset-bottom, 0px)); width: 46px; height: 46px; }
+  html.js .toast { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar { display: none; }
+  html.js .tabbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; background: var(--surface); border-top: 1px solid var(--border); padding: 6px 4px calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0 2px; font: inherit; font-size: .68rem; color: var(--muted); background: none; border: 0; cursor: pointer; position: relative; }
+  .tabbar button i { font-style: normal; font-size: 1.3rem; line-height: 1.2; filter: grayscale(1); }
+  .tabbar button.on { color: var(--ink); font-weight: 700; } .tabbar button.on i { filter: none; }
+  .tabbar button.on::after { content: ""; width: 24px; height: 3px; border-radius: 2px; background: var(--red); margin-top: 3px; }
+  main.nv { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  main.nv > .doc-head, main.nv > .hint { display: none; }
+  main.nv > details.sec { display: none; }
+  main.nv > details.sec.cur { display: block; border: 0; background: none; margin: 0; }
+  main.nv > details.sec.cur > summary { display: none; }
+  main.nv > details.sec.cur > .sec-body { padding: 0; border: 0; }
+  main.nv:not(.v-home) > .home { display: none; }
+  main.nv .navsubs { display: none; }
+  main.v-sec .sec.cur .navsubs { display: block; margin: .6rem 0 1rem; }
+  main.v-sec .sec.cur details.sub, main.v-sub .sec.cur .navsubs { display: none; }
+  main.v-sub .sec.cur .sec-body > :not(details.sub.cur) { display: none; }
+  main.v-sub details.sub.cur { display: block; border: 0; }
+  main.v-sub details.sub.cur > summary { position: static; cursor: default; font-weight: 700; font-size: 1rem; padding: .7rem 0; background: none; }
+  main.v-sub details.sub.cur > summary::-webkit-details-marker { display: none; } main.v-sub details.sub.cur > summary::marker { content: ''; }
+  main.v-sub details.sub.cur > summary::after { display: none; }
+  #navpage:empty { display: none; }
+  #navpage { padding-top: .6rem; }
+  .nhero { background: var(--panel); color: var(--on-panel); border-radius: 16px; padding: 1.1rem 1.1rem 1.2rem; margin-bottom: .8rem; }
+  .nh-t { font-size: .7rem; letter-spacing: .14em; opacity: .7; } .nh-b { font-family: 'Noto Serif JP', serif; font-size: 1.5rem; margin: .2rem 0 .3rem; } .nhero p { font-size: .82rem; opacity: .85; margin-bottom: .8rem; }
+  .ngo { font: inherit; font-weight: 700; padding: .6rem 1.2rem; border: 0; border-radius: 22px; background: var(--bg); color: var(--ink); cursor: pointer; }
+  .nrow { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
+  .nrow button { font: inherit; padding: .9rem; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--ink); cursor: pointer; font-weight: 700; } .nrow i { font-style: normal; margin-right: .4rem; }
+  .npole, .nsec, .nsub { display: flex; align-items: center; gap: .9rem; width: 100%; font: inherit; text-align: left; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: .6rem; cursor: pointer; }
+  .npole { padding: .9rem 1rem; } .nsec { padding: .8rem 1rem; } .nsub { padding: .7rem 1rem; }
+  .ni { flex: none; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; background: var(--panel); color: var(--on-panel); font-family: 'Noto Serif JP', serif; font-size: 1.35rem; }
+  .nj { flex: none; min-width: 3.4rem; font-family: 'Noto Serif JP', serif; font-size: 1.15rem; color: var(--red); }
+  .nt { flex: 1; min-width: 0; font-weight: 700; } .npole .nt { font-size: 1.02rem; } .nt small { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; margin-top: .15rem; }
+  .ch { color: var(--muted); font-size: 1.3rem; }
+  .nquiz { display: block; width: 100%; font: inherit; font-weight: 700; padding: .75rem 1rem; margin-bottom: .8rem; border: 0; border-radius: 14px; background: var(--panel); color: var(--on-panel); cursor: pointer; }
+

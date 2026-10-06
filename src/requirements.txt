@@ -1,0 +1,6 @@
+beautifulsoup4
+sudachipy
+sudachidict_core
+pykakasi
+shapely
+playwright

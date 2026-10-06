@@ -1,0 +1,41 @@
+  .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
+  .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
+  .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
+  .jm-chip.on { border-color: var(--ink); border-width: 2px; font-weight: 700; }
+  .jm-box { position: relative; border: 1px solid var(--border); border-radius: 14px; background: var(--bg); overflow: hidden; }
+  .jm-svg { display: block; width: 100%; height: auto; max-height: 70vh; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .jm-svg.jm-z { touch-action: none; }
+  .jm-p { stroke: #fff; stroke-width: .8; cursor: pointer; fill-opacity: .85; transition: fill-opacity .15s; }
+  .jm-p.jm-dim { fill-opacity: .22; }
+  .jm-p.jm-sel { stroke: #000; stroke-width: 2.6; fill-opacity: 1; }
+  .jm-fr { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 3; pointer-events: none; }
+  .jm-t, .jm-sl { font-size: calc(17px * var(--lf, 1)); font-weight: 700; text-anchor: middle; pointer-events: none; fill: #000; paint-order: stroke; stroke: #fff; stroke-width: 3.5px; stroke-linejoin: round; }
+  .jm-sl { font-size: calc(15px * var(--lf, 1)); }
+  .jm-zb { position: absolute; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .jm-zb button { width: 38px; height: 38px; border-radius: 19px; border: 1px solid var(--border); background: var(--bg); color: var(--ink); font-size: 1.15rem; cursor: pointer; line-height: 1; }
+  .jm-card { margin-top: .7rem; padding: .8rem 1rem; border: 1px solid var(--border); border-radius: 14px; }
+  .jm-hint { margin: 0; color: var(--muted); font-size: .85rem; }
+  .jm-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .7rem; margin-bottom: .4rem; }
+  .jm-k { font-size: 1.7rem; font-weight: 700; } .jm-ka { font-size: 1rem; } .jm-ro { color: var(--muted); font-size: .85rem; }
+  .jm-l { font-size: .88rem; margin: .2rem 0; } .jm-l b { display: inline-block; min-width: 5.2rem; color: var(--muted); font-weight: 600; }
+  .jm-say { margin-top: .5rem; }
+  .jm-ps { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; margin-top: .4rem; }
+  .jm-pb { display: flex; flex-direction: column; align-items: flex-start; padding: .35rem .6rem; font: inherit; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--ink); cursor: pointer; }
+  .jm-pb span { font-size: 1.05rem; font-weight: 700; } .jm-pb small { color: var(--muted); font-size: .72rem; }
+  .jm-quiz { margin: .6rem auto 0; max-width: 250px; } .jm-quiz svg { display: block; width: 100%; height: auto; }
+  .jm-quiz .jm-p { fill: var(--border); stroke: var(--bg); stroke-width: .7; fill-opacity: 1; cursor: default; } .jm-quiz .jm-p.jm-on { fill: var(--ink); stroke: var(--ink); stroke-width: 1.2; } .jm-quiz .jm-fr { stroke-width: .8; }
+  .vq-reg { margin-top: .3rem; } .vq-reg b { color: var(--muted); }
+  .jm-mini { margin: .7rem auto 0; max-width: 190px; } .jm-mini svg { display: block; width: 100%; height: auto; }
+  .jm-mini .jm-p { fill: var(--border); stroke: var(--bg); stroke-width: .7; cursor: default; fill-opacity: 1; }
+  .jm-mini .jm-p.jm-on { fill: var(--ink); stroke: var(--ink); stroke-width: 1.2; }
+  .jm-mini .jm-fr { stroke-width: .8; }
+
+  :root { --ok: #00873a; --okbg: #c9f2d6; --ko: #d90000; --kobg: #ffd0d0; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #3dff7a; --okbg: #0b4a22; --ko: #ff4040; --kobg: #5e0f0f; } }
+  :root[data-theme="dark"] { --ok: #3dff7a; --okbg: #0b4a22; --ko: #ff4040; --kobg: #5e0f0f; }
+  .quizlist { display: grid; gap: .6rem; margin-top: 1rem; } .quizlist .quizcard { margin: 0; }
+  .quizcard { display: flex; align-items: center; gap: .9rem; width: 100%; margin: 0 0 .8rem; padding: .8rem 1rem; font: inherit; text-align: left; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; }
+  .quizcard .qc-jp { font-size: 1.6rem; flex: 0 0 auto; }
+  .quizcard .qc-t { flex: 1; min-width: 0; font-weight: 600; }
+  .quizcard .qc-t small { display: block; font-weight: 400; font-size: .72rem; color: var(--muted); }
+  .quizcard .qc-go { color: var(--muted); font-size: 1.4rem; }

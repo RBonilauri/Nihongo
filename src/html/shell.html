@@ -1,0 +1,21 @@
+<header class="topbar"><button class="tb-btn" id="tb-back" type="button" aria-label="Retour" hidden>‹</button><div class="tb-title"><span>日本語</span><small>Référence</small></div><button class="tb-btn" id="menu" type="button" aria-label="Réglages" aria-expanded="false" aria-controls="drawer">⚙</button></header>
+<nav class="tabbar" id="tabbar" aria-label="Navigation"><button type="button" data-tab="home"><i>🏠</i>Accueil</button><button type="button" data-tab="learn"><i>📚</i>Apprendre</button><button type="button" data-tab="quiz"><i>❓</i>Quiz</button><button type="button" data-srch="1"><i>🔍</i>Recherche</button></nav>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true"><div class="dr-head"><span class="dr-logo">日本語 <small>Référence</small></span><button class="tb-btn" id="dr-close" type="button" aria-label="Fermer le menu">×</button></div>
+<div class="dr-scroll"><div class="field"><span class="ico">⌕</span><input id="q" type="search" placeholder="Rechercher (て形, 食べる…)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher"><button class="clr" id="clr" type="button" aria-label="Effacer" hidden>×</button></div>
+<div class="results" id="results" hidden></div>
+<div class="dr-body" id="dr-body">
+<section class="dr-card"><h4>Apparence</h4>
+<div class="row stack"><span class="lab">Thème</span><div class="seg" id="seg-theme" role="group" aria-label="Thème"><button type="button" data-t="light">☀ Clair</button><button type="button" data-t="dark">☾ Sombre</button><button type="button" data-t="auto">◐ Auto</button></div></div>
+<div class="row"><span class="lab">Taille du texte</span><div class="stepper"><button id="fs-" type="button" aria-label="Réduire">A−</button><output id="fs-val" role="button" tabindex="0" title="Revenir à 100 %">100 %</output><button id="fs+" type="button" aria-label="Agrandir">A+</button></div></div>
+</section>
+<section class="dr-card"><h4>Lecture et accueil</h4>
+<div class="row"><span class="lab">Masquer romaji et traductions<small>Flou, touche pour révéler</small></span><button class="sw" id="sw-aid" type="button" role="switch" aria-checked="false" aria-label="Masquer romaji et traductions"><i></i></button></div>
+<div class="row"><span class="lab">Afficher les récents<small>Les 3 dernières sections ouvertes</small></span><button class="sw" id="sw-rec" type="button" role="switch" aria-checked="true" aria-label="Afficher les récents"><i></i></button></div>
+<div class="row"><span class="lab">Historique des récents</span><button class="mini" id="rec-clear" type="button">Vider</button></div>
+</section>
+<section class="dr-card"><h4>Données</h4>
+<div class="row stack"><span class="lab">Sauvegarde<small>Favoris, fiches sues, réglages</small></span><div class="pair"><button class="mini" id="exp" type="button">Exporter</button><label class="mini">Importer<input id="imp" type="file" accept="application/json" hidden></label></div></div>
+<div class="row"><span class="lab">Fiches sues<small>Tout remettre à zéro</small></span><button class="mini danger" id="rst" type="button">Réinitialiser</button></div>
+</section>
+</div></div></div></aside>
