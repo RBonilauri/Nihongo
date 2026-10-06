@@ -79,6 +79,13 @@ with sync_playwright() as p:
         check(ok, 'quiz « %s » : lancement et questions' % name)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
 
+    print('Objectif du jour')
+    st = pg.evaluate("JSON.parse(localStorage.getItem('jp-state')).day")
+    check(st and st['n'] >= 6, 'les réponses de quiz sont comptées (%s)' % st)
+    pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
+    check(pg.evaluate("!!document.querySelector('.nday .nd-bar i')"), 'carte objectif du jour sur l’accueil')
+    check(pg.evaluate("(document.querySelector('.nday .nd-h span')||{}).textContent") .startswith('%d / 20' % min(st['n'], 20)), 'compteur affiché cohérent')
+
     print('Données')
     counts = pg.evaluate("""() => ({ kanji: JSON.parse(document.getElementById('kanji-data').textContent).length,
         vocab: JSON.parse(document.getElementById('vocab-data').textContent).length,

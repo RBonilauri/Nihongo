@@ -139,7 +139,7 @@
       var o = cur.opts[+b.dataset.i], it = cur.it, x = byI[it.i], good = !!o.ok;
       body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
       var st = ST.gq[x.i] || { n: 0, st: 0, w: false }; st.n++;
-      if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
+      dayHit(good); if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.gq[x.i] = st; save();
       var last = Q.i + 1 >= Q.items.length;
       $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +

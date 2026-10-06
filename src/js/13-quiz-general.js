@@ -50,7 +50,7 @@
       step();
     }
     var hooks = {
-      next: function (ok) { var q = S.items[S.i], r = S.res[q.k]; r.n++; if (ok) { r.ok++; S.ok++; } S.i++; step(); },
+      next: function (ok) { var q = S.items[S.i], r = S.res[q.k]; r.n++; if (ok) { r.ok++; S.ok++; } dayHit(ok); S.i++; step(); },
       quit: function () { open(false); }
     };
     function step() {

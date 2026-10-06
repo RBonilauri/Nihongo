@@ -209,7 +209,7 @@
       var st = ST[kq][x.i] || { n: 0, st: 0, w: false }; st.n++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST[kq][x.i] = st;
-      var S = ST[ks]; S.q++; if (good) S.ok++;
+      var S = ST[ks]; S.q++; if (good) S.ok++; dayHit(good);
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var K = x.c === 'p' ? (S.pt[x.p.a] = S.pt[x.p.a] || { n: 0, ok: 0 }) : (S.lab[x.l] = S.lab[x.l] || { n: 0, ok: 0 }); K.n++; if (good) K.ok++;
       save();

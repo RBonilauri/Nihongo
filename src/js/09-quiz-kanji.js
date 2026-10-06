@@ -192,7 +192,7 @@
       var o = cur.opts[+b.dataset.i], q = cur.q, x = byK[q.k], good = !!o.ok;
       body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
       var st = ST.kq[x.k] || { n: 0, st: 0, w: false }; st.n++; if (!good) st.x = (st.x || 0) + 1;
-      var S = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S.q++; if (good) S.ok++; var T = S.ty[q.t] = S.ty[q.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
+      var S = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S.q++; if (good) S.ok++; dayHit(good); var T = S.ty[q.t] = S.ty[q.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (Q.wrongs.indexOf(x.k) < 0) { Q.wrongs.push(x.k); Q.wrongList.push({ k: x.k, t: q.t, w: q.w }); } }
       ST.kq[x.k] = st; save();
       var say = [];

@@ -174,7 +174,7 @@
       var st = ST.vq[x.i] || { n: 0, st: 0, w: false }; st.n++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.vq[x.i] = st;
-      var S = ST.vqs; S.q++; if (good) S.ok++;
+      var S = ST.vqs; S.q++; if (good) S.ok++; dayHit(good);
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var C = S.cat[x.c] = S.cat[x.c] || { n: 0, ok: 0 }; C.n++; if (good) C.ok++;
       save();

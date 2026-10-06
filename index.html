@@ -680,6 +680,13 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .ch { color: var(--muted); font-size: 1.3rem; }
   .nquiz { display: block; width: 100%; font: inherit; font-weight: 700; padding: .75rem 1rem; margin-bottom: .8rem; border: 0; border-radius: 14px; background: var(--panel); color: var(--on-panel); cursor: pointer; }
 
+
+  .nday { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; padding: .8rem .9rem; margin: 0 0 .8rem; }
+  .nday .nd-h { display: flex; justify-content: space-between; align-items: baseline; font-size: .9rem; }
+  .nday .nd-h span { font-family: 'DM Mono', monospace; color: var(--gold); }
+  .nday .nd-bar { height: 10px; border-radius: 6px; background: var(--border); margin: .5rem 0; overflow: hidden; }
+  .nday .nd-bar i { display: block; height: 100%; background: var(--gold); border-radius: 6px; transition: width .3s; }
+  .nday small { color: var(--muted); font-size: .72rem; }
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -5344,9 +5351,26 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
 
   /* ── état persistant ── */
-  var ST = { fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
+  /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
+  function dkey(t) { var d = t ? new Date(t) : new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function dayState() { var k = dkey(); if (!ST.day || ST.day.d !== k) ST.day = { d: k, n: 0, ok: 0 }; return ST.day; }
+  function dayHit(good) {
+    var D = dayState(); D.n++; if (good) D.ok++;
+    if (D.n === ST.goal) {
+      var y = dkey(Date.now() - 864e5);
+      ST.strk = { last: D.d, n: ST.strk.last === y ? ST.strk.n + 1 : (ST.strk.last === D.d ? ST.strk.n : 1) };
+      try { toast('Objectif du jour atteint 🎉'); } catch (e) {}
+    }
+    save();
+  }
+  function dayCard() {
+    var D = dayState(), g = ST.goal, p = Math.min(100, Math.round(D.n * 100 / g)), y = dkey(Date.now() - 864e5);
+    var s = (ST.strk.last === D.d || ST.strk.last === y) ? ST.strk.n : 0;
+    return '<div class="nday"><div class="nd-h"><b>Objectif du jour</b><span>' + Math.min(D.n, g) + ' / ' + g + (D.n >= g ? ' ✓' : '') + '</span></div><div class="nd-bar" role="progressbar" aria-valuenow="' + p + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + p + '%"></i></div><small>' + (D.n ? D.ok + ' bonnes réponses sur ' + D.n + ' · ' : 'Réponds à ' + g + ' questions pour valider la journée · ') + (s ? '🔥 ' + s + ' jour' + (s > 1 ? 's' : '') + ' de suite' : 'pas encore de série') + '</small></div>';
+  }
   function toast(msg, action, fn) {
     var t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
     t.innerHTML = '<span>' + esc(msg) + '</span>' + (action ? '<button>' + esc(action) + '</button>' : '');
@@ -5771,7 +5795,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var o = cur.opts[+b.dataset.i], q = cur.q, x = byK[q.k], good = !!o.ok;
       body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
       var st = ST.kq[x.k] || { n: 0, st: 0, w: false }; st.n++; if (!good) st.x = (st.x || 0) + 1;
-      var S = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S.q++; if (good) S.ok++; var T = S.ty[q.t] = S.ty[q.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
+      var S = ST.kqs = ST.kqs || { sess: 0, q: 0, ok: 0, ty: {} }; S.q++; if (good) S.ok++; dayHit(good); var T = S.ty[q.t] = S.ty[q.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (Q.wrongs.indexOf(x.k) < 0) { Q.wrongs.push(x.k); Q.wrongList.push({ k: x.k, t: q.t, w: q.w }); } }
       ST.kq[x.k] = st; save();
       var say = [];
@@ -5974,7 +5998,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var st = ST.vq[x.i] || { n: 0, st: 0, w: false }; st.n++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.vq[x.i] = st;
-      var S = ST.vqs; S.q++; if (good) S.ok++;
+      var S = ST.vqs; S.q++; if (good) S.ok++; dayHit(good);
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var C = S.cat[x.c] = S.cat[x.c] || { n: 0, ok: 0 }; C.n++; if (good) C.ok++;
       save();
@@ -6219,7 +6243,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var st = ST[kq][x.i] || { n: 0, st: 0, w: false }; st.n++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST[kq][x.i] = st;
-      var S = ST[ks]; S.q++; if (good) S.ok++;
+      var S = ST[ks]; S.q++; if (good) S.ok++; dayHit(good);
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var K = x.c === 'p' ? (S.pt[x.p.a] = S.pt[x.p.a] || { n: 0, ok: 0 }) : (S.lab[x.l] = S.lab[x.l] || { n: 0, ok: 0 }); K.n++; if (good) K.ok++;
       save();
@@ -6430,7 +6454,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var st = ST.cq[x.i] || { n: 0, st: 0, w: false }; st.n++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.cq[x.i] = st;
-      var S = ST.cqs; S.q++; if (good) S.ok++;
+      var S = ST.cqs; S.q++; if (good) S.ok++; dayHit(good);
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var K = S.ct[counterOf(x)] = S.ct[counterOf(x)] || { n: 0, ok: 0 }; K.n++; if (good) K.ok++;
       save();
@@ -6524,7 +6548,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       step();
     }
     var hooks = {
-      next: function (ok) { var q = S.items[S.i], r = S.res[q.k]; r.n++; if (ok) { r.ok++; S.ok++; } S.i++; step(); },
+      next: function (ok) { var q = S.items[S.i], r = S.res[q.k]; r.n++; if (ok) { r.ok++; S.ok++; } dayHit(ok); S.i++; step(); },
       quit: function () { open(false); }
     };
     function step() {
@@ -6839,7 +6863,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var o = cur.opts[+b.dataset.i], it = cur.it, x = byI[it.i], good = !!o.ok;
       body.querySelectorAll('.qopt').forEach(function (n) { var oo = cur.opts[+n.dataset.i]; n.disabled = true; if (oo.ok) n.classList.add('good'); else if (n === b) n.classList.add('bad'); });
       var st = ST.gq[x.i] || { n: 0, st: 0, w: false }; st.n++;
-      if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
+      dayHit(good); if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.gq[x.i] = st; save();
       var last = Q.i + 1 >= Q.items.length;
       $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
@@ -6907,7 +6931,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     if (st.s) { st.s.open = true; st.s.classList.add('cur'); }
     if (st.d) { st.d.open = true; st.d.classList.add('cur'); var rid = Object.keys(subMap).filter(function (k) { return subMap[k].sub === st.d; })[0]; if (rid) { ST.rec = [rid].concat(ST.rec.filter(function (x) { return x !== rid; })).slice(0, 3); save(); renderHome(); } }
     if (v === 'home') {
-      h = '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
+      h = dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
         '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>';
     } else if (v === 'learn') {
       title = ['日本語', 'Apprendre'];
