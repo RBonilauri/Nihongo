@@ -10,7 +10,7 @@
       { n: 'Conjugaison', ic: '動', it: ST.gq_c, s: ST.gqs_c, tot: 0 },
       { n: 'Particules', ic: '助', it: ST.gq_p, s: ST.gqs_p, tot: GD.parts.length },
       { n: 'Compteurs', ic: '数', it: ST.cq, s: ST.cqs, tot: 0 },
-      { n: 'Géographie', ic: '地', it: ST.gq, s: ST.gqs, tot: MD.p.length }
+      { n: 'Géographie', ic: '地', it: ST.gq, s: ST.gqs, tot: MD.p.length + (MD.ids ? MD.ids.length : 0) + (J('geo-words') || []).length }
     ];
     var tq = 0, tok = 0;
     var cards = QZ.map(function (z) {
