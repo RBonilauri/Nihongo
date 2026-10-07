@@ -224,6 +224,27 @@ with sync_playwright() as p:
         return [n, wrong, miss.slice(0, 10)]; }""")
     check(kj[0] >= 700 and kj[1] == 0 and not kj[2], 'chaque mot à plusieurs kanji a son menu, chaque kanji a un sens %s' % kj)
 
+    print('Écoute : alternative')
+    def ear_run(silent, name):
+        pg.evaluate("s=>{const o=JSON.parse(localStorage.getItem('jp-state')||'{}'); o.silent=s; localStorage.setItem('jp-state',JSON.stringify(o));}", silent); pg.reload(); pg.wait_for_timeout(600)
+        pg.click('#tabbar [data-tab=quiz]')
+        pg.evaluate("n=>[...document.querySelectorAll('.quizlist .quizcard')].filter(e=>e.textContent.includes(n))[0].click()", name); pg.wait_for_timeout(250)
+        Q = '.quiz:not([hidden])'; go = pg.query_selector(Q + ' .qgo'); e = a = 0
+        if go and not go.is_disabled():
+            go.click(); pg.wait_for_timeout(200)
+            for _ in range(30):
+                if not pg.query_selector(Q + ' .qopt'): break
+                if pg.query_selector(Q + ' .vq-ear'):
+                    e += 1; a += 1 if pg.query_selector(Q + ' .ear-alt .ear-show') else 0
+                pg.evaluate("document.querySelector('%s .qopt').click()" % Q); pg.wait_for_timeout(30)
+                pg.evaluate("(document.querySelector('%s .fbb .qgo')||{click(){}}).click()" % Q); pg.wait_for_timeout(30)
+        return e, a
+    r_s = [ear_run(True, n) for n in ('vocabulaire', 'compteurs', 'géographie')]
+    r_n = [ear_run(False, n) for n in ('vocabulaire', 'compteurs', 'géographie')]
+    check(all(x[0] == 0 for x in r_s), 'mode silencieux : aucune question d’écoute %s' % r_s)
+    check(sum(x[0] for x in r_n) > 0 and all(x[0] == x[1] for x in r_n), 'écoute normale : « Voir le texte » toujours proposé %s' % r_n)
+    pg.evaluate("s=>{const o=JSON.parse(localStorage.getItem('jp-state')||'{}'); o.silent=false; localStorage.setItem('jp-state',JSON.stringify(o));}", False)
+
     print('Données')
     counts = pg.evaluate("""() => ({ kanji: JSON.parse(document.getElementById('kanji-data').textContent).length,
         vocab: JSON.parse(document.getElementById('vocab-data').textContent).length,

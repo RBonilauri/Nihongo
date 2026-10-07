@@ -76,7 +76,7 @@
         var round = [];
         order.forEach(function (x) {
           if (items.length + round.length >= target) return;
-          var ok = cfg.types.filter(function (t) { return elig(x, t) && !(used[x.i] && used[x.i][t]); });
+          var ok = ctypes(cfg.types).filter(function (t) { return elig(x, t) && !(used[x.i] && used[x.i][t]); });
           if (!ok.length) return;
           var t = ok[Math.floor(Math.random() * ok.length)]; (used[x.i] = used[x.i] || {})[t] = 1; round.push({ i: x.i, t: t });
         });
@@ -84,7 +84,7 @@
       }
       return items;
     }
-    function countAvail() { var p = pool(), q = 0; p.forEach(function (x) { q += cfg.types.filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
+    function countAvail() { var p = pool(), q = 0; p.forEach(function (x) { q += ctypes(cfg.types).filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
 
     var STOPW = /^(dans|pour|avec|vous|votre|vos|pouvez|pourriez|pourrais|est-ce|tout|sans|plus|cette|elle|nous|faire|c’est|j’ai|puis-je|avoir|quel|quelle)$/;
     function toks(f) { return f.toLowerCase().replace(/[()（）\/,.?!«»…]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 5 && !STOPW.test(w); }); }
@@ -118,7 +118,7 @@
       var cnt = {}; VD.forEach(function (x) { cnt[x.c] = (cnt[x.c] || 0) + 1; });
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Rubriques</h4><div class="qchips">' + VCATS.map(function (c) { return chip((c === 'Verbes' ? 'Verbes du quotidien' : c) + ' · ' + (cnt[c] || 0), cfg.cats.indexOf(c) >= 0, 'data-c="' + c + '"'); }).join('') + '</div><div class="qpre"><button type="button" class="mini" data-call="1">Tout</button><button type="button" class="mini" data-cmin="1">Phrases (voyage)</button><button type="button" class="mini" data-cw="1">Mots</button></div></div>';
-      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + VN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"', n > av.q); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       h += '<button type="button" class="mini qstat-btn" id="v-stats">📊 Statistiques</button>';
@@ -162,10 +162,11 @@
       var ask, big, hint = '';
       if (it.t === 'j2f') { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
       else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(noJpHint(x.fr)) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
-      else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>'; }
+      else if (ST.silent) { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
+      else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>' + earAlt(x.jp + (x.kk && x.kk !== x.jp ? '  (' + x.kk + ')' : '')); }
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || vtag(x)) + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="v-fb"></div>';
-      if (it.t === 'ear') setTimeout(function () { sayJp(x); }, 150);
+      if (it.t === 'ear' && !ST.silent) setTimeout(function () { sayJp(x); }, 150);
     }
     function answer(b) {
       var cur = Q.cur; if (cur.done) return; cur.done = true;

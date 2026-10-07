@@ -10,10 +10,11 @@
     document.documentElement.classList.toggle('aid-hide', !!ST.aid);
   }
   function buildSettings() {
-    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), fsv = document.getElementById('fs-val');
+    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), silB = document.getElementById('sw-silent'), fsv = document.getElementById('fs-val');
     function paint() {
       aidB.setAttribute('aria-checked', ST.aid ? 'true' : 'false');
       recB.setAttribute('aria-checked', ST.showRec ? 'true' : 'false');
+      silB.setAttribute('aria-checked', ST.silent ? 'true' : 'false');
       fsv.textContent = Math.round(ST.fs * 100) + ' %';
     }
     paint();
@@ -21,6 +22,7 @@
     document.getElementById('fs-val').addEventListener('click', function () { ST.fs = 1; save(); applyPrefs(); paint(); });
     document.getElementById('fs+').addEventListener('click', function () { ST.fs = Math.min(1.4, Math.round((ST.fs + 0.1) * 100) / 100); save(); applyPrefs(); paint(); });
     aidB.addEventListener('click', function () { ST.aid = !ST.aid; save(); applyPrefs(); paint(); });
+    silB.addEventListener('click', function () { ST.silent = !ST.silent; save(); paint(); toast(ST.silent ? 'Mode silencieux : les quiz n’auront plus de questions d’écoute.' : 'Questions d’écoute réactivées.'); });
     recB.addEventListener('click', function () { ST.showRec = !ST.showRec; save(); renderHome(); paint(); });
     document.getElementById('rec-clear').addEventListener('click', function () { ST.rec = []; save(); renderHome(); toast('Historique vidé.'); });
     document.getElementById('exp').addEventListener('click', function () {

@@ -716,6 +716,10 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 
 @media (max-width: 700px) { table.stack td.kdup { display: none !important; } }
 
+.ear-alt { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: .7rem; }
+.ear-txt { flex-basis: 100%; text-align: center; font-family: 'Noto Serif JP', serif; font-size: 1.4rem; color: var(--red); padding: .3rem 0; }
+.ear-txt[hidden] { display: none; }
+
   /* ═══ NAVIGATION PAR PAGES ═══ */
   html.js .drawer { left: auto; right: 0; transform: translateX(104%); }
   html.js body.nav-open .drawer { transform: none; }
@@ -980,6 +984,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 </section>
 <section class="dr-card"><h4>Lecture et accueil</h4>
 <div class="row"><span class="lab">Masquer romaji et traductions<small>Flou, touche pour révéler</small></span><button class="sw" id="sw-aid" type="button" role="switch" aria-checked="false" aria-label="Masquer romaji et traductions"><i></i></button></div>
+<div class="row"><span class="lab">Mode silencieux (métro, bureau)<small>Pas de questions d’écoute dans les quiz</small></span><button class="sw" id="sw-silent" type="button" role="switch" aria-checked="false" aria-label="Mode silencieux"><i></i></button></div>
 <div class="row"><span class="lab">Afficher les récents<small>Les 3 dernières sections ouvertes</small></span><button class="sw" id="sw-rec" type="button" role="switch" aria-checked="true" aria-label="Afficher les récents"><i></i></button></div>
 <div class="row"><span class="lab">Historique des récents</span><button class="mini" id="rec-clear" type="button">Vider</button></div>
 </section>
@@ -5499,7 +5504,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   }
 
   /* ── état persistant ── */
-  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, silent: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -5944,6 +5949,16 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     speak(parts);
   });
 
+
+  /* ── alternative à l’écoute (métro, bureau…) : texte à la demande + mode silencieux ── */
+  function ctypes(a) { return ST.silent ? a.filter(function (t) { return t !== 'ear'; }) : a; }
+  function earAlt(txt) { return '<div class="ear-alt"><button type="button" class="mini ear-show">👁 Voir le texte</button><button type="button" class="mini ear-off">🔇 Plus d’écoute</button><div class="ear-txt" hidden>' + esc(txt) + '</div></div>'; }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.ear-show, .ear-off'); if (!b) return;
+    var al = b.closest('.ear-alt'), t = al && al.querySelector('.ear-txt');
+    if (b.classList.contains('ear-off')) { ST.silent = true; save(); toast('Mode silencieux activé : plus de questions d’écoute (réglable dans ⚙).'); if (t) t.hidden = false; b.disabled = true; try { speechSynthesis.cancel(); } catch (x) {} }
+    else if (t) t.hidden = !t.hidden;
+  });
   /* ── mode lecture (flou romaji / traductions) ── */
   document.addEventListener('click', function (e) {
     if (!document.documentElement.classList.contains('aid-hide')) return;
@@ -5956,10 +5971,11 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     document.documentElement.classList.toggle('aid-hide', !!ST.aid);
   }
   function buildSettings() {
-    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), fsv = document.getElementById('fs-val');
+    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), silB = document.getElementById('sw-silent'), fsv = document.getElementById('fs-val');
     function paint() {
       aidB.setAttribute('aria-checked', ST.aid ? 'true' : 'false');
       recB.setAttribute('aria-checked', ST.showRec ? 'true' : 'false');
+      silB.setAttribute('aria-checked', ST.silent ? 'true' : 'false');
       fsv.textContent = Math.round(ST.fs * 100) + ' %';
     }
     paint();
@@ -5967,6 +5983,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     document.getElementById('fs-val').addEventListener('click', function () { ST.fs = 1; save(); applyPrefs(); paint(); });
     document.getElementById('fs+').addEventListener('click', function () { ST.fs = Math.min(1.4, Math.round((ST.fs + 0.1) * 100) / 100); save(); applyPrefs(); paint(); });
     aidB.addEventListener('click', function () { ST.aid = !ST.aid; save(); applyPrefs(); paint(); });
+    silB.addEventListener('click', function () { ST.silent = !ST.silent; save(); paint(); toast(ST.silent ? 'Mode silencieux : les quiz n’auront plus de questions d’écoute.' : 'Questions d’écoute réactivées.'); });
     recB.addEventListener('click', function () { ST.showRec = !ST.showRec; save(); renderHome(); paint(); });
     document.getElementById('rec-clear').addEventListener('click', function () { ST.rec = []; save(); renderHome(); toast('Historique vidé.'); });
     document.getElementById('exp').addEventListener('click', function () {
@@ -6333,7 +6350,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         var round = [];
         order.forEach(function (x) {
           if (items.length + round.length >= target) return;
-          var ok = cfg.types.filter(function (t) { return elig(x, t) && !(used[x.i] && used[x.i][t]); });
+          var ok = ctypes(cfg.types).filter(function (t) { return elig(x, t) && !(used[x.i] && used[x.i][t]); });
           if (!ok.length) return;
           var t = ok[Math.floor(Math.random() * ok.length)]; (used[x.i] = used[x.i] || {})[t] = 1; round.push({ i: x.i, t: t });
         });
@@ -6341,7 +6358,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       }
       return items;
     }
-    function countAvail() { var p = pool(), q = 0; p.forEach(function (x) { q += cfg.types.filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
+    function countAvail() { var p = pool(), q = 0; p.forEach(function (x) { q += ctypes(cfg.types).filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
 
     var STOPW = /^(dans|pour|avec|vous|votre|vos|pouvez|pourriez|pourrais|est-ce|tout|sans|plus|cette|elle|nous|faire|c’est|j’ai|puis-je|avoir|quel|quelle)$/;
     function toks(f) { return f.toLowerCase().replace(/[()（）\/,.?!«»…]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 5 && !STOPW.test(w); }); }
@@ -6375,7 +6392,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var cnt = {}; VD.forEach(function (x) { cnt[x.c] = (cnt[x.c] || 0) + 1; });
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Rubriques</h4><div class="qchips">' + VCATS.map(function (c) { return chip((c === 'Verbes' ? 'Verbes du quotidien' : c) + ' · ' + (cnt[c] || 0), cfg.cats.indexOf(c) >= 0, 'data-c="' + c + '"'); }).join('') + '</div><div class="qpre"><button type="button" class="mini" data-call="1">Tout</button><button type="button" class="mini" data-cmin="1">Phrases (voyage)</button><button type="button" class="mini" data-cw="1">Mots</button></div></div>';
-      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + VN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"', n > av.q); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       h += '<button type="button" class="mini qstat-btn" id="v-stats">📊 Statistiques</button>';
@@ -6419,10 +6436,11 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var ask, big, hint = '';
       if (it.t === 'j2f') { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
       else if (it.t === 'f2j') { ask = 'Comment dit-on en japonais ?'; big = '<div class="q-big sens">' + esc(noJpHint(x.fr)) + '</div>'; hint = hintBtn(opts.some(function (o) { return HK.test(o.v); }) ? opts.map(function (o) { return o.k; }).join('\n') : ''); }
-      else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>'; }
+      else if (ST.silent) { ask = 'Que signifie ?'; big = '<div class="q-big word vq">' + esc(x.jp) + '</div>'; hint = hintBtn(x.kk && x.kk !== x.jp ? x.kk : ''); }
+      else { ask = 'Écoute, puis choisis le sens'; big = '<button type="button" class="qgo vq-ear" id="v-replay">🔊 Réécouter</button>' + earAlt(x.jp + (x.kk && x.kk !== x.jp ? '  (' + x.kk + ')' : '')); }
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || vtag(x)) + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="v-fb"></div>';
-      if (it.t === 'ear') setTimeout(function () { sayJp(x); }, 150);
+      if (it.t === 'ear' && !ST.silent) setTimeout(function () { sayJp(x); }, 150);
     }
     function answer(b) {
       var cur = Q.cur; if (cur.done) return; cur.done = true;
@@ -6788,7 +6806,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
     function typesFor(x) {
       if (cfg.groups.indexOf(x.g) < 0) return [];
       var want = x.kind === 'r' ? ['rd', 'ear'] : x.kind === 'w' ? ['ct'] : ['us'];
-      return cfg.types.filter(function (t) { return want.indexOf(t) >= 0 && (t !== 'ear' || (x.r.c !== '階' && x.r.c !== '回')); });
+      return ctypes(cfg.types).filter(function (t) { return want.indexOf(t) >= 0 && (t !== 'ear' || (x.r.c !== '階' && x.r.c !== '回')); });
     }
     function pool() { return ALL.filter(function (x) { return typesFor(x).length && (!cfg.wrong || (ST.cq[x.i] && ST.cq[x.i].w)); }); }
     function bucket(x) { var s = ST.cq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
@@ -6840,7 +6858,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Catégories</h4><div class="qchips">' + CG.map(function (g) { return chip(g.label, cfg.groups.indexOf(g.id) >= 0, 'data-g="' + g.id + '"'); }).join('') + '</div></div>';
-      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + CN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="k-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       h += '<button type="button" class="mini qstat-btn" id="k-stats">📊 Statistiques</button>';
@@ -6880,12 +6898,13 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
       var ask, big, hint = '';
       if (it.t === 'rd') { ask = 'Comment se lit ?'; big = '<div class="q-big vq">' + esc(x.r.k) + '</div>'; }
-      else if (it.t === 'ear') { ask = 'Écoute, puis choisis l’écriture'; big = '<button type="button" class="qgo vq-ear" id="k-replay">🔊 Réécouter</button>'; }
+      else if (it.t === 'ear' && ST.silent) { ask = 'Choisis l’écriture'; big = '<div class="q-big vq">' + esc(x.r.y) + '</div>'; }
+      else if (it.t === 'ear') { ask = 'Écoute, puis choisis l’écriture'; big = '<button type="button" class="qgo vq-ear" id="k-replay">🔊 Réécouter</button>' + earAlt(x.r.y); }
       else if (it.t === 'ct') { ask = 'Quel compteur pour :'; big = '<div class="q-big vq">' + esc(x.w[0]) + '</div><div class="gq-sub">' + esc(x.w[1]) + '</div>'; hint = hintBtn(HK.test(x.w[0]) || opts.some(function (o) { return HK.test(o.v); }) ? (x.w[2] || x.w[0]) + '\n' + opts.map(function (o) { return o.k || o.v; }).join(' · ') : ''); }
       else { ask = 'À quoi sert ce compteur ?'; big = '<div class="q-big vq">' + esc(x.c.k) + '</div><div class="gq-sub">' + esc(x.c.ro) + '</div>'; hint = hintBtn(HK.test(x.c.k) ? x.c.b : ''); }
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts' + (it.t === 'ct' || it.t === 'ear' ? ' gq-two' : '') + '">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt' + (it.t === 'ct' || it.t === 'ear' ? ' gq-pt' : '') + '" data-i="' + i + '">' + esc(cfg.ka && o.k ? o.k : o.v) + '</button>'; }).join('') + '</div><div id="k-fb"></div>';
-      if (it.t === 'ear' && canSpeak) setTimeout(function () { speak([x.r.y]); }, 150);
+      if (it.t === 'ear' && canSpeak && !ST.silent) setTimeout(function () { speak([x.r.y]); }, 150);
     }
     function lineOf(x) { return x.kind === 'r' ? x.r.k + ' → ' + x.r.y : x.kind === 'w' ? x.w[0] + ' → ' + x.c.k : x.c.k + ' : ' + x.c.u; }
     function answer(b) {
@@ -7195,7 +7214,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       return true;
     }
     function pool() { return ALL.filter(function (x) { return cfg.regs.indexOf(x.r) >= 0 && (!cfg.wrong || (ST.gq[x.i] && ST.gq[x.i].w)); }); }
-    function countAvail() { var q = 0, p = pool(); p.forEach(function (x) { q += cfg.types.filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
+    function countAvail() { var q = 0, p = pool(); p.forEach(function (x) { q += ctypes(cfg.types).filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
     function bucket(x) { var s = ST.gq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function build() {
       var order = shuffle(pool().slice()).sort(function (a, b) { return bucket(a) - bucket(b); }), av = countAvail().q;
@@ -7204,7 +7223,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
         var round = [];
         order.forEach(function (x) {
           if (items.length + round.length >= target) return;
-          var ok = cfg.types.filter(function (t) { return elig(x, t) && !(used[x.i] && used[x.i][t]); }); if (!ok.length) return;
+          var ok = ctypes(cfg.types).filter(function (t) { return elig(x, t) && !(used[x.i] && used[x.i][t]); }); if (!ok.length) return;
           var t = ok[Math.floor(Math.random() * ok.length)]; (used[x.i] = used[x.i] || {})[t] = 1; round.push({ i: x.i, t: t });
         });
         if (!round.length) break; items = items.concat(shuffle(round));
@@ -7249,7 +7268,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Régions</h4><div class="qchips">' + M.ids.map(function (r) { return chip(esc(M.reg[r][0]) + ' · ' + M.p.filter(function (o) { return o.r === r; }).length, cfg.regs.indexOf(r) >= 0, 'data-r="' + r + '"'); }).join('') + '</div></div>';
-      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + GN2.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       h += '<button type="button" class="mini qstat-btn" id="g-stats">📊 Statistiques</button>';
@@ -7302,7 +7321,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       else if (it.t === 'cap') { ask = 'Quel est le chef-lieu de cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
       else if (it.t === 'c2p') { ask = 'De quelle préfecture est-ce le chef-lieu ?'; big = '<div class="q-big word vq">' + esc(x.o.cap) + '</div>'; }
       else if (it.t === 'rd') { ask = 'Comment se lit ce nom ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
-      else { ask = 'Écoute, puis choisis la préfecture'; big = '<button type="button" class="qgo vq-ear" id="g-replay">🔊 Réécouter</button>'; }
+      else if (ST.silent) { ask = 'Quelle préfecture se lit ainsi ?'; big = '<div class="q-big word vq">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.k) + '</div>'; }
+      else { ask = 'Écoute, puis choisis la préfecture'; big = '<button type="button" class="qgo vq-ear" id="g-replay">🔊 Réécouter</button>' + earAlt(x.k === 'r' ? M.reg[x.r][0] : x.o.k); }
       var hl = [], ok = opts.some(function (o) { return o.k && HK.test(o.v); });
       if (it.t === 'reg' || it.t === 'cap') hl.push(x.o.k);
       else if (it.t === 'c2p') hl.push(x.o.capk);
@@ -7311,7 +7331,7 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
       if (hl.length) hint = hintBtn(hl.join('\n'));
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || '<div class="q-tag">Géographie</div>') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="g-fb"></div>';
-      if (it.t === 'ear') setTimeout(function () { sayG(x); }, 150);
+      if (it.t === 'ear' && !ST.silent) setTimeout(function () { sayG(x); }, 150);
     }
     function answerHtml(x) {
       if (x.k === 'r') {

@@ -66,7 +66,7 @@
     function typesFor(x) {
       if (cfg.groups.indexOf(x.g) < 0) return [];
       var want = x.kind === 'r' ? ['rd', 'ear'] : x.kind === 'w' ? ['ct'] : ['us'];
-      return cfg.types.filter(function (t) { return want.indexOf(t) >= 0 && (t !== 'ear' || (x.r.c !== '階' && x.r.c !== '回')); });
+      return ctypes(cfg.types).filter(function (t) { return want.indexOf(t) >= 0 && (t !== 'ear' || (x.r.c !== '階' && x.r.c !== '回')); });
     }
     function pool() { return ALL.filter(function (x) { return typesFor(x).length && (!cfg.wrong || (ST.cq[x.i] && ST.cq[x.i].w)); }); }
     function bucket(x) { var s = ST.cq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
@@ -118,7 +118,7 @@
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Catégories</h4><div class="qchips">' + CG.map(function (g) { return chip(g.label, cfg.groups.indexOf(g.id) >= 0, 'data-g="' + g.id + '"'); }).join('') + '</div></div>';
-      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + CN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="k-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
       h += '<button type="button" class="mini qstat-btn" id="k-stats">📊 Statistiques</button>';
@@ -158,12 +158,13 @@
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
       var ask, big, hint = '';
       if (it.t === 'rd') { ask = 'Comment se lit ?'; big = '<div class="q-big vq">' + esc(x.r.k) + '</div>'; }
-      else if (it.t === 'ear') { ask = 'Écoute, puis choisis l’écriture'; big = '<button type="button" class="qgo vq-ear" id="k-replay">🔊 Réécouter</button>'; }
+      else if (it.t === 'ear' && ST.silent) { ask = 'Choisis l’écriture'; big = '<div class="q-big vq">' + esc(x.r.y) + '</div>'; }
+      else if (it.t === 'ear') { ask = 'Écoute, puis choisis l’écriture'; big = '<button type="button" class="qgo vq-ear" id="k-replay">🔊 Réécouter</button>' + earAlt(x.r.y); }
       else if (it.t === 'ct') { ask = 'Quel compteur pour :'; big = '<div class="q-big vq">' + esc(x.w[0]) + '</div><div class="gq-sub">' + esc(x.w[1]) + '</div>'; hint = hintBtn(HK.test(x.w[0]) || opts.some(function (o) { return HK.test(o.v); }) ? (x.w[2] || x.w[0]) + '\n' + opts.map(function (o) { return o.k || o.v; }).join(' · ') : ''); }
       else { ask = 'À quoi sert ce compteur ?'; big = '<div class="q-big vq">' + esc(x.c.k) + '</div><div class="gq-sub">' + esc(x.c.ro) + '</div>'; hint = hintBtn(HK.test(x.c.k) ? x.c.b : ''); }
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div><div class="q-opts' + (it.t === 'ct' || it.t === 'ear' ? ' gq-two' : '') + '">' +
         opts.map(function (o, i) { return '<button type="button" class="qopt vq-opt' + (it.t === 'ct' || it.t === 'ear' ? ' gq-pt' : '') + '" data-i="' + i + '">' + esc(cfg.ka && o.k ? o.k : o.v) + '</button>'; }).join('') + '</div><div id="k-fb"></div>';
-      if (it.t === 'ear' && canSpeak) setTimeout(function () { speak([x.r.y]); }, 150);
+      if (it.t === 'ear' && canSpeak && !ST.silent) setTimeout(function () { speak([x.r.y]); }, 150);
     }
     function lineOf(x) { return x.kind === 'r' ? x.r.k + ' → ' + x.r.y : x.kind === 'w' ? x.w[0] + ' → ' + x.c.k : x.c.k + ' : ' + x.c.u; }
     function answer(b) {

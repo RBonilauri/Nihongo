@@ -46,3 +46,13 @@
     speak(parts);
   });
 
+
+  /* ── alternative à l’écoute (métro, bureau…) : texte à la demande + mode silencieux ── */
+  function ctypes(a) { return ST.silent ? a.filter(function (t) { return t !== 'ear'; }) : a; }
+  function earAlt(txt) { return '<div class="ear-alt"><button type="button" class="mini ear-show">👁 Voir le texte</button><button type="button" class="mini ear-off">🔇 Plus d’écoute</button><div class="ear-txt" hidden>' + esc(txt) + '</div></div>'; }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.ear-show, .ear-off'); if (!b) return;
+    var al = b.closest('.ear-alt'), t = al && al.querySelector('.ear-txt');
+    if (b.classList.contains('ear-off')) { ST.silent = true; save(); toast('Mode silencieux activé : plus de questions d’écoute (réglable dans ⚙).'); if (t) t.hidden = false; b.disabled = true; try { speechSynthesis.cancel(); } catch (x) {} }
+    else if (t) t.hidden = !t.hidden;
+  });
