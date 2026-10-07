@@ -35,6 +35,9 @@ with sync_playwright() as p:
         secs = pg.evaluate("[...document.querySelectorAll('.nsec')].map(e=>e.dataset.sj)")
         for sj in secs:
             pg.click('.nsec[data-sj="%s"]' % sj)
+            if pg.evaluate("!!document.querySelector('.sec.cur details.sub.cur')"):
+                if pg.evaluate("document.querySelector('.sec.cur details.sub.cur').innerText.length") < 30: n_empty += 1
+                n_sub += 1; pg.click('#tb-back'); continue
             ids = pg.evaluate("[...document.querySelectorAll('.sec.cur .nsub')].map(e=>e.dataset.id)")
             if not ids and pg.evaluate("document.querySelector('.sec.cur').innerText.length") < 50: n_empty += 1
             for i in ids:
@@ -46,9 +49,8 @@ with sync_playwright() as p:
     check(n_sub > 100 and n_empty == 0, '%d sous-rubriques ouvertes, %d vide(s)' % (n_sub, n_empty))
 
     print('Retour après un long défilement')
-    pg.click('#tabbar [data-tab=learn]'); pg.click('.npole[data-p=voc]'); pg.click('.nsec[data-sj=語彙]')
-    idx = pg.evaluate("[...document.querySelectorAll('.sec.cur .nsub')].findIndex(e=>e.textContent.includes('動詞'))")
-    pg.click('.sec.cur .nsub >> nth=%d' % idx); pg.evaluate("window.scrollTo(0, 60000)"); pg.wait_for_timeout(200)
+    pg.click('#tabbar [data-tab=learn]'); pg.click('.npole[data-p=voc]'); pg.click('.nsec[data-sj=常用]')
+    pg.evaluate("window.scrollTo(0, 60000)"); pg.wait_for_timeout(200)
     pg.go_back(); pg.wait_for_timeout(600)
     check(pg.evaluate("window.scrollY") == 0 and 'Vocabulaire' in title(), 'retour du téléphone : page en haut')
 
