@@ -42,6 +42,7 @@
         st = v.slice(0, -2); var p = st;
         if (/(el|et)$/.test(st) && !GRAVE[v]) p = st + st.slice(-1);                      // appeler → appelle, jeter → jette
         else if (/é[bcdfgpt][lr]$/.test(st)) p = st.replace(/é([bcdfgpt][lr])$/, 'è$1');                                   // régler → règle
+        else if (/é(ch|gl|tr)$/.test(st)) p = st.replace(/é(ch|gl|tr)$/, 'è$1');                                 // sécher → sèche
         else if (new RegExp('[eé]' + CONS + '$').test(st) && !/(ll|tt)$/.test(st)) p = st.replace(new RegExp('[eé](' + CONS + ')$'), 'è$1'); // lever → lève
         else if (/[ou]yer$/.test(v) || /ayer$/.test(v)) p = st.slice(0, -1) + 'i';       // nettoyer → nettoie, payer → paie
         var nous = /ger$/.test(v) ? st + 'eons' : /cer$/.test(v) ? st.slice(0, -1) + 'çons' : st + 'ons';

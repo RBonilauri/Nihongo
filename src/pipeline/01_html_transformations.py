@@ -88,8 +88,8 @@ def add_romaji(html):
     print('rows with romaji', n)
     return str(soup)
 main = stackify(main)
-import json as _json, verbes_exemples as _vx
-_EX = _vx.frames()
+import json as _json, verbes_exemples as _vx, verbes_exemples2 as _vx2
+_EX = _vx.frames(); _EX2 = _vx2.frames()
 nex = [0]
 def conjify(html):
     soup = _BS(html, 'html.parser'); n = 0
@@ -121,6 +121,10 @@ def conjify(html):
                 ex = soup.new_tag('details', attrs={'class': 'exd', 'data-k': k, 'data-ka': ka, 'data-t': ty, 'data-ex': _json.dumps([fr_['p'], pk, fr_['v'], fr_['c'], fr_['s'], fr_['n'], fr_['o']], ensure_ascii=False, separators=(',', ':'))})
                 sm2 = soup.new_tag('summary'); lb = soup.new_tag('span', attrs={'class': 'ex-l'}); lb.string = 'Phrases d’exemple'; bt2 = soup.new_tag('span', attrs={'class': 'cj-btn'}); bt2.string = 'Exemple'
                 sm2.append(lb); sm2.append(bt2); ex.append(sm2); ex.append(soup.new_tag('div', attrs={'class': 'exb'}))
+                f2 = _EX2.get(k)
+                if f2:
+                    pk2 = ''.join(x['hira'] for x in _kks.convert(f2['p'])) if f2['p'] else ''
+                    ex['data-ex2'] = _json.dumps([f2['p'], pk2, f2['v'], f2['c'], f2['s'], f2['n'], f2['o']], ensure_ascii=False, separators=(',', ':'))
                 td[4].append(ex); nex[0] += 1
     print('conjugaisons', n, 'exemples', nex[0])
     return str(soup)

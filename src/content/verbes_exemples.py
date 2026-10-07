@@ -233,7 +233,7 @@ RAW = """
 乗せる|荷物を棚に|poser|les bagages sur l’étagère||||
 下ろす|銀行でお金を|retirer|de l’argent à la banque||d’argent|
 繋ぐ|ケーブルを|brancher|le câble||||
-繋がる|電話が|passer||L’appel|||E
+繋がる|電話が|être|connecté|L’appel|||E
 切れる|電池が|se vider|bientôt|La pile|||
 外す|眼鏡を|enlever|mes lunettes||||
 外れる|ボタンが|se détacher|tout seul|Le bouton|||
@@ -261,7 +261,7 @@ RAW = """
 下げる|値段を|baisser|le prix||||
 届く|荷物が|arriver|vite|Le colis|||
 届ける|荷物を|livrer|le colis||||
-集まる|みんなが駅に|se rassembler|devant la gare|Les gens|||
+集まる|みんなが駅に|se rassembler|devant la gare|Tout le monde|||
 集める|切手を|collectionner|les timbres||||
 遅れる|電車が|avoir|du retard|Le train|||
 頑張る|試験のために|se donner|du mal pour l’examen||||
@@ -418,7 +418,7 @@ PATCH = """
 建つ|新しい建物が|être|construit|Un nouveau bâtiment|||EP
 延びる|予定が|être|reporté|Le rendez-vous|||EP
 切れる|糸が|se couper||Le fil|||E
-伝わる|気持ちが|passer||Le message|||E
+伝わる|気持ちが|être|compris|Le message|||E
 温まる|部屋が|se réchauffer|doucement|La pièce*|||
 積もる|雪が|s’accumuler|sur la route|La neige*|||
 通る|橋を|emprunter|le pont||||

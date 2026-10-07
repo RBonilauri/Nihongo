@@ -203,6 +203,8 @@ with sync_playwright() as p:
     ex = pg.evaluate("""() => { let n = 0, bad = 0; document.querySelectorAll('details.exd').forEach(d => { d.open = true; d.dispatchEvent(new Event('toggle')); n++; if (d.querySelectorAll('.ex-s').length < 2) bad++; });
         return [n, bad, document.querySelectorAll('details.vgrp').length]; }""")
     check(ex[0] >= 300 and ex[1] == 0 and ex[2] >= 10, 'exemples (>=2 phrases par verbe) et rubriques repliables %s' % ex)
+    ex2 = pg.evaluate("""() => { let n = 0, same = 0; document.querySelectorAll('details.exd').forEach(d => { if (!d.dataset.ex2) return; n++; const a = JSON.parse(d.dataset.ex), b = JSON.parse(d.dataset.ex2); if (a[0] === b[0] && a[3] === b[3]) same++; }); return [n, same]; }""")
+    check(ex2[0] >= 380 and ex2[1] == 0, 'chaque verbe a une 2e phrase au contexte différent %s' % ex2)
 
     print('Écoute ciblée')
     pg.evaluate("""() => { window.__said = []; window.SpeechSynthesisUtterance = function (t) { window.__said.push(t); }; speechSynthesis.speak = () => {}; speechSynthesis.cancel = () => {};

@@ -26,12 +26,13 @@
   }
   function exFill(d) {
     var b = d.querySelector('.exb'); if (!b) return;
-    var ex; try { ex = JSON.parse(d.dataset.ex); } catch (e) { return; }
+    var ex, ex2 = null; try { ex = JSON.parse(d.dataset.ex); if (d.dataset.ex2) ex2 = JSON.parse(d.dataset.ex2); } catch (e) { return; }
     var k = d.dataset.k, ka = d.dataset.ka, ty = d.dataset.t, rows = cjForms(k, ty, false), rowsR = k === ka ? null : cjForms(ka, ty, true);
-    var pool = exTenses(d, ex, rows), last = d._last, pick = pool.filter(function (t) { return t !== last; });
+    var f2 = ex2 || ex;                                         // 2e phrase : autre sens si disponible
+    var pool = exTenses(d, f2, rows), last = d._last, pick = pool.filter(function (t) { return t !== last; });
     if (!pick.length) pick = pool;
     var t = pick.length ? pick[Math.floor(Math.random() * pick.length)] : null; d._last = t;
-    var h = exLine(ex, rows, rowsR, 'pres') + (t ? exLine(ex, rows, rowsR, t) : '');
+    var h = exLine(ex, rows, rowsR, 'pres') + (t ? exLine(f2, rows, rowsR, t) : '');
     if (pool.length > 1) h += '<button type="button" class="mini ex-more">↻ Autre temps</button>';
     b.innerHTML = h;
   }
