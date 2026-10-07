@@ -93,3 +93,12 @@
 .fbw b { font-size: 1.7rem; font-weight: 600; }
 .fbw span { font-size: 1.05rem; color: var(--ink-soft, inherit); }
 .fbw em { flex-basis: 100%; font-style: normal; font-size: 1.1rem; font-weight: 600; }
+
+  .qsubd { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: .1rem .8rem; }
+  .qsubd > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: .6rem; padding: .65rem 0; font-size: .9rem; }
+  .qsubd > summary::-webkit-details-marker { display: none; }
+  .qsubd > summary::after { content: ''; width: .5rem; height: .5rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); transition: transform .2s; margin-left: .3rem; }
+  .qsubd[open] > summary::after { transform: rotate(-135deg); }
+  .qsubd > summary b { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--gold); margin-left: auto; }
+  .qsubd .qchips { padding-top: .2rem; }
+  .qsubd .qpre { padding-bottom: .7rem; }

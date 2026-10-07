@@ -28,6 +28,10 @@
     cfg.ka = false;
     if (!cfg.v2) { cfg.v2 = 1; if (cfg.cats.indexOf('Verbes') < 0) cfg.cats.push('Verbes'); }
     cfg.types = cfg.types.filter(function (t) { return types.some(function (u) { return u.id === t; }); }); if (!cfg.types.length) cfg.types = types.map(function (t) { return t.id; });
+    if (!cfg.vx) cfg.vx = [];
+    var vsOpen = false, VG = [], vgN = {};
+    VD.forEach(function (x) { if (x.c === 'Vocabulaire') { if (!vgN[x.g]) { vgN[x.g] = 0; VG.push(x.g); } vgN[x.g]++; } });
+    function vgLab(g) { var k = g.split(':')[1]; return k === '交通' ? 'Transports' : (VSUB[k] || k); }
     var Q = null;
     MIXREG['vocab'] = {
       label: 'Vocabulaire',
@@ -62,7 +66,7 @@
     el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); });
 
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-    function pool() { return VD.filter(function (x) { return cfg.cats.indexOf(x.c) >= 0 && (!cfg.wrong || (ST.vq[x.i] && ST.vq[x.i].w)); }); }
+    function pool() { return VD.filter(function (x) { return cfg.cats.indexOf(x.c) >= 0 && !(x.c === 'Vocabulaire' && cfg.vx && cfg.vx.indexOf(x.g) >= 0) && (!cfg.wrong || (ST.vq[x.i] && ST.vq[x.i].w)); }); }
     function earOK(x) { return /[぀-ヿ㐀-鿿]/.test(x.jp) && x.jp.indexOf('…') < 0; }
     function elig(x, t) { return cands(x).length >= 2 && (t !== 'ear' || earOK(x)); }
     function bucket(x) { var s = ST.vq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
@@ -118,6 +122,12 @@
       var cnt = {}; VD.forEach(function (x) { cnt[x.c] = (cnt[x.c] || 0) + 1; });
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Rubriques</h4><div class="qchips">' + VCATS.map(function (c) { return chip((c === 'Verbes' ? 'Verbes du quotidien' : c) + ' · ' + (cnt[c] || 0), cfg.cats.indexOf(c) >= 0, 'data-c="' + c + '"'); }).join('') + '</div><div class="qpre"><button type="button" class="mini" data-call="1">Tout</button><button type="button" class="mini" data-cmin="1">Phrases (voyage)</button><button type="button" class="mini" data-cw="1">Mots</button></div></div>';
+      if (cfg.cats.indexOf('Vocabulaire') >= 0 && VG.length) {
+        var vOn = VG.filter(function (g) { return cfg.vx.indexOf(g) < 0; }).length;
+        h += '<div class="q-sec"><details class="qsubd" id="v-sub"' + (vsOpen ? ' open' : '') + '><summary><span>Sous-rubriques de Vocabulaire</span><b>' + vOn + ' / ' + VG.length + '</b></summary><div class="qchips">' +
+          VG.map(function (g) { return chip(esc(vgLab(g)) + ' · ' + vgN[g], cfg.vx.indexOf(g) < 0, 'data-vs="' + esc(g) + '"'); }).join('') +
+          '</div><div class="qpre"><button type="button" class="mini" data-vsall="1">Tout</button><button type="button" class="mini" data-vsnone="1">Aucune</button></div></details></div>';
+      }
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + VN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"', n > av.q); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
@@ -128,11 +138,15 @@
     function persist() { ST.vqc = cfg; save(); }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
 
+    body.addEventListener('toggle', function (e) { if (e.target.id === 'v-sub') vsOpen = e.target.open; }, true);
     body.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b || b.disabled) return;
       var d = b.dataset;
       if (b.classList.contains('qhint')) { toggleHint(b); return; }
-      if (d.c) { toggle(cfg.cats, d.c); persist(); showSetup(); }
+      if (d.vs) { toggle(cfg.vx, d.vs); persist(); showSetup(); }
+      else if (d.vsall) { cfg.vx = []; persist(); showSetup(); }
+      else if (d.vsnone) { cfg.vx = VG.slice(); persist(); showSetup(); }
+      else if (d.c) { toggle(cfg.cats, d.c); persist(); showSetup(); }
       else if (d.call) { cfg.cats = VCATS.slice(); persist(); showSetup(); }
       else if (d.cmin) { cfg.cats = ['Voyage', 'Conversation', 'Keigo']; persist(); showSetup(); }
       else if (d.cw) { cfg.cats = ['Vocabulaire', 'Temps', 'Adjectifs', 'Outils']; persist(); showSetup(); }
