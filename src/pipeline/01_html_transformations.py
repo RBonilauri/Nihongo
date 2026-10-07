@@ -37,32 +37,12 @@ def stackify(html):
         heads = [h.get_text(' ', strip=True) for h in t.select('thead th')]
         if not (4 <= len(heads) <= 5 or heads == ['日本語', 'Sens', 'Pourquoi']): continue
         if not heads[0] or heads[0].isdigit() or heads[0] == 'Base': continue
-        # Uniformisation : « Kanji / Kana / Rōmaji / Sens » -> « Français / Kanji / Kana / Rōmaji » (sauf kanji, verbes courants, famille)
-        _sec = t.find_parent('details', class_='sec'); _sub = t.find_parent('details', class_='sub')
-        _sj = _sec.summary.get_text(' ', strip=True).split()[0] if _sec is not None and _sec.summary else ''
-        _st = _sub.summary.get_text(' ', strip=True) if _sub is not None and _sub.summary else ''
-        if (heads[:4] == ['Kanji', 'Kana', heads[2], 'Sens'] and heads[2].lower() in ('rōmaji', 'romaji') and len(heads) in (4, 5) and _sj in ('語彙', '時間', '地理', '形容詞', '敬語')
-                and '人間関係' not in _st and not _st.startswith('動詞')):
-            ths = t.select('thead th'); trs = t.select('thead tr')[0]
-            for r in [trs] + list(t.select('tbody tr')):
-                cs = r.find_all(['th', 'td'], recursive=False)
-                if len(cs) >= 4:
-                    cs[3].extract(); cs[0].insert_before(cs[3])
-            hh = t.select('thead th')[0]; hh.string = 'Français'
-            heads = [h.get_text(' ', strip=True) for h in t.select('thead th')]
-            _reord[0] += 1
         t['class'] = (t.get('class') or []) + ['stack'] + (['stack-kanji'] if heads[0] == 'Kanji' and len(heads) >= 4 else [])
-        _voc = _sj in ('語彙', '時間', '地理', '形容詞', '敬語') and '人間関係' not in _st and not _st.startswith('動詞') and 'stack-kanji' not in t['class'] and 'Kanji' in heads and 'Kana' in heads
-        _ik, _ia = (heads.index('Kanji'), heads.index('Kana')) if _voc else (-1, -1)
         for tr in t.select('tbody tr'):
-            tds = tr.find_all('td', recursive=False)
-            for i, td in enumerate(tds):
-                if i < len(heads): td['data-label'] = '日本語' if i == _ik else heads[i]
-                if i == _ik: td['data-k'] = '1'
-            if _voc and len(tds) > max(_ik, _ia) and tds[_ik].get_text(strip=True) == tds[_ia].get_text(strip=True):
-                tds[_ia]['class'] = (tds[_ia].get('class') or []) + ['kdup']; _kdup[0] += 1
+            for i, td in enumerate(tr.find_all('td', recursive=False)):
+                if i < len(heads): td['data-label'] = heads[i]
         n += 1
-    print('stacked tables', n, 'réordonnées', _reord[0], 'kana masqués', _kdup[0])
+    print('stacked tables', n)
     return str(soup)
 
 import pykakasi as _pk, re as _re
