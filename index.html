@@ -6143,6 +6143,8 @@ table.stack td.kdup > * { display: none; }
     } catch (e) {}
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
     cfg.types = cfg.types.filter(function (t) { return QT.some(function (z) { return z.id === t; }); });
+    if (!Array.isArray(cfg.lv)) cfg.lv = (cfg.lv === 'ALL' || !cfg.lv) ? ['N5', 'N4', 'N3'] : [cfg.lv];
+    cfg.lv = cfg.lv.filter(function (l) { return ['N5', 'N4', 'N3'].indexOf(l) >= 0; }); if (!cfg.lv.length) cfg.lv = ['N5'];
     var Q = null;
     [['N5', 'kanji5'], ['N4', 'kanji4'], ['N3', 'kanji3']].forEach(function (pr) {
       var LV = pr[0];
@@ -6185,7 +6187,7 @@ table.stack td.kdup > * { display: none; }
 
     /* — utilitaires — */
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-    function levelPool(lv) { return KD.filter(function (x) { return lv === 'ALL' || x.l === lv; }); }
+    function levelPool(lv) { return KD.filter(function (x) { return lv === 'ALL' || (Array.isArray(lv) ? lv.indexOf(x.l) >= 0 : x.l === lv); }); }
     function elig(x, t) {
       return t === 'k2s' || t === 's2k' || (t === 'k2on' && x.on) || (t === 'k2kun' && x.kun) || (WT.indexOf(t) >= 0 && x.kw.length);
     }
@@ -6267,7 +6269,7 @@ table.stack td.kdup > * { display: none; }
       var ps = poolSize(cfg.lv, cfg.types, cfg.wrong);
       if (cfg.n !== 0 && cfg.n > ps.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
-      h += '<div class="q-sec"><h4>Niveau</h4><div class="seg" id="q-lv">' + [['N5', 'N5 · ' + levelPool('N5').length], ['N4', 'N4 · ' + levelPool('N4').length], ['N3', 'N3 · ' + levelPool('N3').length], ['ALL', 'Tous · ' + KD.length]].map(function (a) { return '<button type="button" data-lv="' + a[0] + '" aria-pressed="' + (cfg.lv === a[0]) + '">' + a[1] + '</button>'; }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Niveau <small>(un ou plusieurs)</small></h4><div class="qchips" id="q-lv">' + ['N5', 'N4', 'N3'].map(function (l) { return chipBtn(l + ' · ' + levelPool(l).length, cfg.lv.indexOf(l) >= 0, 'data-lv="' + l + '"'); }).join('') + chipBtn('Tous · ' + KD.length, cfg.lv.length === 3, 'data-lv="ALL"') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + QT.map(function (t) { return chipBtn(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div><div class="qpre">' + QPRESETS.map(function (p, i) { return '<button type="button" class="mini" data-p="' + i + '">' + p.label + '</button>'; }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + QN.filter(function (n) { return n <= ps.q; }).map(function (n) { return chipBtn(n, cfg.n === n, 'data-n="' + n + '"', n > ps.q); }).join('') + chipBtn('Tout · ' + ps.q, cfg.n === 0, 'data-n="0"', ps.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' kanji à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
@@ -6293,7 +6295,7 @@ table.stack td.kdup > * { display: none; }
     body.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b || b.disabled) return;
       if (b.classList.contains('qhint')) { toggleHint(b); return; }
-      if (b.dataset.lv) { cfg.lv = b.dataset.lv; persist(); showSetup(); }
+      if (b.dataset.lv) { var lv = b.dataset.lv; if (lv === 'ALL') cfg.lv = ['N5', 'N4', 'N3']; else { var i = cfg.lv.indexOf(lv); if (i >= 0) { if (cfg.lv.length > 1) cfg.lv.splice(i, 1); } else cfg.lv.push(lv); cfg.lv = ['N5', 'N4', 'N3'].filter(function (l) { return cfg.lv.indexOf(l) >= 0; }); } persist(); showSetup(); }
       else if (b.dataset.t) { var i = cfg.types.indexOf(b.dataset.t); if (i >= 0) cfg.types.splice(i, 1); else cfg.types.push(b.dataset.t); persist(); showSetup(); }
       else if (b.dataset.p) { cfg.types = QPRESETS[+b.dataset.p].types.slice(); persist(); showSetup(); }
       else if (b.dataset.n !== undefined) { cfg.n = +b.dataset.n; persist(); showSetup(); }
@@ -6318,7 +6320,7 @@ table.stack td.kdup > * { display: none; }
     function showQ() {
       if (Q.i >= Q.items.length) return showResult();
       var q = Q.items[Q.i], x = byK[q.k], opts = options(q); Q.cur = { q: q, opts: opts, done: false };
-      ttl.textContent = 'Quiz kanji · ' + (cfg.lv === 'ALL' ? 'N5 + N4 + N3' : cfg.lv);
+      ttl.textContent = 'Quiz kanji · ' + cfg.lv.join(' + ');
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
       var ask = '', big = '', hint = '';
       if (q.t === 'k2s') { ask = 'Que signifie ce kanji ?'; big = bigKanji(x.k); }
