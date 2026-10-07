@@ -7416,7 +7416,7 @@ table.stack td.kdup > * { display: none; }
     if (pushed > 0) { bkSkip++; try { history.go(-pushed); } catch (e) { bkSkip--; } pushed = 0; }
     TAB = tab; NAV = [tab === 'quiz' ? { v: 'sec', s: secBy['クイズ'] } : { v: tab }]; navRender();
   }
-  function navOpen(sec, sub) { navPush(sub ? { v: 'sub', s: sec, d: sub } : { v: 'sec', s: sec }); }
+  function navOpen(sec, sub) { if (!sub && subsOf(sec).length === 1) sub = subsOf(sec)[0]; navPush(sub ? { v: 'sub', s: sec, d: sub } : { v: 'sec', s: sec }); }
   function navRender() {
     var st = NAV[NAV.length - 1], v = st.v, h = '', title = ['日本語', 'Référence'];
     navMain.className = navMain.className.replace(/\bv-\w+\b/g, '').trim() + ' nv v-' + v;
@@ -7466,7 +7466,7 @@ table.stack td.kdup > * { display: none; }
       if (b.classList.contains('nsub')) { var d = subById[b.dataset.id], cur = NAV[NAV.length - 1]; navPush({ v: 'sub', s: cur.s, d: d }); }
       else if (b.classList.contains('nquiz')) { var q = QMAP[b.dataset.qj]; launchQuiz(q[0], q[1]); }
       else if (b.classList.contains('npole') && b.dataset.p) navPush({ v: 'pole', p: b.dataset.p });
-      else if (b.classList.contains('nsec')) navPush({ v: 'sec', s: secBy[b.dataset.sj] });
+      else if (b.classList.contains('nsec')) { var sc = secBy[b.dataset.sj], su = subsOf(sc); navPush(su.length === 1 ? { v: 'sub', s: sc, d: su[0] } : { v: 'sec', s: sc }); }
       else if (b.dataset.act === 'learn') navReset('learn');
       else if (b.dataset.act === 'quiz') navReset('quiz');
       else if (b.dataset.act === 'stats') navPush({ v: 'stats' });
