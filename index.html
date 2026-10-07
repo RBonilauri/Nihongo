@@ -862,6 +862,13 @@ table.stack td.kdup > * { display: none; }
   .trip-pick input { font: inherit; font-size: .8rem; padding: .25rem .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 8.6rem; min-width: 0; }
   .row .lab.nosh { flex-shrink: 0; }
   .trip-pick input { max-width: 6.8rem; font-size: .72rem; }
+  .nrv { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; padding: .8rem .9rem .9rem; margin: 0 0 .8rem; }
+  .nrv .rv-h { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; font-size: .9rem; margin-bottom: .5rem; }
+  .nrv .rv-h span { font-size: .72rem; color: var(--muted); }
+  .nrv .rv-l { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: .7rem; }
+  .nrv .rv-c { font: inherit; font-size: .78rem; padding: .3rem .7rem; border: 1px solid var(--border); border-radius: 16px; background: var(--bg, transparent); color: var(--ink); cursor: pointer; }
+  .nrv .rv-c b { color: var(--gold); margin-left: .25rem; }
+  .nrv .ngo { width: 100%; }
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -5554,7 +5561,7 @@ table.stack td.kdup > * { display: none; }
   }
 
   /* ── état persistant ── */
-  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -5592,6 +5599,13 @@ table.stack td.kdup > * { display: none; }
     var D = dayState(), g = ST.goal, p = Math.min(100, Math.round(D.n * 100 / g)), y = dkey(Date.now() - 864e5);
     var s = (ST.strk.last === D.d || ST.strk.last === y) ? ST.strk.n : 0;
     return '<div class="nday"><div class="nd-h"><b>Objectif du jour</b><span>' + Math.min(D.n, g) + ' / ' + g + (D.n >= g ? ' ✓' : '') + '</span></div><div class="nd-bar" role="progressbar" aria-valuenow="' + p + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + p + '%"></i></div><small>' + (D.n ? D.ok + ' bonnes réponses sur ' + D.n + ' · ' : 'Réponds à ' + g + ' questions pour valider la journée · ') + (s ? '🔥 ' + s + ' jour' + (s > 1 ? 's' : '') + ' de suite' : 'pas encore de série') + '</small></div>';
+  }
+  function rvCount() { return Object.keys(ST.rv || {}).length; }
+  function rvCard() {
+    var ks = Object.keys(ST.rv || {}); if (!ks.length) return '';
+    var by = {}; ks.forEach(function (k) { var id = ST.rv[k].id; by[id] = (by[id] || 0) + 1; });
+    var chips = Object.keys(by).filter(function (id) { return subMap[id]; }).map(function (id) { return '<button type="button" class="rv-c" data-act="rv-sub" data-id="' + esc(id) + '">' + esc(subMap[id].title) + ' <b>' + by[id] + '</b></button>'; }).join('');
+    return '<div class="nrv"><div class="rv-h"><b>🔖 Fiches à revoir</b><span>' + ks.length + ' fiche' + (ks.length > 1 ? 's' : '') + '</span></div>' + (chips ? '<div class="rv-l">' + chips + '</div>' : '') + '<button type="button" class="ngo" data-act="rv-all">Réviser mes ' + ks.length + ' fiche' + (ks.length > 1 ? 's' : '') + '</button></div>';
   }
   function toast(msg, action, fn) {
     var t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
@@ -5923,7 +5937,7 @@ table.stack td.kdup > * { display: none; }
         if (!cells[0]) return;
         var back = []; for (var k = 1; k < cells.length; k++) if (cells[k]) back.push({ l: heads[k] || '', v: cells[k] });
         if (!back.length) return;
-        out.push({ key: title + '|' + cells[0], fl: heads[0] || '', front: cells[0], back: back });
+        out.push({ id: title, key: title + '|' + cells[0], fl: heads[0] || '', front: cells[0], back: back });
       });
     });
     return out;
@@ -5947,22 +5961,28 @@ table.stack td.kdup > * { display: none; }
     card.innerHTML = (c.fl ? '<div class="flab">' + esc(c.fl) + '</div>' : '') + '<div class="front">' + esc(c.front) + '</div>' +
       (D.flipped ? '<div class="back">' + c.back.map(function (b) { return '<div>' + (b.l ? '<b>' + esc(b.l) + '</b>' : '') + esc(b.v) + '</div>'; }).join('') + '</div>' : '<div class="tap">Touche pour voir la réponse</div>');
   }
-  function hideDeck() { deck.hidden = true; document.body.style.overflow = ''; }
+  function hideDeck() { deck.hidden = true; document.body.style.overflow = ''; if (window.__navHomeRefresh) window.__navHomeRefresh(); }
   function startDeck(sub, title, onlyTodo) {
-    var all = cardsFrom(sub, title);
+    D.rv = false; var all = cardsFrom(sub, title);
     var list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
     if (!list.length) { list = all; }
     D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = sub; D.all = all;
     deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
-  function answer(ok) { var c = D.cards[D.i]; if (!c) return; if (ok) ST.su[c.key] = 1; else delete ST.su[c.key]; save(); D.i++; showCard(); }
+  function startRv(id) {
+    var list = Object.keys(ST.rv).map(function (k) { var c = ST.rv[k]; return { id: c.id, key: k, fl: c.fl, front: c.front, back: c.back }; }).filter(function (c) { return !id || c.id === id; });
+    if (!list.length) return;
+    D.cards = shuffle(list); D.i = 0; D.title = id && subMap[id] ? subMap[id].title + ' · à revoir' : 'Fiches à revoir'; D.sub = null; D.all = list; D.rv = id || true;
+    deck.querySelector('.ttl').textContent = D.title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
+  }
+  function answer(ok) { var c = D.cards[D.i]; if (!c) return; if (ok) { ST.su[c.key] = 1; delete ST.rv[c.key]; } else { delete ST.su[c.key]; ST.rv[c.key] = { id: c.id, fl: c.fl, front: c.front, back: c.back }; } save(); D.i++; showCard(); }
   deck.addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (b) {
       if (b.classList.contains('x') || b.classList.contains('close')) bkClose(hideDeck);
       else if (b.classList.contains('again')) answer(false);
       else if (b.classList.contains('ok')) answer(true);
-      else if (b.classList.contains('restart')) startDeck(D.sub, D.title, true);
+      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else startDeck(D.sub, D.title, true); }
       return;
     }
     if (e.target.closest('#card')) flip();
@@ -7577,6 +7597,7 @@ table.stack td.kdup > * { display: none; }
     TAB = tab; NAV = [tab === 'quiz' ? { v: 'sec', s: secBy['クイズ'] } : { v: tab }]; navRender();
   }
   function navOpen(sec, sub) { if (!sub && subsOf(sec).length === 1) sub = subsOf(sec)[0]; navPush(sub ? { v: 'sub', s: sec, d: sub } : { v: 'sec', s: sec }); }
+  window.__navHomeRefresh = function () { var pg = document.getElementById('navpage'); if (pg && pg.querySelector('.nday')) { var y = window.scrollY; navRender(); window.scrollTo(0, y); } };
   function navRender() {
     var st = NAV[NAV.length - 1], v = st.v, h = '', title = ['日本語', 'Référence'];
     navMain.className = navMain.className.replace(/\bv-\w+\b/g, '').trim() + ' nv v-' + v;
@@ -7585,7 +7606,7 @@ table.stack td.kdup > * { display: none; }
     if (st.s) { st.s.open = true; st.s.classList.add('cur'); }
     if (st.d) { st.d.open = true; st.d.classList.add('cur'); var rid = Object.keys(subMap).filter(function (k) { return subMap[k].sub === st.d; })[0]; if (rid) { ST.rec = [rid].concat(ST.rec.filter(function (x) { return x !== rid; })).slice(0, 3); save(); renderHome(); } }
     if (v === 'home') {
-      h = tripCard() + dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
+      h = tripCard() + dayCard() + rvCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
         '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>' +
         '<button type="button" class="nstats" data-act="stats"><i>📈</i>Ma progression<small>Réussite, jours actifs, points faibles</small></button>';
     } else if (v === 'search') { title = ['日本語', 'Recherche'];
@@ -7630,6 +7651,8 @@ table.stack td.kdup > * { display: none; }
       else if (b.dataset.act === 'learn') navReset('learn');
       else if (b.dataset.act === 'quiz') navReset('quiz');
       else if (b.dataset.act === 'stats') navPush({ v: 'stats' });
+      else if (b.dataset.act === 'rv-all') startRv('');
+      else if (b.dataset.act === 'rv-sub') startRv(b.dataset.id);
       else if (b.dataset.act === 'mix') launchQuiz('Quiz général');
       else if (b.dataset.act === 'trip-set') document.getElementById('menu').click();
     });

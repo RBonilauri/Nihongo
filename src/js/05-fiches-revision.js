@@ -12,7 +12,7 @@
         if (!cells[0]) return;
         var back = []; for (var k = 1; k < cells.length; k++) if (cells[k]) back.push({ l: heads[k] || '', v: cells[k] });
         if (!back.length) return;
-        out.push({ key: title + '|' + cells[0], fl: heads[0] || '', front: cells[0], back: back });
+        out.push({ id: title, key: title + '|' + cells[0], fl: heads[0] || '', front: cells[0], back: back });
       });
     });
     return out;
@@ -36,22 +36,28 @@
     card.innerHTML = (c.fl ? '<div class="flab">' + esc(c.fl) + '</div>' : '') + '<div class="front">' + esc(c.front) + '</div>' +
       (D.flipped ? '<div class="back">' + c.back.map(function (b) { return '<div>' + (b.l ? '<b>' + esc(b.l) + '</b>' : '') + esc(b.v) + '</div>'; }).join('') + '</div>' : '<div class="tap">Touche pour voir la réponse</div>');
   }
-  function hideDeck() { deck.hidden = true; document.body.style.overflow = ''; }
+  function hideDeck() { deck.hidden = true; document.body.style.overflow = ''; if (window.__navHomeRefresh) window.__navHomeRefresh(); }
   function startDeck(sub, title, onlyTodo) {
-    var all = cardsFrom(sub, title);
+    D.rv = false; var all = cardsFrom(sub, title);
     var list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
     if (!list.length) { list = all; }
     D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = sub; D.all = all;
     deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
-  function answer(ok) { var c = D.cards[D.i]; if (!c) return; if (ok) ST.su[c.key] = 1; else delete ST.su[c.key]; save(); D.i++; showCard(); }
+  function startRv(id) {
+    var list = Object.keys(ST.rv).map(function (k) { var c = ST.rv[k]; return { id: c.id, key: k, fl: c.fl, front: c.front, back: c.back }; }).filter(function (c) { return !id || c.id === id; });
+    if (!list.length) return;
+    D.cards = shuffle(list); D.i = 0; D.title = id && subMap[id] ? subMap[id].title + ' · à revoir' : 'Fiches à revoir'; D.sub = null; D.all = list; D.rv = id || true;
+    deck.querySelector('.ttl').textContent = D.title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
+  }
+  function answer(ok) { var c = D.cards[D.i]; if (!c) return; if (ok) { ST.su[c.key] = 1; delete ST.rv[c.key]; } else { delete ST.su[c.key]; ST.rv[c.key] = { id: c.id, fl: c.fl, front: c.front, back: c.back }; } save(); D.i++; showCard(); }
   deck.addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (b) {
       if (b.classList.contains('x') || b.classList.contains('close')) bkClose(hideDeck);
       else if (b.classList.contains('again')) answer(false);
       else if (b.classList.contains('ok')) answer(true);
-      else if (b.classList.contains('restart')) startDeck(D.sub, D.title, true);
+      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else startDeck(D.sub, D.title, true); }
       return;
     }
     if (e.target.closest('#card')) flip();

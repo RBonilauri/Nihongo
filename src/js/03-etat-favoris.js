@@ -1,5 +1,5 @@
   /* ── état persistant ── */
-  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -37,6 +37,13 @@
     var D = dayState(), g = ST.goal, p = Math.min(100, Math.round(D.n * 100 / g)), y = dkey(Date.now() - 864e5);
     var s = (ST.strk.last === D.d || ST.strk.last === y) ? ST.strk.n : 0;
     return '<div class="nday"><div class="nd-h"><b>Objectif du jour</b><span>' + Math.min(D.n, g) + ' / ' + g + (D.n >= g ? ' ✓' : '') + '</span></div><div class="nd-bar" role="progressbar" aria-valuenow="' + p + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + p + '%"></i></div><small>' + (D.n ? D.ok + ' bonnes réponses sur ' + D.n + ' · ' : 'Réponds à ' + g + ' questions pour valider la journée · ') + (s ? '🔥 ' + s + ' jour' + (s > 1 ? 's' : '') + ' de suite' : 'pas encore de série') + '</small></div>';
+  }
+  function rvCount() { return Object.keys(ST.rv || {}).length; }
+  function rvCard() {
+    var ks = Object.keys(ST.rv || {}); if (!ks.length) return '';
+    var by = {}; ks.forEach(function (k) { var id = ST.rv[k].id; by[id] = (by[id] || 0) + 1; });
+    var chips = Object.keys(by).filter(function (id) { return subMap[id]; }).map(function (id) { return '<button type="button" class="rv-c" data-act="rv-sub" data-id="' + esc(id) + '">' + esc(subMap[id].title) + ' <b>' + by[id] + '</b></button>'; }).join('');
+    return '<div class="nrv"><div class="rv-h"><b>🔖 Fiches à revoir</b><span>' + ks.length + ' fiche' + (ks.length > 1 ? 's' : '') + '</span></div>' + (chips ? '<div class="rv-l">' + chips + '</div>' : '') + '<button type="button" class="ngo" data-act="rv-all">Réviser mes ' + ks.length + ' fiche' + (ks.length > 1 ? 's' : '') + '</button></div>';
   }
   function toast(msg, action, fn) {
     var t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
