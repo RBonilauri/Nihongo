@@ -1,7 +1,7 @@
 # Données JSON du vocabulaire
 # Exécuté par build.py dans un espace de noms partagé (variables main, css, js…).
 import hashlib as _hl
-_CAT = {'旅行': 'Voyage', '会話': 'Conversation', '敬語': 'Keigo', '語彙': 'Vocabulaire', '時間': 'Temps', '形容詞': 'Adjectifs', '道具': 'Outils', '表現': 'Expressions', '助詞': 'Particules'}
+_CAT = {'旅行': 'Voyage', '会話': 'Conversation', '敬語': 'Keigo', '語彙': 'Vocabulaire', '常用': 'Vocabulaire', '時間': 'Temps', '形容詞': 'Adjectifs', '道具': 'Outils', '表現': 'Expressions', '助詞': 'Particules'}
 def vocab_json(html):
     soup = _BS(html, 'html.parser'); out = []; seen = set()
     def add(cat, g, fr, jp, ka, ro):
