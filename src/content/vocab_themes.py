@@ -198,7 +198,7 @@ def geo_section():
     for r, (jp, ro) in M['reg'].items():
         ps = sorted((q for q in M['p'] if q['r'] == r), key=lambda q: order[q['n']])
         reg_blocks.append(_H(jp + '（' + _kr[r] + '） — ' + ro))
-        reg_blocks.append(T(['Préfecture', 'Kanji', 'Kana'], [[o['ro'], o['n'], o['k']] for o in ps], jp=(1, 2), ro=()))
+        reg_blocks.append(C2.kanji_table([(o['n'], o['k'], o['ro'] + ' · chef-lieu ' + o['capr']) for o in ps]))
     return {'id': 'chiri', 'jp': '地理', 'label': 'Géographie', 'replace': None, 'after': '時間',
       'intro': 'Les 47 préfectures et les 8 régions du Japon, avec une carte interactive et un quiz dédié (Quiz géographie, aussi dans le Quiz général).',
       'subs': [
