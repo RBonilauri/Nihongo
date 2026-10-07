@@ -2,11 +2,11 @@
   var POLES = [
     { id: 'bases', jp: '仮', label: 'Bases', secs: ['仮名', '発音', '漢字'] },
     { id: 'gram', jp: '文', label: 'Grammaire', secs: ['助詞', '動詞', 'N4', 'N3', '形容詞', '助数詞', '表現', '道具'] },
-    { id: 'voc', jp: '語', label: 'Vocabulaire', secs: ['語彙', '時間', '地理'] },
+    { id: 'voc', jp: '語', label: 'Vocabulaire', secs: ['語彙', '常用', '時間', '地理'] },
     { id: 'parl', jp: '話', label: 'Parler', secs: ['会話', '旅行', '敬語'] }
   ];
   var QMAP = { '助詞': ['Quiz particules'], '動詞': ['Quiz conjugaison'], '漢字': ['Quiz kanji'], '助数詞': ['Quiz compteurs'], '地理': ['Quiz géographie'],
-    '語彙': ['Quiz vocabulaire', ['Vocabulaire', 'Verbes']], '時間': ['Quiz vocabulaire', ['Temps']], '形容詞': ['Quiz vocabulaire', ['Adjectifs']], '表現': ['Quiz vocabulaire', ['Expressions']],
+    '語彙': ['Quiz vocabulaire', ['Vocabulaire']], '常用': ['Quiz vocabulaire', ['Verbes']], '時間': ['Quiz vocabulaire', ['Temps']], '形容詞': ['Quiz vocabulaire', ['Adjectifs']], '表現': ['Quiz vocabulaire', ['Expressions']],
     '旅行': ['Quiz vocabulaire', ['Voyage']], '会話': ['Quiz vocabulaire', ['Conversation']], '敬語': ['Quiz vocabulaire', ['Keigo']], '道具': ['Quiz vocabulaire', ['Outils']] };
   var NAV = [{ v: 'home' }], TAB = 'home', pushed = 0, secBy = {}, subById = {}, navMain = null, navPage = null;
   function secJp(s) { return s.querySelector(':scope > summary .jp').textContent.trim(); }

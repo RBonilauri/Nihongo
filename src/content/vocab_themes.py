@@ -183,6 +183,12 @@ def all_subs():
 
 
 # ───────────── GÉOGRAPHIE ─────────────
+def verbs_section():
+    import vocab_core
+    return {'id': 'jouyou', 'jp': '常用', 'label': 'Verbes courants', 'replace': None, 'after': '語彙',
+      'intro': 'Les verbes du quotidien rangés par thème : groupe, forme en て, forme négative, et deux phrases d’exemple.',
+      'subs': [{'title': '動詞 — Verbes courants', 'blocks': vocab_core.verbs_blocks()}]}
+
 def geo_section():
     import json
     from content import T, DATA

@@ -431,7 +431,6 @@ def _vocab_sub(title, rows, intro=None):
     bl.append(kanji_table(rows)); return {'title': title, 'blocks': bl}
 
 SUBS_VOCAB = [
- {'title': '動詞 — Verbes courants', 'blocks': verbs_blocks()},
  _vocab_sub('場所 — Lieux en ville', LIEUX, 'Les lieux qu’on cherche, qu’on demande et qu’on lit sur les panneaux.'),
  _vocab_sub('家 — Maison et objets', MAISON, 'Objets du quotidien, hébergement et affaires de voyage.'),
  _vocab_sub('服 — Vêtements', FUKU),

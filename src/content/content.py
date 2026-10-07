@@ -654,6 +654,7 @@ _merge(adjectifs_keigo.extra_subs()); _merge(voyage_conversation.voy_conv_subs()
 import compteurs
 _merge(compteurs.counters_subs())
 
+SECTIONS.append(vocab_themes.verbs_section())
 SECTIONS.append(vocab_themes.geo_section())
 import grammaire_n4_n3
 SECTIONS.append(grammaire_n4_n3.SECTION_N3)
