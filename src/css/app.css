@@ -256,3 +256,9 @@
 /* kana identique au kanji : masqué aussi sur grand écran */
 table.stack td.kdup { font-size: 0 !important; }
 table.stack td.kdup > * { display: none; }
+
+@media (max-width: 700px) {
+  table.stack td:has(.exs) { grid-column: 1 / -1 !important; display: block !important; grid-template-columns: none; }
+  table.stack td:has(.exs)::before { display: none !important; }
+}
+.exs { min-width: 12rem; }

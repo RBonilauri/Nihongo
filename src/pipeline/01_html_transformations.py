@@ -118,19 +118,47 @@ def conjify(html):
             td[4].append(d); n += 1
             fr_ = _EX.get(k)
             if fr_:
-                pk = ''.join(x['hira'] for x in _kks.convert(fr_['p'])) if fr_['p'] else ''
+                pk = ''.join(x['hira'] for x in _kks.convert(fr_['p'])).replace('にっぽん', 'にほん') if fr_['p'] else ''
                 ex = soup.new_tag('details', attrs={'class': 'exd', 'data-k': k, 'data-ka': ka, 'data-t': ty, 'data-ex': _json.dumps([fr_['p'], pk, fr_['v'], fr_['c'], fr_['s'], fr_['n'], fr_['o']], ensure_ascii=False, separators=(',', ':'))})
                 sm2 = soup.new_tag('summary'); lb = soup.new_tag('span', attrs={'class': 'ex-l'}); lb.string = 'Phrases d’exemple'; bt2 = soup.new_tag('span', attrs={'class': 'cj-btn'}); bt2.string = 'Exemple'
                 sm2.append(lb); sm2.append(bt2); ex.append(sm2); ex.append(soup.new_tag('div', attrs={'class': 'exb'}))
                 f2 = _EX2.get(k)
                 if f2:
-                    pk2 = ''.join(x['hira'] for x in _kks.convert(f2['p'])) if f2['p'] else ''
+                    pk2 = ''.join(x['hira'] for x in _kks.convert(f2['p'])).replace('にっぽん', 'にほん') if f2['p'] else ''
                     ex['data-ex2'] = _json.dumps([f2['p'], pk2, f2['v'], f2['c'], f2['s'], f2['n'], f2['o']], ensure_ascii=False, separators=(',', ':'))
                 td[4].append(ex); nex[0] += 1
     print('conjugaisons', n, 'exemples', nex[0])
     return str(soup)
 main = _re.sub(r'<p class="conj-intro">\[\[JPMAP\]\]</p>', '<div class="jpmap-host"></div>', main)
 main = conjify(main)
+
+def connectify(html):
+    """Connecteurs : 2 phrases d'exemple dépliables par connecteur."""
+    from connecteurs_exemples import EX as _CX, KANA as _CK
+    soup = _BS(html, 'html.parser'); n = 0
+    for d in soup.select('details.sub'):
+        if not d.summary.get_text().startswith('接続詞'): continue
+        for tr in d.select('tbody tr'):
+            tds = tr.find_all('td', recursive=False)
+            fr = tds[0].get_text(strip=True)
+            if fr not in _CX: continue
+            ex = soup.new_tag('details', attrs={'class': 'exd exs'})
+            sm = soup.new_tag('summary'); lb = soup.new_tag('span', attrs={'class': 'ex-l'}); lb.string = 'Phrases d’exemple'
+            bt = soup.new_tag('span', attrs={'class': 'cj-btn'}); bt.string = 'Exemple'
+            sm.append(lb); sm.append(bt); ex.append(sm)
+            body = soup.new_tag('div', attrs={'class': 'exb'})
+            for jp, fre in _CX[fr]:
+                kana = _CK.get(jp) or ''.join(x['hira'] for x in _kks.convert(jp))
+                row = soup.new_tag('div', attrs={'class': 'ex-s'})
+                a = soup.new_tag('span', attrs={'class': 'ex-jp'}); a.string = jp; row.append(a)
+                if kana != jp:
+                    k = soup.new_tag('span', attrs={'class': 'ex-k'}); k.string = kana; row.append(k)
+                f = soup.new_tag('span', attrs={'class': 'ex-fr'}); f.string = fre; row.append(f)
+                body.append(row)
+            ex.append(body); tds[-1].append(ex); n += 1
+    print('connecteurs avec exemples', n)
+    return str(soup)
+main = connectify(main)
 def foldify(html):
     """Verbes courants : chaque thème (Vie quotidienne, Déplacements…) devient un bloc repliable."""
     soup = _BS(html, 'html.parser'); n = 0
