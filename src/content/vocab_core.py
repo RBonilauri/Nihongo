@@ -261,8 +261,7 @@ KUNI = [
  ('中国', 'ちゅうごく', 'Chine'), ('韓国', 'かんこく', 'Corée du Sud'), ('台湾', 'たいわん', 'Taïwan'), ('タイ', 'タイ', 'Thaïlande'), ('インド', 'インド', 'Inde'),
  ('ブラジル', 'ブラジル', 'Brésil'), ('オーストラリア', 'オーストラリア', 'Australie'), ('ヨーロッパ', 'ヨーロッパ', 'Europe'), ('アジア', 'アジア', 'Asie'), ('外国', 'がいこく', 'Pays étranger'),
  ('外国人', 'がいこくじん', 'Étranger'), ('日本人', 'にほんじん', 'Japonais(e)'), ('フランス人', 'フランスじん', 'Français(e)'), ('日本語', 'にほんご', 'Langue japonaise'), ('フランス語', 'フランスご', 'Langue française'),
- ('英語', 'えいご', 'Anglais'), ('中国語', 'ちゅうごくご', 'Chinois'), ('韓国語', 'かんこくご', 'Coréen'), ('東京', 'とうきょう', 'Tokyo'), ('大阪', 'おおさか', 'Osaka'),
- ('京都', 'きょうと', 'Kyoto'), ('北海道', 'ほっかいどう', 'Hokkaidō'), ('沖縄', 'おきなわ', 'Okinawa'), ('富士山', 'ふじさん', 'Mont Fuji'), ('パリ', 'パリ', 'Paris'),
+ ('英語', 'えいご', 'Anglais'), ('中国語', 'ちゅうごくご', 'Chinois'), ('韓国語', 'かんこくご', 'Coréen'),
 ]
 SHUMI = [
  ('趣味', 'しゅみ', 'Passe-temps'), ('音楽', 'おんがく', 'Musique'), ('映画', 'えいが', 'Film'), ('本', 'ほん', 'Livre'), ('漫画', 'まんが', 'Manga'),
@@ -439,7 +438,6 @@ SUBS_VOCAB = [
  _vocab_sub('天気 — Météo et saisons', TENKI),
  _vocab_sub('気持ち — Émotions et états', KIMOCHI, 'Pour dire comment tu te sens : adjectifs en い, mots en な et quelques verbes.'),
  _vocab_sub('症状 — Santé et symptômes', SHOJO, 'À compléter avec la rubrique Voyage › Urgences et santé, qui contient les phrases complètes.'),
- _vocab_sub('国 — Pays, langues, villes', KUNI),
  _vocab_sub('趣味 — Loisirs', SHUMI),
  {'title': '擬音語 — Onomatopées et adverbes expressifs', 'blocks': [P('Les mots expressifs sont partout à l’oral : ils décrivent les sons, les textures, les sensations. Les plus fréquents, avec un exemple.'), onoma_table()]},
  _vocab_sub('標識 — Panneaux et affichages', HYOSHIKI, 'À lire sans traduction : portes, magasins, gares, caisses. Les mêmes mots sont dans le quiz vocabulaire.'),

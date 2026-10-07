@@ -205,5 +205,6 @@ def geo_section():
         sub('地図 — Carte interactive du Japon', 'Touche une préfecture pour voir son nom en japonais, son chef-lieu et ce qu’il faut en retenir. Touche une région pour en voir toutes les préfectures. Les boutons + et − zooment, et tu peux déplacer la carte une fois zoomée.', [{'t': 'p', 'text': '[[JPMAP]]'}]),
         sub('都道府県 — Les 47 préfectures', 'Chaque préfecture avec sa lecture, sa région et son chef-lieu.', [C2.kanji_table(rows)]),
         sub('地方 — Les 8 régions', 'Pour chaque région, ses préfectures du nord au sud : kanji et lecture en kana.', reg_blocks),
+        sub('国 — Pays, langues et nationalités', 'Les principaux pays, continents, nationalités et langues.', [C2.kanji_table(C2.KUNI)]),
         sub('島と海 — Îles, mers et grandes zones', 'Îles principales, mers et zones souvent citées (Kansai, Kantō…).', [C2.kanji_table([r for r in REGIONS if not r[0].endswith('地方')])]),
       ]}
