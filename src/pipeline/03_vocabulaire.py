@@ -27,10 +27,10 @@ def vocab_json(html):
                 if len(hd) >= 3 and hd[1] in ('日本語', 'Japonais') and hd[2].lower().startswith(('rōmaji', 'romaji')):
                     for c in rows:
                         if len(c) >= 3: add(cat, g, c[3] if hd[0] == 'Structure' and len(c) > 3 else c[0], c[1], '', c[2])
-                elif len(hd) >= 4 and hd[1] == 'Kanji' and hd[2] == 'Kana' and hd[3].lower().startswith(('romaji', 'rōmaji')):
+                elif len(hd) >= 4 and hd[1] in ('Kanji', '日本語') and hd[2] == 'Kana' and hd[3].lower().startswith(('romaji', 'rōmaji')):
                     for c in rows:
                         for o in range(0, len(c) - 3, 4):
-                            if hd[o + 1:o + 2] == ['Kanji']: add(cat, g, c[o], c[o + 1], c[o + 2], c[o + 3])
+                            if hd[o + 1:o + 2] in (['Kanji'], ['日本語']): add(cat, g, c[o], c[o + 1], c[o + 2], c[o + 3])
                 elif hd[:2] == ['日本語', 'Sens'] and cat in ('Particules', 'Expressions'):
                     for c in rows:
                         if len(c) >= 2 and not _re.search(r'[A-Za-z]{4,}', c[0]): add(cat, g, c[1], c[0], '', '')

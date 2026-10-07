@@ -54,6 +54,7 @@ def stackify(html):
         t['class'] = (t.get('class') or []) + ['stack'] + (['stack-kanji'] if heads[0] == 'Kanji' and len(heads) >= 4 else [])
         _voc = _sj in ('語彙', '時間', '地理', '形容詞', '敬語') and '人間関係' not in _st and not _st.startswith('動詞') and 'stack-kanji' not in t['class'] and 'Kanji' in heads and 'Kana' in heads
         _ik, _ia = (heads.index('Kanji'), heads.index('Kana')) if _voc else (-1, -1)
+        if _voc and _ik >= 0: t.select('thead th')[_ik].string = '日本語'
         for tr in t.select('tbody tr'):
             tds = tr.find_all('td', recursive=False)
             for i, td in enumerate(tds):
