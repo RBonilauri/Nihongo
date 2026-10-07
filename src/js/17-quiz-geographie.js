@@ -6,22 +6,30 @@
     { id: 'c2p', label: 'Chef-lieu → préfecture' },
     { id: 'rd', label: 'Lecture du nom' },
     { id: 'rmap', label: 'Régions sur la carte' },
-    { id: 'ear', label: '🔊 Écoute → préfecture' }
+    { id: 'ear', label: '🔊 Écoute → préfecture' },
+    { id: 'w2f', label: 'Pays, îles : japonais → français' },
+    { id: 'f2w', label: 'Pays, îles : français → japonais' }
   ];
   function initGeo(mainEl) {
     var M = jpm(); if (!M) return;
     var canSpeak = !!window.speechSynthesis;
     var types = GTY.filter(function (t) { return canSpeak || t.id !== 'ear'; });
-    var ALL = M.p.map(function (o) { return { i: 'g:' + o.n, k: 'p', o: o, r: o.r }; }).concat(M.ids.map(function (r) { return { i: 'r:' + r, k: 'r', r: r }; }));
+    var GW = []; try { GW = JSON.parse(document.getElementById('geo-words').textContent); } catch (e) {}
+    var RIDS = M.ids.concat(GW.length ? ['w'] : []), WLAB = 'Pays, îles et mers';
+    var ALL = M.p.map(function (o) { return { i: 'g:' + o.n, k: 'p', o: o, r: o.r }; }).concat(M.ids.map(function (r) { return { i: 'r:' + r, k: 'r', r: r }; })).concat(GW.map(function (w) { return { i: 'w:' + w.i, k: 'w', w: w, r: 'w' }; }));
     var byI = {}; ALL.forEach(function (x) { byI[x.i] = x; });
     var GN2 = [10, 25, 50, 100];
-    var cfg = ST.gqc || { regs: M.ids.slice(), types: types.map(function (t) { return t.id; }), n: 25, wrong: false };
+    var cfg = ST.gqc || { regs: RIDS.slice(), types: types.map(function (t) { return t.id; }), n: 25, wrong: false };
     cfg.types = cfg.types.filter(function (t) { return types.some(function (u) { return u.id === t; }); }); if (!cfg.types.length) cfg.types = types.map(function (t) { return t.id; });
+    if (cfg.regs.indexOf('w') < 0 && !cfg.wSeen && GW.length) cfg.regs.push('w'); cfg.wSeen = 1;
+    if (!cfg.tw) { ['w2f', 'f2w'].forEach(function (t) { if (cfg.types.indexOf(t) < 0) cfg.types.push(t); }); cfg.tw = 1; }
     if (!ST.gq) ST.gq = {};
     var Q = null;
     var rl = function (r) { return M.reg[r][0] + ' · ' + M.reg[r][1]; };
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function elig(x, t) {
+      if (t === 'w2f' || t === 'f2w') return x.k === 'w';
+      if (x.k === 'w') return t === 'ear';
       if (x.k === 'r') return t === 'rmap';
       if (t === 'rmap') return false;
       if (t === 'reg' && rl(x.o.r).indexOf(x.o.n) >= 0) return false;
@@ -47,8 +55,8 @@
     }
     MIXREG['geo'] = {
       label: 'Géographie',
-      count: function () { var sv = cfg; cfg = { regs: M.ids.slice(), types: types.map(function (t) { return t.id; }), n: 0, wrong: false }; var r = countAvail().q; cfg = sv; return r; },
-      make: function (n) { var sv = cfg; cfg = { regs: M.ids.slice(), types: types.map(function (t) { return t.id; }), n: n, wrong: false }; var r = build(); cfg = sv; return r; },
+      count: function () { var sv = cfg; cfg = { regs: RIDS.slice(), types: types.map(function (t) { return t.id; }), n: 0, wrong: false }; var r = countAvail().q; cfg = sv; return r; },
+      make: function (n) { var sv = cfg; cfg = { regs: RIDS.slice(), types: types.map(function (t) { return t.id; }), n: n, wrong: false }; var r = build(); cfg = sv; return r; },
       show: function (it, hooks, idx, total) {
         Q = { items: idx < total ? [it, it] : [it], i: 0, ok: 0, wrongList: [], t0: Date.now(), mix: hooks, mixTag: '<div class="q-tag q-tag-mix"><b>Géographie</b></div>' };
         el.style.zIndex = 95; el.hidden = false; document.body.style.overflow = 'hidden';
@@ -65,7 +73,7 @@
     function wrongCount() { return Object.keys(ST.gq).filter(function (k) { return ST.gq[k].w && byI[k]; }).length; }
     function paintCard() {
       var seen = Object.keys(ST.gq).length, w = wrongCount();
-      card.innerHTML = '<span class="qc-jp">地理</span><span class="qc-t">Quiz géographie<small>47 préfectures · 8 régions · cartes · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
+      card.innerHTML = '<span class="qc-jp">地理</span><span class="qc-t">Quiz géographie<small>47 préfectures · 8 régions · pays, îles et mers · cartes · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
     }
     paintCard();
     card.addEventListener('click', function () { open(true); showSetup(); });
@@ -82,7 +90,7 @@
       Q = null; ttl.textContent = 'Quiz géographie'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
-      h += '<div class="q-sec"><h4>Régions</h4><div class="qchips">' + M.ids.map(function (r) { return chip(esc(M.reg[r][0]) + ' · ' + M.p.filter(function (o) { return o.r === r; }).length, cfg.regs.indexOf(r) >= 0, 'data-r="' + r + '"'); }).join('') + '</div></div>';
+      h += '<div class="q-sec"><h4>Régions</h4><div class="qchips">' + RIDS.map(function (r) { return chip(r === 'w' ? WLAB + ' · ' + GW.length : esc(M.reg[r][0]) + ' · ' + M.p.filter(function (o) { return o.r === r; }).length, cfg.regs.indexOf(r) >= 0, 'data-r="' + r + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + GN2.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
@@ -97,12 +105,20 @@
       var h = '<div class="q-stats"><div class="qs-tiles"><div><b>' + S.sess + '</b><span>quiz terminés</span></div><div><b>' + S.q + '</b><span>questions</span></div><div><b>' + pc(S.ok, S.q) + '</b><span>de réussite</span></div></div>';
       h += qsExtra('g', ST.gq, ALL.length);
       h += '<h4 class="q-h">Par type de question</h4><div class="qs-types">' + GTY.map(function (t) { return row(esc(t.label), (S.ty || {})[t.id]); }).join('') + '</div>';
-      h += '<h4 class="q-h">Par région</h4><div class="qs-types">' + M.ids.map(function (r) { return row(esc(M.reg[r][0]), (S.rg || {})[r]); }).join('') + '</div>';
+      h += '<h4 class="q-h">Par région</h4><div class="qs-types">' + RIDS.map(function (r) { return row(esc(r === 'w' ? WLAB : M.reg[r][0]), (S.rg || {})[r]); }).join('') + '</div>';
       var worst = Object.keys(ST.gq).map(function (k) { var v = ST.gq[k]; return { k: k, x: v.x || (v.w ? 1 : 0), n: v.n }; }).filter(function (v) { return v.x > 0 && byI[v.k]; }).sort(missSort);
       h += '<h4 class="q-h">Les plus ratés</h4>';
-      h += worst.length ? missBlock(worst.map(function (v) { var x = byI[v.k]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.n) + '</span><span>' + esc(x.k === 'r' ? M.reg[x.r][1] : x.o.ro) + '</span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; })) : '<p class="conj-note">Aucun raté pour l’instant.</p>';
+      h += worst.length ? missBlock(worst.map(function (v) { var x = byI[v.k]; return '<div class="q-miss"><span class="vq-mj">' + esc(nm(x)) + '</span><span>' + esc(rn(x)) + '</span><span class="qs-cnt">' + v.x + ' / ' + v.n + '</span></div>'; })) : '<p class="conj-note">Aucun raté pour l’instant.</p>';
       h += '<div class="q-end"><button type="button" class="qgo" id="g-back">Retour</button><button type="button" class="mini" id="g-reset">Effacer les statistiques</button></div></div>';
       body.innerHTML = h; body.scrollTop = 0;
+    }
+    function nm(x) { return x.k === 'r' ? M.reg[x.r][0] : x.k === 'w' ? x.w.jp : x.o.n; }
+    function rn(x) { return x.k === 'r' ? M.reg[x.r][1] : x.k === 'w' ? x.w.fr : x.o.ro; }
+    function pickWords(x, n, key) {
+      var others = GW.filter(function (o) { return o.i !== x.w.i && o[key] !== x.w[key]; }), same = shuffle(others.filter(function (o) { return o.g === x.w.g; })), rest = shuffle(others.filter(function (o) { return o.g !== x.w.g; }));
+      var out = [], seen = {}; seen[x.w[key]] = 1;
+      same.slice(0, 3).concat(rest).concat(same.slice(3)).forEach(function (o) { if (out.length < n && !seen[o[key]]) { seen[o[key]] = 1; out.push(o); } });
+      return out;
     }
     function pickPrefs(x, n, key) {
       var others = M.p.filter(function (o) { return o.n !== x.o.n; }), same = shuffle(others.filter(function (o) { return o.r === x.o.r; })), rest = shuffle(others.filter(function (o) { return o.r !== x.o.r; }));
@@ -112,6 +128,7 @@
     }
     function options(it) {
       var x = byI[it.i], t = it.t, out;
+      if (x.k === 'w') { var key = t === 'f2w' ? 'jp' : 'fr'; return shuffle([{ v: x.w[key], k: key === 'jp' ? (x.w.kk || '') : '', ok: true }].concat(pickWords(x, 3, key).map(function (o) { return { v: o[key], k: key === 'jp' ? (o.kk || '') : '', ok: false }; }))); }
       if (t === 'rmap') out = [{ v: rl(x.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
       else if (t === 'reg') out = [{ v: rl(x.o.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.o.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
       else if (t === 'cap') out = [{ v: x.o.cap, k: x.o.capk, ok: true }].concat(pickPrefs(x, 3, 'cap').map(function (o) { return { v: o.cap, k: o.capk, ok: false }; }));
@@ -119,8 +136,8 @@
       else out = [{ v: x.o.n, k: x.o.k, ok: true }].concat(pickPrefs(x, 3, 'n').map(function (o) { return { v: o.n, k: o.k, ok: false }; }));
       return shuffle(out);
     }
-    function setOf(x) { return x.k === 'r' ? M.p.filter(function (o) { return o.r === x.r; }).map(function (o) { return o.n; }) : [x.o.n]; }
-    function sayG(x) { if (canSpeak) speak([x.k === 'r' ? M.reg[x.r][0] : x.o.k]); }
+    function setOf(x) { return x.k === 'w' ? [] : x.k === 'r' ? M.p.filter(function (o) { return o.r === x.r; }).map(function (o) { return o.n; }) : [x.o.n]; }
+    function sayG(x) { if (canSpeak) speak([x.k === 'r' ? M.reg[x.r][0] : x.k === 'w' ? (x.w.kk || x.w.jp) : x.o.k]); }
     function start(items) {
       if (!items.length) { toast('Aucune question disponible avec ces réglages.'); return; }
       Q = { items: items, i: 0, ok: 0, wrongList: [], t0: Date.now(), done: false }; showQ();
@@ -129,8 +146,13 @@
       if (Q.i >= Q.items.length) return showResult();
       var it = Q.items[Q.i], x = byI[it.i], opts = options(it); Q.cur = { it: it, opts: opts, done: false };
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
-      var ask, big, hint = '';
-      if (it.t === 'map') { ask = 'Quelle est cette préfecture ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
+      var ask, big, hint = '', isW = x.k === 'w';
+      if (isW) {
+        if (it.t === 'f2w') { ask = 'Comment dit-on cela en japonais ?'; big = '<div class="q-big word vq">' + esc(x.w.fr) + '</div>'; }
+        else if (it.t === 'w2f' || ST.silent) { ask = 'Que signifie ce mot ?'; big = '<div class="q-big word vq">' + esc(x.w.jp) + '</div>'; }
+        else { ask = 'Écoute, puis choisis la traduction'; big = '<button type="button" class="qgo vq-ear" id="g-replay">🔊 Réécouter</button>' + earAlt(x.w.jp); }
+      }
+      else if (it.t === 'map') { ask = 'Quelle est cette préfecture ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'rmap') { ask = 'Quelle est cette région ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'reg') { ask = 'Dans quelle région se trouve cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
       else if (it.t === 'cap') { ask = 'Quel est le chef-lieu de cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
@@ -139,7 +161,8 @@
       else if (ST.silent) { ask = 'Quelle préfecture se lit ainsi ?'; big = '<div class="q-big word vq">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.k) + '</div>'; }
       else { ask = 'Écoute, puis choisis la préfecture'; big = '<button type="button" class="qgo vq-ear" id="g-replay">🔊 Réécouter</button>' + earAlt(x.k === 'r' ? M.reg[x.r][0] : x.o.k); }
       var hl = [], ok = opts.some(function (o) { return o.k && HK.test(o.v); });
-      if (it.t === 'reg' || it.t === 'cap') hl.push(x.o.k);
+      if (isW) { if (it.t === 'w2f') hl.push(x.w.kk || x.w.jp); }
+      else if (it.t === 'reg' || it.t === 'cap') hl.push(x.o.k);
       else if (it.t === 'c2p') hl.push(x.o.capk);
       if (ok) opts.forEach(function (o) { hl.push(o.k); });
       hl = hl.filter(Boolean);
@@ -149,6 +172,7 @@
       if (it.t === 'ear' && !ST.silent) setTimeout(function () { sayG(x); }, 150);
     }
     function answerHtml(x) {
+      if (x.k === 'w') return '<div class="vq-ans"><div class="vq-jp">' + esc(x.w.jp) + '</div>' + (x.w.kk && x.w.kk !== x.w.jp ? '<div>' + esc(x.w.kk) + '</div>' : '') + (x.w.ro ? '<div class="vq-ro">' + esc(x.w.ro) + '</div>' : '') + '<div>' + esc(x.w.fr) + '</div></div>';
       if (x.k === 'r') {
         var m = M.p.filter(function (o) { return o.r === x.r; });
         return '<div class="vq-ans"><div class="vq-jp">' + esc(M.reg[x.r][0]) + '</div><div class="vq-ro">' + esc(M.reg[x.r][1]) + '</div><div>' + m.map(function (o) { return esc(o.n); }).join('・') + '</div></div>';
@@ -165,11 +189,11 @@
       dayHit(good, 'g');
       var GS = ST.gqs = ST.gqs || { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }; GS.q++; if (good) GS.ok++;
       var GT0 = GS.ty[it.t] = GS.ty[it.t] || { n: 0, ok: 0 }; GT0.n++; if (good) GT0.ok++;
-      var rk0 = x.k === 'r' ? x.r : x.o.r, GR = (GS.rg = GS.rg || {})[rk0] = (GS.rg[rk0] || { n: 0, ok: 0 }); GR.n++; if (good) GR.ok++;
+      var rk0 = x.k === 'r' ? x.r : x.k === 'w' ? 'w' : x.o.r, GR = (GS.rg = GS.rg || {})[rk0] = (GS.rg[rk0] || { n: 0, ok: 0 }); GR.n++; if (good) GR.ok++;
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.gq[x.i] = st; save();
       var last = Q.i + 1 >= Q.items.length;
-      $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
+      $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' || x.k === 'w' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
         '<div class="fbb">' + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + x.i + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -177,7 +201,7 @@
       if (!Q.done) { Q.done = true; (ST.gqs = ST.gqs || { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }).sess++; save(); }
       barI.style.width = '100%'; prog.textContent = '';
       var n = Q.items.length, pct = Math.round(Q.ok / n * 100), secs = Math.round((Date.now() - Q.t0) / 1000);
-      var list = Q.wrongList.map(function (w) { var x = byI[w.i]; return '<div class="q-miss"><span class="vq-mj">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.n) + '</span><span>' + esc(x.k === 'r' ? M.reg[x.r][1] : x.o.ro) + '<small>' + esc(x.k === 'r' ? '' : rl(x.o.r)) + '</small></span></div>'; }).join('');
+      var list = Q.wrongList.map(function (w) { var x = byI[w.i]; return '<div class="q-miss"><span class="vq-mj">' + esc(nm(x)) + '</span><span>' + esc(rn(x)) + '<small>' + esc(x.k === 'p' ? rl(x.o.r) : '') + '</small></span></div>'; }).join('');
       body.scrollTop = 0; body.innerHTML = '<div class="q-score"><div class="n">' + Q.ok + '<small> / ' + n + '</small></div><div class="p">' + pct + ' % · ' + Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s</div></div>' +
         (list ? '<h4 class="q-h">À revoir (' + Q.wrongList.length + ')</h4><div class="q-miss-list">' + list + '</div>' : '<p class="conj-note">Sans faute. Bravo.</p>') +
         '<div class="q-end">' + (list ? '<button type="button" class="qgo" id="g-again">Refaire les ratés</button>' : '') + '<button type="button" class="mini" id="g-new">Nouveau quiz</button><button type="button" class="mini" id="g-close">Fermer</button></div>';

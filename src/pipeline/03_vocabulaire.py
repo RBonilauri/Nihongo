@@ -12,19 +12,19 @@ def vocab_json(html):
         out.append({'i': _hl.md5((fr + '|' + jp).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''})
     for sec in soup.select('details.sec'):
         head = sec.summary.get_text(' ', strip=True).split()[0]
-        cat = 'Vocabulaire' if head == '地理' else ('Expressions' if head == '動詞' else _CAT.get(head))
+        cat = 'Géographie' if head == '地理' else ('Expressions' if head == '動詞' else _CAT.get(head))
         if not cat: continue
         for d in sec.select('details.sub'):
             if head == '地理' and not d.summary.get_text(' ', strip=True).startswith(('国', '島と海')): continue
             if head == '動詞' and not d.summary.get_text(' ', strip=True).startswith('表現'): continue
-            cat = 'Vocabulaire' if head == '地理' else ('Expressions' if head == '動詞' else _CAT.get(head))
+            cat = 'Géographie' if head == '地理' else ('Expressions' if head == '動詞' else _CAT.get(head))
             g = cat + ':' + d.summary.get_text(' ', strip=True).split()[0]
             isv = (cat == 'Vocabulaire' and g.endswith(':動詞'))
             for tb in d.select('table'):
                 if isv:
                     vg = tb.find_parent('details', class_='vgrp'); vt = vg.select_one('.vg-t') if vg else None
                     hh = vt or tb.find_previous('div', class_='section-title'); cat, g = 'Verbes', 'Verbes:' + (hh.get_text(strip=True) if hh else 'Divers')
-                else: cat = 'Vocabulaire' if head == '地理' else _CAT.get(head)
+                else: cat = 'Géographie' if head == '地理' else _CAT.get(head)
                 hd = [th.get_text(strip=True) for th in tb.select('thead th')]
                 rows = [[td.get_text(' ', strip=True) for td in tr.find_all(['td', 'th'], recursive=False)] for tr in tb.select('tbody tr')]
                 _st = d.summary.get_text(' ', strip=True)
@@ -88,4 +88,8 @@ def vocab_json(html):
     print('vocab', len(out), cats)
     return _json.dumps(out, ensure_ascii=False, separators=(',', ':'))
 _VJ = vocab_json(main)
+_vall = _json.loads(_VJ)
+_GW = _json.dumps([x for x in _vall if x['c'] == 'Géographie'], ensure_ascii=False, separators=(',', ':'))
+_VJ = _json.dumps([x for x in _vall if x['c'] != 'Géographie'], ensure_ascii=False, separators=(',', ':'))
+print('mots de géographie', len(_json.loads(_GW)))
 
