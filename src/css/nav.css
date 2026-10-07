@@ -113,3 +113,21 @@
 
   /* pas d'affichage de la page « brute » pendant le chargement */
   html.boot main { visibility: hidden; }
+
+  /* compte à rebours du voyage */
+  .ntrip { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; padding: .8rem .9rem .7rem; margin: 0 0 .8rem; }
+  .ntrip .tr-h { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; font-size: .9rem; }
+  .ntrip .tr-h span { font-size: .72rem; color: var(--muted); }
+  .ntrip .tr-n { display: flex; align-items: baseline; gap: .6rem; margin: .35rem 0 .1rem; }
+  .ntrip .tr-n b { font-family: 'DM Mono', monospace; font-size: 1.9rem; color: var(--red); line-height: 1.1; }
+  .ntrip .tr-n small, .ntrip .tr-s { color: var(--muted); font-size: .72rem; }
+  .ntrip p.tr-s { margin: .4rem 0 .5rem; }
+  .ntrip .tr-bar { position: relative; height: 22px; margin: .5rem .7rem .3rem .2rem; }
+  .ntrip .tr-bar::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px dashed var(--border); }
+  .ntrip .tr-bar i { position: absolute; left: 0; top: 50%; height: 0; border-top: 2px solid var(--gold); transition: width .4s; }
+  .ntrip .tr-bar span { position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; color: var(--red); display: flex; transition: left .4s; }
+  .ntrip .tr-bar::after { content: '🇯🇵'; position: absolute; right: -.7rem; top: 50%; transform: translateY(-50%); font-size: .95rem; }
+  .trip-pick { display: flex; gap: .4rem; align-items: center; }
+  .trip-pick input { font: inherit; font-size: .8rem; padding: .25rem .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 8.6rem; min-width: 0; }
+  .row .lab.nosh { flex-shrink: 0; }
+  .trip-pick input { max-width: 6.8rem; font-size: .72rem; }

@@ -10,11 +10,12 @@
     document.documentElement.classList.toggle('aid-hide', !!ST.aid);
   }
   function buildSettings() {
-    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), silB = document.getElementById('sw-silent'), fsv = document.getElementById('fs-val');
+    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), silB = document.getElementById('sw-silent'), fsv = document.getElementById('fs-val'), tripB = document.getElementById('sw-trip'), tripD = document.getElementById('trip-date');
     function paint() {
       aidB.setAttribute('aria-checked', ST.aid ? 'true' : 'false');
       recB.setAttribute('aria-checked', ST.showRec ? 'true' : 'false');
       silB.setAttribute('aria-checked', ST.silent ? 'true' : 'false');
+      tripB.setAttribute('aria-checked', ST.trip.show ? 'true' : 'false'); tripD.value = ST.trip.d || '';
       fsv.textContent = Math.round(ST.fs * 100) + ' %';
     }
     paint();
@@ -23,6 +24,10 @@
     document.getElementById('fs+').addEventListener('click', function () { ST.fs = Math.min(1.4, Math.round((ST.fs + 0.1) * 100) / 100); save(); applyPrefs(); paint(); });
     aidB.addEventListener('click', function () { ST.aid = !ST.aid; save(); applyPrefs(); paint(); });
     silB.addEventListener('click', function () { ST.silent = !ST.silent; save(); paint(); toast(ST.silent ? 'Mode silencieux : les quiz n’auront plus de questions d’écoute.' : 'Questions d’écoute réactivées.'); });
+    function homeNow() { if (NAV[NAV.length - 1].v === 'home') navRender(); }
+    tripB.addEventListener('click', function () { ST.trip.show = !ST.trip.show; save(); paint(); homeNow(); });
+    tripD.addEventListener('change', function () { ST.trip.d = tripD.value || ''; ST.trip.s = ST.trip.d ? ymd(Date.now()) : ''; if (ST.trip.d) ST.trip.show = true; save(); paint(); homeNow(); if (ST.trip.d) toast('Compte à rebours mis à jour.'); });
+    document.getElementById('trip-clear').addEventListener('click', function () { ST.trip.d = ''; ST.trip.s = ''; save(); paint(); homeNow(); });
     recB.addEventListener('click', function () { ST.showRec = !ST.showRec; save(); renderHome(); paint(); });
     document.getElementById('rec-clear').addEventListener('click', function () { ST.rec = []; save(); renderHome(); toast('Historique vidé.'); });
     document.getElementById('exp').addEventListener('click', function () {

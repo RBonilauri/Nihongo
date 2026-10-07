@@ -844,6 +844,24 @@ table.stack td.kdup > * { display: none; }
 
   /* pas d'affichage de la page « brute » pendant le chargement */
   html.boot main { visibility: hidden; }
+
+  /* compte à rebours du voyage */
+  .ntrip { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; padding: .8rem .9rem .7rem; margin: 0 0 .8rem; }
+  .ntrip .tr-h { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; font-size: .9rem; }
+  .ntrip .tr-h span { font-size: .72rem; color: var(--muted); }
+  .ntrip .tr-n { display: flex; align-items: baseline; gap: .6rem; margin: .35rem 0 .1rem; }
+  .ntrip .tr-n b { font-family: 'DM Mono', monospace; font-size: 1.9rem; color: var(--red); line-height: 1.1; }
+  .ntrip .tr-n small, .ntrip .tr-s { color: var(--muted); font-size: .72rem; }
+  .ntrip p.tr-s { margin: .4rem 0 .5rem; }
+  .ntrip .tr-bar { position: relative; height: 22px; margin: .5rem .7rem .3rem .2rem; }
+  .ntrip .tr-bar::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px dashed var(--border); }
+  .ntrip .tr-bar i { position: absolute; left: 0; top: 50%; height: 0; border-top: 2px solid var(--gold); transition: width .4s; }
+  .ntrip .tr-bar span { position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; color: var(--red); display: flex; transition: left .4s; }
+  .ntrip .tr-bar::after { content: '🇯🇵'; position: absolute; right: -.7rem; top: 50%; transform: translateY(-50%); font-size: .95rem; }
+  .trip-pick { display: flex; gap: .4rem; align-items: center; }
+  .trip-pick input { font: inherit; font-size: .8rem; padding: .25rem .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 8.6rem; min-width: 0; }
+  .row .lab.nosh { flex-shrink: 0; }
+  .trip-pick input { max-width: 6.8rem; font-size: .72rem; }
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -996,6 +1014,8 @@ table.stack td.kdup > * { display: none; }
 <div class="row"><span class="lab">Masquer romaji et traductions<small>Flou, touche pour révéler</small></span><button class="sw" id="sw-aid" type="button" role="switch" aria-checked="false" aria-label="Masquer romaji et traductions"><i></i></button></div>
 <div class="row"><span class="lab">Mode silencieux (métro, bureau)<small>Pas de questions d’écoute dans les quiz</small></span><button class="sw" id="sw-silent" type="button" role="switch" aria-checked="false" aria-label="Mode silencieux"><i></i></button></div>
 <div class="row"><span class="lab">Afficher les récents<small>Les 3 dernières sections ouvertes</small></span><button class="sw" id="sw-rec" type="button" role="switch" aria-checked="true" aria-label="Afficher les récents"><i></i></button></div>
+<div class="row"><span class="lab">Compte à rebours du voyage<small>Carte d’accueil avec un petit avion</small></span><button class="sw" id="sw-trip" type="button" role="switch" aria-checked="true" aria-label="Afficher le compte à rebours"><i></i></button></div>
+<div class="row"><span class="lab nosh">Départ</span><span class="trip-pick"><input type="date" id="trip-date" aria-label="Date de départ"><button class="mini" id="trip-clear" type="button">Effacer</button></span></div>
 <div class="row"><span class="lab">Historique des récents</span><button class="mini" id="rec-clear" type="button">Vider</button></div>
 </section>
 <section class="dr-card"><h4>Données</h4>
@@ -5511,7 +5531,7 @@ table.stack td.kdup > * { display: none; }
   }
 
   /* ── état persistant ── */
-  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, silent: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -5527,6 +5547,23 @@ table.stack td.kdup > * { display: none; }
       try { toast('Objectif du jour atteint 🎉'); } catch (e) {}
     }
     save();
+  }
+  /* ── compte à rebours du voyage (date réglable, avion comme barre de progression) ── */
+  function ymd(t) { var d = new Date(t); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function dayNum(k) { var a = String(k).split('-'); return Math.round(Date.UTC(+a[0], +a[1] - 1, +a[2]) / 864e5); }
+  var PLANE = '<svg class="tr-plane" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg>';
+  function tripCard() {
+    var T = ST.trip || {}; if (!T.show) return '';
+    if (!T.d) return '<div class="ntrip"><div class="tr-h"><b>Voyage au Japon</b></div><p class="tr-s">Choisis ta date de départ pour lancer le compte à rebours.</p><button type="button" class="mini" data-act="trip-set">Choisir la date</button></div>';
+    var today = dayNum(ymd(Date.now())), end = dayNum(T.d), start = dayNum(T.s || ymd(Date.now())), left = end - today;
+    if (left < 0) return '';
+    var span = Math.max(1, end - start), f = Math.max(0, Math.min(1, (today - start) / span)), pct = Math.round(f * 100);
+    var dt = new Date(T.d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    var big = left === 0 ? 'C’est aujourd’hui !' : 'J-' + left;
+    var sub = left === 0 ? 'Bon voyage !' : (left === 1 ? 'jour avant le départ' : 'jours avant le départ');
+    return '<div class="ntrip"><div class="tr-h"><b>Voyage au Japon</b><span>' + dt + '</span></div><div class="tr-n"><b>' + big + '</b><small>' + sub + '</small></div>' +
+      '<div class="tr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i><span style="left:' + pct + '%">' + PLANE + '</span></div>' +
+      '<small class="tr-s">' + pct + ' % du chemin parcouru</small></div>';
   }
   function dayCard() {
     var D = dayState(), g = ST.goal, p = Math.min(100, Math.round(D.n * 100 / g)), y = dkey(Date.now() - 864e5);
@@ -5978,11 +6015,12 @@ table.stack td.kdup > * { display: none; }
     document.documentElement.classList.toggle('aid-hide', !!ST.aid);
   }
   function buildSettings() {
-    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), silB = document.getElementById('sw-silent'), fsv = document.getElementById('fs-val');
+    var aidB = document.getElementById('sw-aid'), recB = document.getElementById('sw-rec'), silB = document.getElementById('sw-silent'), fsv = document.getElementById('fs-val'), tripB = document.getElementById('sw-trip'), tripD = document.getElementById('trip-date');
     function paint() {
       aidB.setAttribute('aria-checked', ST.aid ? 'true' : 'false');
       recB.setAttribute('aria-checked', ST.showRec ? 'true' : 'false');
       silB.setAttribute('aria-checked', ST.silent ? 'true' : 'false');
+      tripB.setAttribute('aria-checked', ST.trip.show ? 'true' : 'false'); tripD.value = ST.trip.d || '';
       fsv.textContent = Math.round(ST.fs * 100) + ' %';
     }
     paint();
@@ -5991,6 +6029,10 @@ table.stack td.kdup > * { display: none; }
     document.getElementById('fs+').addEventListener('click', function () { ST.fs = Math.min(1.4, Math.round((ST.fs + 0.1) * 100) / 100); save(); applyPrefs(); paint(); });
     aidB.addEventListener('click', function () { ST.aid = !ST.aid; save(); applyPrefs(); paint(); });
     silB.addEventListener('click', function () { ST.silent = !ST.silent; save(); paint(); toast(ST.silent ? 'Mode silencieux : les quiz n’auront plus de questions d’écoute.' : 'Questions d’écoute réactivées.'); });
+    function homeNow() { if (NAV[NAV.length - 1].v === 'home') navRender(); }
+    tripB.addEventListener('click', function () { ST.trip.show = !ST.trip.show; save(); paint(); homeNow(); });
+    tripD.addEventListener('change', function () { ST.trip.d = tripD.value || ''; ST.trip.s = ST.trip.d ? ymd(Date.now()) : ''; if (ST.trip.d) ST.trip.show = true; save(); paint(); homeNow(); if (ST.trip.d) toast('Compte à rebours mis à jour.'); });
+    document.getElementById('trip-clear').addEventListener('click', function () { ST.trip.d = ''; ST.trip.s = ''; save(); paint(); homeNow(); });
     recB.addEventListener('click', function () { ST.showRec = !ST.showRec; save(); renderHome(); paint(); });
     document.getElementById('rec-clear').addEventListener('click', function () { ST.rec = []; save(); renderHome(); toast('Historique vidé.'); });
     document.getElementById('exp').addEventListener('click', function () {
@@ -7431,7 +7473,7 @@ table.stack td.kdup > * { display: none; }
     if (st.s) { st.s.open = true; st.s.classList.add('cur'); }
     if (st.d) { st.d.open = true; st.d.classList.add('cur'); var rid = Object.keys(subMap).filter(function (k) { return subMap[k].sub === st.d; })[0]; if (rid) { ST.rec = [rid].concat(ST.rec.filter(function (x) { return x !== rid; })).slice(0, 3); save(); renderHome(); } }
     if (v === 'home') {
-      h = dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
+      h = tripCard() + dayCard() + '<div class="nhero"><div class="nh-t">DÉMARRER</div><div class="nh-b">Quiz général</div><p>Un mélange de tous les thèmes, à ton rythme.</p><button type="button" class="ngo" data-act="mix">Lancer un quiz</button></div>' +
         '<div class="nrow"><button type="button" data-act="learn"><i>📚</i>Apprendre</button><button type="button" data-act="quiz"><i>❓</i>Tous les quiz</button></div>' +
         '<button type="button" class="nstats" data-act="stats"><i>📈</i>Ma progression<small>Réussite, jours actifs, points faibles</small></button>';
     } else if (v === 'search') { title = ['日本語', 'Recherche'];
@@ -7477,6 +7519,7 @@ table.stack td.kdup > * { display: none; }
       else if (b.dataset.act === 'quiz') navReset('quiz');
       else if (b.dataset.act === 'stats') navPush({ v: 'stats' });
       else if (b.dataset.act === 'mix') launchQuiz('Quiz général');
+      else if (b.dataset.act === 'trip-set') document.getElementById('menu').click();
     });
     // une sous-rubrique affichée comme page reste ouverte
     navMain.addEventListener('click', function (e) { var sm = e.target.closest('details.sub.cur > summary'); if (sm && !e.target.closest('button')) e.preventDefault(); }, true);

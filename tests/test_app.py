@@ -180,6 +180,17 @@ with sync_playwright() as p:
     check(pg.evaluate("!!document.querySelector('.nday .nd-bar i')"), 'carte objectif du jour sur l’accueil')
     check(pg.evaluate("(document.querySelector('.nday .nd-h span')||{}).textContent") .startswith('%d / 20' % min(st['n'], 20)), 'compteur affiché cohérent')
 
+    print('Compte à rebours')
+    pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
+    check(pg.evaluate("!!document.querySelector('.ntrip [data-act=trip-set]')"), 'sans date : invitation à choisir la date')
+    pg.click('#menu'); pg.wait_for_timeout(400)
+    pg.fill('#trip-date', '2099-01-01'); pg.dispatch_event('#trip-date', 'change'); pg.wait_for_timeout(300)
+    pg.click('#dr-close'); pg.wait_for_timeout(400)
+    check(pg.evaluate("(document.querySelector('.ntrip .tr-n b')||{}).textContent||''").startswith('J-') and pg.evaluate("!!document.querySelector('.ntrip .tr-plane')"), 'date choisie : J-xxx et avion affichés')
+    pg.click('#menu'); pg.wait_for_timeout(400); pg.click('#sw-trip'); pg.click('#dr-close'); pg.wait_for_timeout(400)
+    check(pg.evaluate("!document.querySelector('.ntrip')"), 'option « masquer » : la carte disparaît')
+    pg.click('#menu'); pg.wait_for_timeout(400); pg.click('#sw-trip'); pg.click('#trip-clear'); pg.click('#dr-close'); pg.wait_for_timeout(300)
+
     print('Ma progression')
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
     pg.click('.nstats'); pg.wait_for_timeout(300)

@@ -1,5 +1,5 @@
   /* ── état persistant ── */
-  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, silent: false, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -15,6 +15,23 @@
       try { toast('Objectif du jour atteint 🎉'); } catch (e) {}
     }
     save();
+  }
+  /* ── compte à rebours du voyage (date réglable, avion comme barre de progression) ── */
+  function ymd(t) { var d = new Date(t); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function dayNum(k) { var a = String(k).split('-'); return Math.round(Date.UTC(+a[0], +a[1] - 1, +a[2]) / 864e5); }
+  var PLANE = '<svg class="tr-plane" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg>';
+  function tripCard() {
+    var T = ST.trip || {}; if (!T.show) return '';
+    if (!T.d) return '<div class="ntrip"><div class="tr-h"><b>Voyage au Japon</b></div><p class="tr-s">Choisis ta date de départ pour lancer le compte à rebours.</p><button type="button" class="mini" data-act="trip-set">Choisir la date</button></div>';
+    var today = dayNum(ymd(Date.now())), end = dayNum(T.d), start = dayNum(T.s || ymd(Date.now())), left = end - today;
+    if (left < 0) return '';
+    var span = Math.max(1, end - start), f = Math.max(0, Math.min(1, (today - start) / span)), pct = Math.round(f * 100);
+    var dt = new Date(T.d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    var big = left === 0 ? 'C’est aujourd’hui !' : 'J-' + left;
+    var sub = left === 0 ? 'Bon voyage !' : (left === 1 ? 'jour avant le départ' : 'jours avant le départ');
+    return '<div class="ntrip"><div class="tr-h"><b>Voyage au Japon</b><span>' + dt + '</span></div><div class="tr-n"><b>' + big + '</b><small>' + sub + '</small></div>' +
+      '<div class="tr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i><span style="left:' + pct + '%">' + PLANE + '</span></div>' +
+      '<small class="tr-s">' + pct + ' % du chemin parcouru</small></div>';
   }
   function dayCard() {
     var D = dayState(), g = ST.goal, p = Math.min(100, Math.round(D.n * 100 / g)), y = dkey(Date.now() - 864e5);
