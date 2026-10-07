@@ -232,7 +232,7 @@ with sync_playwright() as p:
         Q = '.quiz:not([hidden])'; go = pg.query_selector(Q + ' .qgo'); e = a = 0
         if go and not go.is_disabled():
             go.click(); pg.wait_for_timeout(200)
-            for _ in range(30):
+            for _ in range(12):
                 if not pg.query_selector(Q + ' .qopt'): break
                 if pg.query_selector(Q + ' .vq-ear'):
                     e += 1; a += 1 if pg.query_selector(Q + ' .ear-alt .ear-show') else 0

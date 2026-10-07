@@ -1,3 +1,4 @@
+  var REGK = { hok: 'ほっかいどう', toh: 'とうほく', kan: 'かんとう', chu: 'ちゅうぶ', kin: 'きんき', chg: 'ちゅうごく', shi: 'しこく', kyu: 'きゅうしゅう・おきなわ' };
   /* ── carte du Japon ── */
   var JPM = null, JPCOL = ['#e69f00', '#56b4e9', '#009e73', '#f0e442', '#0072b2', '#d55e00', '#cc79a7', '#9a9a9a'];
   function jpm() {
@@ -63,12 +64,12 @@
     function showPref(n) {
       var o = M.by[n], r = M.reg[o.r]; selN = n; selR = o.r; paint();
       card.innerHTML = '<div class="jm-h"><span class="jm-k">' + esc(o.n) + '</span><span class="jm-ka">' + esc(o.k) + '</span><span class="jm-ro">' + esc(o.ro) + '</span></div>' +
-        '<div class="jm-l"><b>Région</b> ' + esc(r[0]) + ' · ' + esc(r[1]) + '</div><div class="jm-l"><b>Chef-lieu</b> ' + esc(o.cap) + (o.cap !== o.capk ? ' (' + esc(o.capk) + ')' : '') + ' · ' + esc(o.capr) + '</div>' +
+        '<div class="jm-l"><b>Région</b> ' + esc(r[0]) + ' (' + esc(REGK[o.r] || '') + ') · ' + esc(r[1]) + '</div><div class="jm-l"><b>Chef-lieu</b> ' + esc(o.cap) + (o.cap !== o.capk ? ' (' + esc(o.capk) + ')' : '') + ' · ' + esc(o.capr) + '</div>' +
         '<div class="jm-l"><b>À retenir</b> ' + esc(o.sp) + '</div>' + (window.speechSynthesis ? '<button type="button" class="mini jm-say" data-t="' + esc(o.k) + '">🔊 Écouter</button>' : '');
     }
     function showReg(r) {
       selR = r; selN = null; paint(); var m = M.p.filter(function (o) { return o.r === r; });
-      card.innerHTML = '<div class="jm-h"><span class="jm-k">' + esc(M.reg[r][0]) + '</span><span class="jm-ro">' + esc(M.reg[r][1]) + '</span></div>' +
+      card.innerHTML = '<div class="jm-h"><span class="jm-k">' + esc(M.reg[r][0]) + '</span><span class="jm-ka">' + esc(REGK[r] || '') + '</span><span class="jm-ro">' + esc(M.reg[r][1]) + '</span></div>' +
         '<div class="jm-l"><b>' + m.length + ' préfecture' + (m.length > 1 ? 's' : '') + '</b></div><div class="jm-ps">' + m.map(function (o) { return '<button type="button" class="jm-pb" data-n="' + o.n + '"><span>' + esc(o.n) + '</span><small>' + esc(o.ro) + '</small></button>'; }).join('') + '</div>';
     }
     svg.addEventListener('click', function (e) { if (moved) { moved = false; return; } var p = e.target.closest && e.target.closest('.jm-p'); if (p) showPref(p.dataset.n); });

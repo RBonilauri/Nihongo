@@ -194,12 +194,13 @@ def geo_section():
     rows.sort(key=lambda r: order[r[0]])
     reg_rows = []
     for r, (jp, ro) in M['reg'].items():
-        reg_rows.append([jp + ('地方' if r not in ('hok',) and False else ''), ro, '・'.join(o['n'] for o in M['p'] if o['r'] == r)])
+        _kr = {'hok': 'ほっかいどう', 'toh': 'とうほく', 'kan': 'かんとう', 'chu': 'ちゅうぶ', 'kin': 'きんき', 'chg': 'ちゅうごく', 'shi': 'しこく', 'kyu': 'きゅうしゅう・おきなわ'}
+        reg_rows.append([jp, _kr[r], ro, '・'.join(o['n'] for o in sorted((q for q in M['p'] if q['r'] == r), key=lambda q: order[q['n']])), '・'.join(pk[o['n']] for o in sorted((q for q in M['p'] if q['r'] == r), key=lambda q: order[q['n']]))])
     return {'id': 'chiri', 'jp': '地理', 'label': 'Géographie', 'replace': None, 'after': '時間',
       'intro': 'Les 47 préfectures et les 8 régions du Japon, avec une carte interactive et un quiz dédié (Quiz géographie, aussi dans le Quiz général).',
       'subs': [
         sub('地図 — Carte interactive du Japon', 'Touche une préfecture pour voir son nom en japonais, son chef-lieu et ce qu’il faut en retenir. Touche une région pour en voir toutes les préfectures. Les boutons + et − zooment, et tu peux déplacer la carte une fois zoomée.', [{'t': 'p', 'text': '[[JPMAP]]'}]),
         sub('都道府県 — Les 47 préfectures', 'Chaque préfecture avec sa lecture, sa région et son chef-lieu.', [C2.kanji_table(rows)]),
-        sub('地方 — Les 8 régions', 'Les régions et les préfectures qui les composent.', [T(['Région', 'Rōmaji', 'Préfectures'], reg_rows, jp=(0, 2), ro=(1,))]),
+        sub('地方 — Les 8 régions', 'Les régions et les préfectures qui les composent.', [T(['Région', 'Kana', 'Rōmaji', 'Préfectures', 'Lectures'], reg_rows, jp=(0, 1, 3, 4), ro=(2,))]),
         sub('島と海 — Îles, mers et grandes zones', 'Îles principales, mers et zones souvent citées (Kansai, Kantō…).', [C2.kanji_table([r for r in REGIONS if not r[0].endswith('地方')])]),
       ]}
