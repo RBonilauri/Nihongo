@@ -62,7 +62,9 @@ def vocab_json(html):
                             if len(c) >= 4: add(cat, g, (c[3] + ' (' + c[0] + ')') if hd[3] == 'Sens' else (ptx.split(' — ')[0] + ' : ' + c[0]), c[1].replace(' Kanji', ''), c[2], '')
                     elif hd[:1] == ['Suffixe']:
                         for c in rows:
-                            if len(c) >= 3: add(cat, g, 'Suffixe ' + c[2].lower(), c[0], '', '')
+                            if len(c) >= 3:
+                                _lab = {'さん': 'Suffixe neutre (standard, M. / Mme)', '先生': 'Suffixe de respect pour professeurs, médecins, avocats', '様': 'Suffixe très formel (courrier, clients)', '氏': 'Suffixe formel écrit (presse, documents officiels)'}.get(c[0], 'Suffixe ' + c[2].lower())
+                                add(cat, g, _lab, c[0], '', '')
                     continue
                 if head == '形容詞' and hd[:1] == ['Forme'] and len(hd) == 3 and 'adj' in hd[1]:
                     for c in rows:
