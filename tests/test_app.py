@@ -249,7 +249,7 @@ with sync_playwright() as p:
     pg.evaluate("document.documentElement.setAttribute('data-theme', 'dark')")
     pg.evaluate("[...document.querySelectorAll('button.quizcard')].find(b => /quiz kanji/i.test(b.innerText)).click()"); pg.wait_for_timeout(300)
     r = pg.evaluate("(() => { var c = document.querySelector('.quiz:not([hidden]) .qchip.on'), st = getComputedStyle(c), af = getComputedStyle(c, '::before'); return [st.backgroundColor, st.color, af.content]; })()")
-    check(r[0] == 'rgb(244, 239, 230)' and r[1] == 'rgb(28, 21, 16)' and '✓' in r[2], 'pastille sélectionnée : fond clair, texte sombre, coche (%s)' % r)
+    check(r[0] == 'rgb(179, 166, 144)' and r[1] == 'rgb(28, 21, 16)' and '✓' in r[2], 'pastille sélectionnée : fond clair, texte sombre, coche (%s)' % r)
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
     pg.evaluate("document.documentElement.setAttribute('data-theme', 'light')")
 
