@@ -197,7 +197,7 @@
       save();
       var last = Q.i + 1 >= Q.items.length;
       $('v-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
-        '<div class="vq-ans"><div class="vq-jp">' + esc(x.jp) + '</div>' + (x.ka ? '<div>' + esc(x.ka) + '</div>' : '') + (x.ro ? '<div class="vq-ro">' + esc(x.ro) + '</div>' : '') + '<div><b>' + esc(x.fr) + '</b></div></div>' + jpMini(x) +
+        '<div class="vq-ans"><div class="vq-jp">' + esc(x.jp) + '</div>' + (x.ka ? '<div>' + esc(x.ka) + '</div>' : '') + (x.ro ? '<div class="vq-ro">' + esc(x.ro) + '</div>' : '') + '<div><b>' + esc(x.fr) + '</b></div></div>' + jpMini(x) + (x.ex ? '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(x.ex[0]) + '</div><div class="vq-exfr">' + esc(x.ex[1]) + '</div></div>' : '') +
         '<div class="fbb">' + (canSpeak && earOK(x) ? '<button type="button" class="mini" id="v-say" data-id="' + x.i + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="v-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('v-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }

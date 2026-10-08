@@ -1,6 +1,7 @@
 # Données JSON du vocabulaire
 # Exécuté par build.py dans un espace de noms partagé (variables main, css, js…).
 import hashlib as _hl
+from outils_exemples import EX as _OX
 _CAT = {'旅行': 'Voyage', '会話': 'Conversation', '敬語': 'Keigo', '語彙': 'Vocabulaire', '常用': 'Vocabulaire', '時間': 'Temps', '形容詞': 'Adjectifs', '道具': 'Outils', '表現': 'Expressions', '助詞': 'Particules'}
 def vocab_json(html):
     soup = _BS(html, 'html.parser'); out = []; seen = set()
@@ -9,7 +10,12 @@ def vocab_json(html):
         if not fr or not jp or len(jp) > 45 or len(fr) > 70 or (fr, jp) in seen: return
         if (jp.startswith('〜') and not tilde) or fr.startswith('-'): return
         seen.add((fr, jp))
-        out.append({'i': _hl.md5((fr + '|' + jp).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''})
+        _it = {'i': _hl.md5((fr + '|' + jp).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''}
+        if g.startswith('Outils:'):
+            _sub = g.split(':', 1)[1]
+            _e = _OX.get(_sub + '|' + jp + '|' + _it['kk']) or _OX.get(_sub + '|' + jp)
+            if _e: _it['ex'] = list(_e)
+        out.append(_it)
     for sec in soup.select('details.sec'):
         head = sec.summary.get_text(' ', strip=True).split()[0]
         cat = 'Géographie' if head == '地理' else ('Expressions' if head == '動詞' else _CAT.get(head))
@@ -64,7 +70,7 @@ def vocab_json(html):
                         for c in rows:
                             if len(c) >= 3:
                                 _lab = {'さん': 'Suffixe neutre (standard, M. / Mme)', '先生': 'Suffixe de respect pour professeurs, médecins, avocats', '様': 'Suffixe très formel (courrier, clients)', '氏': 'Suffixe formel écrit (presse, documents officiels)'}.get(c[0], 'Suffixe ' + c[2].lower())
-                                add(cat, g, _lab, c[0], '', '')
+                                add(cat, g, _lab, c[0], (c[1] if c[1] != c[0] else ''), '')
                     continue
                 if head == '形容詞' and hd[:1] == ['Forme'] and len(hd) == 3 and 'adj' in hd[1]:
                     for c in rows:

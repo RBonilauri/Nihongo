@@ -270,6 +270,10 @@ with sync_playwright() as p:
         return all.filter(f => !strip(f)).length; }""")
     check(leak == 0, 'aucune traduction française vide une fois les indices japonais retirés (%s)' % leak)
 
+    print('Outils : exemples d’utilisation')
+    ox = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => x.g.startsWith('Outils:')); return [v.length, v.filter(x => !x.ex || !x.ex[0] || !x.ex[1]).length]; }""")
+    check(ox[0] >= 141 and ox[1] == 0, 'chaque mot Outils a un exemple (%s)' % ox)
+
     print('Grammaire N4 / N3')
     gn = pg.evaluate("""() => ['N4','N3'].map(j => { const s = [...document.querySelectorAll('main > details.sec')].find(d => d.querySelector(':scope > summary .jp').textContent.trim() === j); return s ? [s.querySelectorAll(':scope > .sec-body > details.sub').length, s.querySelectorAll('tbody tr').length] : null; })""")
     check(gn[0] and gn[1] and gn[0][0] >= 8 and gn[1][0] >= 8 and gn[0][1] >= 60 and gn[1][1] >= 70, 'pages Grammaire N4 et N3 présentes %s' % gn)
