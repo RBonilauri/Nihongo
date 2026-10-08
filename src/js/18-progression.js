@@ -1,12 +1,28 @@
 
   /* ═══════════ PAGE « MA PROGRESSION » ═══════════ */
+  var RANGES = { '7': '7 derniers jours', '15': '15 derniers jours', '30': '30 derniers jours', 'month': 'Mois en cours' };
+  function rangeKey() { return RANGES[ST.range] ? ST.range : '7'; }
+  function rangeTitle() { var k = rangeKey(); return k === 'month' ? 'Mois de ' + new Date().toLocaleDateString('fr-FR', { month: 'long' }) : RANGES[k]; }
+  function buildDays(H) {
+    var DN = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'], k = rangeKey(), now = new Date(), list = [], out = { days: [], mx: 1, n: 0, ok: 0 };
+    if (k === 'month') { var last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); for (var d = 1; d <= last; d++) list.push({ t: new Date(now.getFullYear(), now.getMonth(), d, 12).getTime(), f: d > now.getDate() }); }
+    else { var N = +k; for (var i = N - 1; i >= 0; i--) list.push({ t: Date.now() - i * 864e5, f: false }); }
+    list.forEach(function (e, idx) {
+      var dt = new Date(e.t), v = e.f ? { n: 0, ok: 0 } : (H[dkey(e.t)] || { n: 0, ok: 0 });
+      out.mx = Math.max(out.mx, v.n); out.n += v.n; out.ok += v.ok;
+      out.days.push({ l: list.length > 8 ? String(dt.getDate()) : DN[dt.getDay()], n: v.n, ok: v.ok, f: e.f, today: !e.f && (k === 'month' ? dt.getDate() === now.getDate() : idx === list.length - 1) });
+    });
+    return out;
+  }
   /* graphique des 7 jours : barres ou points reliés (réglage ST.chart) */
   function chartHtml(days, mx) {
-    if (ST.chart !== 'line') return days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('');
-    var N = days.length, pt = days.map(function (d, i) { return { x: (i + .5) * 100 / N, y: 100 - d.n * 78 / mx, d: d }; });
-    return '<div class="pg-line"><div class="pg-plot"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline vector-effect="non-scaling-stroke" points="' + pt.map(function (q) { return q.x.toFixed(1) + ',' + q.y.toFixed(1); }).join(' ') + '"/></svg>' +
-      pt.map(function (q) { return '<span class="pg-pt' + (q.d.today ? ' today' : '') + '" style="left:' + q.x.toFixed(1) + '%;top:' + q.y.toFixed(1) + '%"></span>' + (q.d.n ? '<span class="pg-pn" style="left:' + q.x.toFixed(1) + '%;top:' + q.y.toFixed(1) + '%">' + q.d.n + '</span>' : ''); }).join('') + '</div>' +
-      '<div class="pg-axis">' + pt.map(function (q) { return '<span class="pg-l' + (q.d.today ? ' today' : '') + '">' + q.d.l + '</span>'; }).join('') + '</div></div>';
+    var N = days.length, dense = N > 8, step = N > 20 ? 5 : N > 8 ? 3 : 1;
+    function lab(d, i, cls) { var show = !dense || i % step === 0 || i === N - 1 && (N - 1) % step > 1 || d.today; return '<span class="pg-l' + (cls || '') + '">' + (show ? d.l : '') + '</span>'; }
+    if (ST.chart !== 'line') return '<div class="pg-bars' + (dense ? ' dense' : '') + '">' + days.map(function (d, i) { return '<div class="pg-d' + (d.today ? ' today' : '') + (d.f ? ' fut' : '') + '"><span class="pg-n">' + (d.n && (!dense || d.today || d.n === mx) ? d.n : '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / mx) + '%"></i></div>' + lab(d, i, '') + '</div>'; }).join('') + '</div>';
+    var pt = days.map(function (d, i) { return { x: (i + .5) * 100 / N, y: 100 - d.n * 78 / mx, d: d, i: i }; }), live = pt.filter(function (q) { return !q.d.f; });
+    return '<div class="pg-line' + (dense ? ' dense' : '') + '"><div class="pg-plot"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline vector-effect="non-scaling-stroke" points="' + live.map(function (q) { return q.x.toFixed(1) + ',' + q.y.toFixed(1); }).join(' ') + '"/></svg>' +
+      live.map(function (q) { return '<span class="pg-pt' + (q.d.today ? ' today' : '') + '" style="left:' + q.x.toFixed(1) + '%;top:' + q.y.toFixed(1) + '%"></span>' + (q.d.n && (!dense || q.d.today || q.d.n === mx) ? '<span class="pg-pn" style="left:' + q.x.toFixed(1) + '%;top:' + q.y.toFixed(1) + '%">' + q.d.n + '</span>' : ''); }).join('') + '</div>' +
+      '<div class="pg-axis">' + pt.map(function (q) { return lab(q.d, q.i, q.d.today ? ' today' : ''); }).join('') + '</div></div>';
   }
   function statsHtml() {
     function J(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } }
@@ -34,14 +50,12 @@
         '<div class="pg-k"><span><b>' + seen + '</b>' + (tot ? ' / ' + tot : '') + ' vus</span><span><b>' + mast + '</b> maîtrisés</span><span><b>' + wr + '</b> à revoir</span><span><b>' + q + '</b> réponses</span></div></div>';
     }).join('');
     // 7 derniers jours
-    var days = [], mx = 1, H = ST.hist || {}, DN = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
-    for (var i = 6; i >= 0; i--) { var t = Date.now() - i * 864e5, k = dkey(t), v = H[k] || { n: 0, ok: 0 }; mx = Math.max(mx, v.n); days.push({ l: DN[new Date(t).getDay()], n: v.n, ok: v.ok, today: i === 0 }); }
+    var H = ST.hist || {}, DN = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'], BD = buildDays(H), days = BD.days, mx = BD.mx;
     var week = chartHtml(days, mx);
     var QK = [['k', 'Kanji', '漢'], ['v', 'Vocabulaire', '語'], ['c', 'Conjugaison', '動'], ['p', 'Particules', '助'], ['n', 'Compteurs', '数'], ['g', 'Géographie', '地']];
     var detail = QK.map(function (z) {
-      var QH = (ST.qh || {})[z[0]] || {}, dd = [], m2 = 1, n7 = 0, ok7 = 0;
-      for (var i = 6; i >= 0; i--) { var t = Date.now() - i * 864e5, v = QH[dkey(t)] || { n: 0, ok: 0 }; m2 = Math.max(m2, v.n); n7 += v.n; ok7 += v.ok; dd.push({ l: DN[new Date(t).getDay()], n: v.n, today: i === 0 }); }
-      return '<div class="pg-sub"><div class="pg-h"><span class="pg-i">' + z[2] + '</span><b>' + esc(z[1]) + '</b><span class="pg-p">' + (n7 ? n7 + ' réponses · ' + Math.round(ok7 * 100 / n7) + ' %' : 'aucune cette semaine') + '</span></div>' +
+      var QH = (ST.qh || {})[z[0]] || {}, QD = buildDays(QH), dd = QD.days, m2 = QD.mx, n7 = QD.n, ok7 = QD.ok;
+      return '<div class="pg-sub"><div class="pg-h"><span class="pg-i">' + z[2] + '</span><b>' + esc(z[1]) + '</b><span class="pg-p">' + (n7 ? n7 + ' réponses · ' + Math.round(ok7 * 100 / n7) + ' %' : 'aucune sur la période') + '</span></div>' +
         '<div class="pg-week pg-mini">' + chartHtml(dd, m2) + '</div></div>';
     }).join('');
     var wk = days.reduce(function (a, d) { return a + d.n; }, 0), act = Object.keys(H).filter(function (k) { return H[k].n > 0; }).length;
@@ -53,7 +67,7 @@
     weak.sort(missSort);
     var wh = weak.map(function (w) { return '<li><span class="pg-wt">' + esc(w.t) + '</span><span class="pg-wd">' + esc(w.d) + '</span><span class="pg-wx">' + w.x + '/' + w.n + ' ratés</span></li>'; });
     return '<div class="pg"><div class="pg-sum"><div><b>' + tq + '</b><small>réponses</small></div><div><b>' + (tq ? Math.round(tok * 100 / tq) : 0) + ' %</b><small>réussite</small></div><div><b>' + act + '</b><small>jours actifs</small></div><div><b>' + strk + '</b><small>série 🔥</small></div></div>' +
-      '<h3 class="pg-t">7 derniers jours <small>' + wk + ' réponses</small></h3><div class="pg-week">' + week + '</div>' +
+      '<h3 class="pg-t">' + esc(rangeTitle()) + ' <small>' + wk + ' réponses</small></h3><div class="pg-week">' + week + '</div>' +
       '<details class="pg-det"><summary>Détails par quiz</summary>' + detail + '</details>' +
       '<h3 class="pg-t">Par quiz</h3>' + cards +
       '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div>' +

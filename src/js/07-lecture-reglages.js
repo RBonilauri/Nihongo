@@ -17,6 +17,7 @@
       silB.setAttribute('aria-checked', ST.silent ? 'true' : 'false');
       tripB.setAttribute('aria-checked', ST.trip.show ? 'true' : 'false'); tripD.value = ST.trip.d || '';
       fsv.textContent = Math.round(ST.fs * 100) + ' %';
+      [].forEach.call(document.querySelectorAll('#seg-range button'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.r === (['7', '15', '30', 'month'].indexOf(ST.range) >= 0 ? ST.range : '7'))); });
       [].forEach.call(document.querySelectorAll('#seg-chart button'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === (ST.chart === 'line' ? 'line' : 'bar'))); });
     }
     paint();
@@ -30,6 +31,7 @@
     tripD.addEventListener('change', function () { ST.trip.d = tripD.value || ''; ST.trip.s = ST.trip.d ? ymd(Date.now()) : ''; if (ST.trip.d) ST.trip.show = true; save(); paint(); homeNow(); if (ST.trip.d) toast('Compte à rebours mis à jour.'); });
     document.getElementById('trip-clear').addEventListener('click', function () { ST.trip.d = ''; ST.trip.s = ''; save(); paint(); homeNow(); });
     document.getElementById('seg-chart').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; ST.chart = b.dataset.c === 'line' ? 'line' : 'bar'; save(); paint(); if (NAV[NAV.length - 1].v === 'stats') { var y = window.scrollY; navRender(); window.scrollTo(0, y); } });
+    document.getElementById('seg-range').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; ST.range = b.dataset.r; save(); paint(); if (NAV[NAV.length - 1].v === 'stats') { var y = window.scrollY; navRender(); window.scrollTo(0, y); } });
     recB.addEventListener('click', function () { ST.showRec = !ST.showRec; save(); renderHome(); paint(); });
     document.getElementById('rec-clear').addEventListener('click', function () { ST.rec = []; save(); renderHome(); toast('Historique vidé.'); });
     document.getElementById('exp').addEventListener('click', function () {

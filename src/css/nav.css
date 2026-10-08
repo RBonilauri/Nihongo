@@ -157,3 +157,15 @@
   .pg-axis { display: flex; }
   .pg-axis .pg-l { flex: 1; text-align: center; }
   .pg-axis .pg-l.today { color: var(--ink); font-weight: 700; }
+  .pg-bars { flex: 1; display: flex; gap: .4rem; align-items: flex-end; height: 100%; min-width: 0; }
+  .pg-bars.dense { gap: 2px; }
+  .pg-bars.dense .pg-col i { border-radius: 2px 2px 0 0; }
+  .pg-bars .pg-d { min-width: 0; }
+  .pg-bars.dense .pg-n, .pg-bars.dense .pg-l, .pg-line.dense .pg-l { white-space: nowrap; overflow: visible; }
+  .pg-bars.dense .pg-l, .pg-line.dense .pg-l { font-size: .6rem; min-height: 1em; }
+  .pg-d.fut .pg-col i { opacity: .25; }
+  .pg-d.fut .pg-l { opacity: .5; }
+  .pg-line.dense .pg-pt { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-width: 1.5px; }
+  .pg-line.dense .pg-pt.today { width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+  .pg-line.dense .pg-plot polyline { stroke-width: 1.6; }
+  .pg-axis .pg-l { overflow: visible; white-space: nowrap; }
