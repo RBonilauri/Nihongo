@@ -34,10 +34,10 @@
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
     cfg.types = cfg.types.filter(function (t) { return QT.some(function (z) { return z.id === t; }); });
     if (!cfg.types.length) cfg.types = QT.map(function (t) { return t.id; });
-    if (!Array.isArray(cfg.lv)) cfg.lv = (cfg.lv === 'ALL' || !cfg.lv) ? ['N5', 'N4', 'N3'] : [cfg.lv];
-    cfg.lv = cfg.lv.filter(function (l) { return ['N5', 'N4', 'N3'].indexOf(l) >= 0; }); if (!cfg.lv.length) cfg.lv = ['N5'];
+    if (!Array.isArray(cfg.lv)) cfg.lv = (cfg.lv === 'ALL' || !cfg.lv) ? ['N5', 'N4', 'N3', 'N2'] : [cfg.lv];
+    cfg.lv = cfg.lv.filter(function (l) { return ['N5', 'N4', 'N3', 'N2'].indexOf(l) >= 0; }); if (!cfg.lv.length) cfg.lv = ['N5'];
     var Q = null;
-    [['N5', 'kanji5'], ['N4', 'kanji4'], ['N3', 'kanji3']].forEach(function (pr) {
+    [['N5', 'kanji5'], ['N4', 'kanji4'], ['N3', 'kanji3'], ['N2', 'kanji2']].forEach(function (pr) {
       var LV = pr[0];
       MIXREG[pr[1]] = {
         label: 'Kanji ' + LV,
@@ -64,7 +64,7 @@
     function wrongCount() { return Object.keys(ST.kq).filter(function (k) { return ST.kq[k].w; }).length; }
     function paintCard() {
       var seen = Object.keys(ST.kq).length, w = wrongCount();
-      card.innerHTML = '<span class="qc-jp">漢字</span><span class="qc-t">Quiz kanji<small>' + KD.length + ' kanji N5 + N4 + N3 · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
+      card.innerHTML = '<span class="qc-jp">漢字</span><span class="qc-t">Quiz kanji<small>' + KD.length + ' kanji N5 à N2 · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
     }
     paintCard();
     card.addEventListener('click', function () { openQuiz(); });
@@ -161,7 +161,7 @@
       var ps = poolSize(cfg.lv, cfg.types, cfg.wrong);
       if (cfg.n !== 0 && cfg.n > ps.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
-      h += '<div class="q-sec"><h4>Niveau <small>(un ou plusieurs)</small></h4><div class="qchips" id="q-lv">' + ['N5', 'N4', 'N3'].map(function (l) { return chipBtn(l + ' · ' + levelPool(l).length, cfg.lv.indexOf(l) >= 0, 'data-lv="' + l + '"'); }).join('') + chipBtn('Tous · ' + KD.length, cfg.lv.length === 3, 'data-lv="ALL"') + '</div></div>';
+      h += '<div class="q-sec"><h4>Niveau <small>(un ou plusieurs)</small></h4><div class="qchips" id="q-lv">' + ['N5', 'N4', 'N3', 'N2'].map(function (l) { return chipBtn(l + ' · ' + levelPool(l).length, cfg.lv.indexOf(l) >= 0, 'data-lv="' + l + '"'); }).join('') + chipBtn('Tous · ' + KD.length, cfg.lv.length === 4, 'data-lv="ALL"') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + QT.map(function (t) { return chipBtn(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div><div class="qpre">' + QPRESETS.map(function (p, i) { return '<button type="button" class="mini" data-p="' + i + '">' + p.label + '</button>'; }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + QN.filter(function (n) { return n <= ps.q; }).map(function (n) { return chipBtn(n, cfg.n === n, 'data-n="' + n + '"', n > ps.q); }).join('') + chipBtn('Tout · ' + ps.q, cfg.n === 0, 'data-n="0"', ps.q === 0) + '</div></div>';
       h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.kq, wc, function (k) { return !!byK[k]; }) : '') + '</div>';
@@ -187,7 +187,7 @@
     body.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b || b.disabled) return;
       if (b.classList.contains('qhint')) { toggleHint(b); return; }
-      if (b.dataset.lv) { var lv = b.dataset.lv; if (lv === 'ALL') cfg.lv = ['N5', 'N4', 'N3']; else { var i = cfg.lv.indexOf(lv); if (i >= 0) { if (cfg.lv.length > 1) cfg.lv.splice(i, 1); } else cfg.lv.push(lv); cfg.lv = ['N5', 'N4', 'N3'].filter(function (l) { return cfg.lv.indexOf(l) >= 0; }); } persist(); showSetup(); }
+      if (b.dataset.lv) { var lv = b.dataset.lv; if (lv === 'ALL') cfg.lv = ['N5', 'N4', 'N3', 'N2']; else { var i = cfg.lv.indexOf(lv); if (i >= 0) { if (cfg.lv.length > 1) cfg.lv.splice(i, 1); } else cfg.lv.push(lv); cfg.lv = ['N5', 'N4', 'N3', 'N2'].filter(function (l) { return cfg.lv.indexOf(l) >= 0; }); } persist(); showSetup(); }
       else if (b.dataset.t) { var i = cfg.types.indexOf(b.dataset.t); if (i >= 0) cfg.types.splice(i, 1); else cfg.types.push(b.dataset.t); persist(); showSetup(); }
       else if (b.dataset.p) { cfg.types = QPRESETS[+b.dataset.p].types.slice(); persist(); showSetup(); }
       else if (b.dataset.n !== undefined) { cfg.n = +b.dataset.n; persist(); showSetup(); }

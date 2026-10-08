@@ -29,7 +29,7 @@ def kanji_json(html):
     soup = _BS(html, 'html.parser'); data = []; wordcache = {}
     for d in soup.select('details.sub'):
         t = d.summary.get_text(' ', strip=True)
-        lvl = 'N5' if t.startswith('N5') else 'N4' if t.startswith('N4') else 'N3' if t.startswith('N3') else None
+        lvl = 'N5' if t.startswith('N5') else 'N4' if t.startswith('N4') else 'N3' if t.startswith('N3') else 'N2' if t.startswith('N2') else None
         if not lvl or 'Liste' not in t: continue
         for gi, tb in enumerate(d.select('table.stack-kanji')):
             for tr in tb.select('tbody tr'):

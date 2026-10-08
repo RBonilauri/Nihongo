@@ -645,7 +645,8 @@ EXTRA_SUBS['表現'] = vocab_core.EXPR_SUBS
 EXTRA_SUBS['会話'] = vocab_core.KAIWA_SUBS
 
 import kanji_n3
-EXTRA_SUBS['漢字'] = [kanji_n3.n3_sub(open(os.path.join(DATA, 'have_kanji.txt'), encoding='utf-8').read())]
+import kanji_lists
+EXTRA_SUBS['漢字'] = kanji_lists.subs()
 
 import adjectifs_keigo, voyage_conversation, vocab_themes
 def _merge(d):
