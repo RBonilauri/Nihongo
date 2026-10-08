@@ -15,6 +15,9 @@
 <div class="row"><span class="lab nosh">Départ</span><span class="trip-pick"><input type="date" id="trip-date" aria-label="Date de départ"><button class="mini" id="trip-clear" type="button">Effacer</button></span></div>
 <div class="row"><span class="lab">Historique des récents</span><button class="mini" id="rec-clear" type="button">Vider</button></div>
 </section>
+<section class="dr-card"><h4>Progression</h4>
+<div class="row stack"><span class="lab">Style des graphiques<small>Les 7 derniers jours</small></span><div class="seg" id="seg-chart" role="group" aria-label="Style des graphiques"><button type="button" data-c="bar">▮ Barres</button><button type="button" data-c="line">⟋ Points reliés</button></div></div>
+</section>
 <section class="dr-card"><h4>Données</h4>
 <div class="row stack"><span class="lab">Sauvegarde<small>Favoris, fiches sues, réglages</small></span><div class="pair"><button class="mini" id="exp" type="button">Exporter</button><label class="mini">Importer<input id="imp" type="file" accept="application/json" hidden></label></div></div>
 <div class="row"><span class="lab">Fiches sues<small>Tout remettre à zéro</small></span><button class="mini danger" id="rst" type="button">Réinitialiser</button></div>

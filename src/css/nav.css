@@ -147,3 +147,13 @@
   .pg-sub .pg-h { margin-bottom: .35rem; font-size: .82rem; }
   .pg-sub .pg-week.pg-mini { height: 92px; }
   .pg-sub .pg-p { white-space: nowrap; }
+  .pg-line { flex: 1; display: flex; flex-direction: column; height: 100%; min-width: 0; }
+  .pg-plot { position: relative; flex: 1; margin: 0 0 .15rem; }
+  .pg-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .pg-plot polyline { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
+  .pg-pt { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); box-sizing: border-box; }
+  .pg-pt.today { background: var(--gold); width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
+  .pg-pn { position: absolute; transform: translate(-50%, -165%); font-size: .66rem; font-family: 'DM Mono', monospace; color: var(--ink); }
+  .pg-axis { display: flex; }
+  .pg-axis .pg-l { flex: 1; text-align: center; }
+  .pg-axis .pg-l.today { color: var(--ink); font-weight: 700; }

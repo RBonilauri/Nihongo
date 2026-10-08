@@ -878,6 +878,16 @@ table.stack td.kdup > * { display: none; }
   .pg-sub .pg-h { margin-bottom: .35rem; font-size: .82rem; }
   .pg-sub .pg-week.pg-mini { height: 92px; }
   .pg-sub .pg-p { white-space: nowrap; }
+  .pg-line { flex: 1; display: flex; flex-direction: column; height: 100%; min-width: 0; }
+  .pg-plot { position: relative; flex: 1; margin: 0 0 .15rem; }
+  .pg-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .pg-plot polyline { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
+  .pg-pt { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); box-sizing: border-box; }
+  .pg-pt.today { background: var(--gold); width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
+  .pg-pn { position: absolute; transform: translate(-50%, -165%); font-size: .66rem; font-family: 'DM Mono', monospace; color: var(--ink); }
+  .pg-axis { display: flex; }
+  .pg-axis .pg-l { flex: 1; text-align: center; }
+  .pg-axis .pg-l.today { color: var(--ink); font-weight: 700; }
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -1055,6 +1065,9 @@ table.stack td.kdup > * { display: none; }
 <div class="row"><span class="lab">Compte à rebours du voyage<small>Carte d’accueil avec un petit avion</small></span><button class="sw" id="sw-trip" type="button" role="switch" aria-checked="true" aria-label="Afficher le compte à rebours"><i></i></button></div>
 <div class="row"><span class="lab nosh">Départ</span><span class="trip-pick"><input type="date" id="trip-date" aria-label="Date de départ"><button class="mini" id="trip-clear" type="button">Effacer</button></span></div>
 <div class="row"><span class="lab">Historique des récents</span><button class="mini" id="rec-clear" type="button">Vider</button></div>
+</section>
+<section class="dr-card"><h4>Progression</h4>
+<div class="row stack"><span class="lab">Style des graphiques<small>Les 7 derniers jours</small></span><div class="seg" id="seg-chart" role="group" aria-label="Style des graphiques"><button type="button" data-c="bar">▮ Barres</button><button type="button" data-c="line">⟋ Points reliés</button></div></div>
 </section>
 <section class="dr-card"><h4>Données</h4>
 <div class="row stack"><span class="lab">Sauvegarde<small>Favoris, fiches sues, réglages</small></span><div class="pair"><button class="mini" id="exp" type="button">Exporter</button><label class="mini">Importer<input id="imp" type="file" accept="application/json" hidden></label></div></div>
@@ -5570,7 +5583,7 @@ table.stack td.kdup > * { display: none; }
   }
 
   /* ── état persistant ── */
-  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, chart: 'bar', fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
@@ -6074,6 +6087,7 @@ table.stack td.kdup > * { display: none; }
       silB.setAttribute('aria-checked', ST.silent ? 'true' : 'false');
       tripB.setAttribute('aria-checked', ST.trip.show ? 'true' : 'false'); tripD.value = ST.trip.d || '';
       fsv.textContent = Math.round(ST.fs * 100) + ' %';
+      [].forEach.call(document.querySelectorAll('#seg-chart button'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === (ST.chart === 'line' ? 'line' : 'bar'))); });
     }
     paint();
     document.getElementById('fs-').addEventListener('click', function () { ST.fs = Math.max(0.8, Math.round((ST.fs - 0.1) * 100) / 100); save(); applyPrefs(); paint(); });
@@ -6085,6 +6099,7 @@ table.stack td.kdup > * { display: none; }
     tripB.addEventListener('click', function () { ST.trip.show = !ST.trip.show; save(); paint(); homeNow(); });
     tripD.addEventListener('change', function () { ST.trip.d = tripD.value || ''; ST.trip.s = ST.trip.d ? ymd(Date.now()) : ''; if (ST.trip.d) ST.trip.show = true; save(); paint(); homeNow(); if (ST.trip.d) toast('Compte à rebours mis à jour.'); });
     document.getElementById('trip-clear').addEventListener('click', function () { ST.trip.d = ''; ST.trip.s = ''; save(); paint(); homeNow(); });
+    document.getElementById('seg-chart').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; ST.chart = b.dataset.c === 'line' ? 'line' : 'bar'; save(); paint(); if (NAV[NAV.length - 1].v === 'stats') { var y = window.scrollY; navRender(); window.scrollTo(0, y); } });
     recB.addEventListener('click', function () { ST.showRec = !ST.showRec; save(); renderHome(); paint(); });
     document.getElementById('rec-clear').addEventListener('click', function () { ST.rec = []; save(); renderHome(); toast('Historique vidé.'); });
     document.getElementById('exp').addEventListener('click', function () {
@@ -7678,6 +7693,14 @@ table.stack td.kdup > * { display: none; }
   }
 
   /* ═══════════ PAGE « MA PROGRESSION » ═══════════ */
+  /* graphique des 7 jours : barres ou points reliés (réglage ST.chart) */
+  function chartHtml(days, mx) {
+    if (ST.chart !== 'line') return days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('');
+    var N = days.length, pt = days.map(function (d, i) { return { x: (i + .5) * 100 / N, y: 100 - d.n * 78 / mx, d: d }; });
+    return '<div class="pg-line"><div class="pg-plot"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline vector-effect="non-scaling-stroke" points="' + pt.map(function (q) { return q.x.toFixed(1) + ',' + q.y.toFixed(1); }).join(' ') + '"/></svg>' +
+      pt.map(function (q) { return '<span class="pg-pt' + (q.d.today ? ' today' : '') + '" style="left:' + q.x.toFixed(1) + '%;top:' + q.y.toFixed(1) + '%"></span>' + (q.d.n ? '<span class="pg-pn" style="left:' + q.x.toFixed(1) + '%;top:' + q.y.toFixed(1) + '%">' + q.d.n + '</span>' : ''); }).join('') + '</div>' +
+      '<div class="pg-axis">' + pt.map(function (q) { return '<span class="pg-l' + (q.d.today ? ' today' : '') + '">' + q.d.l + '</span>'; }).join('') + '</div></div>';
+  }
   function statsHtml() {
     function J(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } }
     var KD = J('kanji-data') || [], VD = J('vocab-data') || [], GD = J('grammar-data') || { verbs: [], parts: [] }, MD = J('map-data') || { p: [] }, CD = J('counter-data') || { counters: [] };
@@ -7706,13 +7729,13 @@ table.stack td.kdup > * { display: none; }
     // 7 derniers jours
     var days = [], mx = 1, H = ST.hist || {}, DN = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
     for (var i = 6; i >= 0; i--) { var t = Date.now() - i * 864e5, k = dkey(t), v = H[k] || { n: 0, ok: 0 }; mx = Math.max(mx, v.n); days.push({ l: DN[new Date(t).getDay()], n: v.n, ok: v.ok, today: i === 0 }); }
-    var week = days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('');
+    var week = chartHtml(days, mx);
     var QK = [['k', 'Kanji', '漢'], ['v', 'Vocabulaire', '語'], ['c', 'Conjugaison', '動'], ['p', 'Particules', '助'], ['n', 'Compteurs', '数'], ['g', 'Géographie', '地']];
     var detail = QK.map(function (z) {
       var QH = (ST.qh || {})[z[0]] || {}, dd = [], m2 = 1, n7 = 0, ok7 = 0;
       for (var i = 6; i >= 0; i--) { var t = Date.now() - i * 864e5, v = QH[dkey(t)] || { n: 0, ok: 0 }; m2 = Math.max(m2, v.n); n7 += v.n; ok7 += v.ok; dd.push({ l: DN[new Date(t).getDay()], n: v.n, today: i === 0 }); }
       return '<div class="pg-sub"><div class="pg-h"><span class="pg-i">' + z[2] + '</span><b>' + esc(z[1]) + '</b><span class="pg-p">' + (n7 ? n7 + ' réponses · ' + Math.round(ok7 * 100 / n7) + ' %' : 'aucune cette semaine') + '</span></div>' +
-        '<div class="pg-week pg-mini">' + dd.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / m2) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('') + '</div></div>';
+        '<div class="pg-week pg-mini">' + chartHtml(dd, m2) + '</div></div>';
     }).join('');
     var wk = days.reduce(function (a, d) { return a + d.n; }, 0), act = Object.keys(H).filter(function (k) { return H[k].n > 0; }).length;
     var D = dayState(), y = dkey(Date.now() - 864e5), strk = (ST.strk.last === D.d || ST.strk.last === y) ? ST.strk.n : 0;
@@ -7747,7 +7770,7 @@ table.stack td.kdup > * { display: none; }
       '<div class="pg-k"><span><b>' + seen + '</b>' + (tot ? ' / ' + tot : '') + ' vus</span><span><b>' + mast + '</b> maîtrisés</span><span><b>' + wr + '</b> à revoir</span>' + (tot ? '<span><b>' + Math.round(mast * 100 / tot) + ' %</b> maîtrisé</span>' : '') + '</div>' +
       '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div></div>';
     h += '<h4 class="q-h">7 derniers jours' + (n7 ? ' · ' + n7 + ' réponses' + (p7 !== null ? ' · ' + p7 + ' %' : '') : '') + '</h4><div class="pg-week pg-mini">' +
-      days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('') + '</div>';
+      chartHtml(days, mx) + '</div>';
     if (trend) h += '<p class="pg-trend">' + trend + '</p>';
     return h;
   }
