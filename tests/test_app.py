@@ -277,6 +277,8 @@ with sync_playwright() as p:
     print('Listes de kanji complètes')
     kc = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); const c = {}; d.forEach(x => c[x.l] = (c[x.l] || 0) + 1);
         return [c.N5, c.N4, c.N3, d.length - new Set(d.map(x => x.k)).size, d.filter(x => !x.kw.length || !x.s).length, '駅少多店世事発局機'.split('').filter(k => !d.some(x => x.k === k)).length]; }""")
+    kv = pg.evaluate("""() => { const ks = new Set(JSON.parse(document.getElementById('kanji-data').textContent).map(x => x.k)); const v = JSON.parse(document.getElementById('vocab-data').textContent); const m = new Set(); v.forEach(x => [...x.jp].forEach(c => { if (c >= '一' && c <= '鿿' && !ks.has(c)) m.add(c); })); return [...m].join(''); }""")
+    check(kv == '', 'tout kanji du vocabulaire figure dans les listes N5/N4/N3 (%s)' % kv)
     check(kc[0] >= 116 and kc[1] >= 211 and kc[2] >= 472 and kc[3] == 0 and kc[4] == 0 and kc[5] == 0, 'kanji N5/N4/N3 complets, sans doublon, avec sens et mots %s' % kc)
 
     print('Grammaire N4 / N3')

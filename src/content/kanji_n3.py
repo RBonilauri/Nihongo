@@ -28,7 +28,8 @@ def build(have):
 def n3_sub(have):
     groups = build(have)
     total = sum(len(v) for v in groups.values())
-    bl = [P(f'Les {total} kanji du JLPT N3 élargissent le vocabulaire à la vie sociale, au travail, à l’actualité et aux sentiments. Ils sont rangés par thème ; les mots clés sont les composés les plus fréquents. Ils alimentent le quiz kanji (niveau N3) et le Quiz général.')]
+    nc = sum(len(v) for g, v in groups.items() if not g.startswith('Compléments'))
+    bl = [P(f'Les {nc} kanji du JLPT N3 élargissent le vocabulaire à la vie sociale, au travail, à l’actualité et aux sentiments. Ils sont rangés par thème ; les mots clés sont les composés les plus fréquents. Ils alimentent le quiz kanji (niveau N3) et le Quiz général. Les deux dernières rubriques (« Compléments du vocabulaire », {total - nc} kanji) regroupent des kanji plus rares (N2 et au-delà), de noms de lieux ou de plats, présents dans le vocabulaire de l’appli : ils sont aussi proposés dans le quiz kanji N3.')]
     for g, rows in groups.items():
         bl.append(H(g)); bl.append(T(['Kanji', 'On', 'Kun', 'Sens', 'Mots clés'], rows, jp=(0,), ro=()))
     return {'title': 'N3 — Liste complète', 'blocks': bl}
