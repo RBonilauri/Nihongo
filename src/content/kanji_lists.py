@@ -15,7 +15,7 @@ INTRO = {
 def _sub(lv):
     rows = [r for r in kanji_master.ROWS if r[6] == lv]
     groups = {}
-    for k, on, kun, s, kw, th, _ in rows: groups.setdefault(th, []).append([k, on, kun, s, kw])
+    for k, on, kun, s, kw, th, _, mx in rows: groups.setdefault(th, []).append([k, on, kun, s, kw + (' ＋ ' + mx if mx else '')])
     beyond = sum(len(v) for g, v in groups.items() if g.startswith('Au-delà'))
     txt = INTRO[lv].format(n=len(rows), a=len(rows) - beyond, b=beyond) + ' Ils alimentent le quiz kanji (niveau ' + lv + ') et le Quiz général.'
     bl = [P(txt)]

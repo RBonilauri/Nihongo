@@ -278,6 +278,10 @@ with sync_playwright() as p:
     kc = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); const c = {}; d.forEach(x => c[x.l] = (c[x.l] || 0) + 1);
         return [c.N5, c.N4, c.N3, c.N2, d.length - new Set(d.map(x => x.k)).size, d.filter(x => !x.kw.length || !x.s).length, '駅少多店世事発局機'.split('').filter(k => !d.some(x => x.k === k)).length]; }""")
     kv = pg.evaluate("""() => { const ks = new Set(JSON.parse(document.getElementById('kanji-data').textContent).map(x => x.k)); const v = JSON.parse(document.getElementById('vocab-data').textContent); const m = new Set(); v.forEach(x => [...x.jp].forEach(c => { if (c >= '一' && c <= '鿿' && !ks.has(c)) m.add(c); })); return [...m].join(''); }""")
+    km = pg.evaluate("""() => { const c = [...document.querySelectorAll('table.stack-kanji td[data-label="Mots clés"]')], rows = c;
+        const nw = c.map(x => x.querySelectorAll(':scope > .kw').length);
+        return [rows.length, c.filter(x => x.querySelector('details.kmore > summary')).length, c.filter(x => x.querySelector('ruby rt')).length, nw.filter(n => n >= 3).length, c.filter(x => /＋/.test(x.textContent)).length]; }""")
+    check(km[0] == 1395 and km[1] >= 900 and km[2] >= 1380 and km[3] >= 1250 and km[4] == 0, 'mots clés : lecture au-dessus des mots, 3 mots visibles, « + » pour plus d’exemples %s' % km)
     check(kv == '', 'tout kanji du vocabulaire figure dans les listes N5 à N2 (%s)' % kv)
     check(kc[0] == 103 and kc[1] == 181 and kc[2] >= 340 and kc[3] >= 700 and kc[4] == 0 and kc[5] == 0 and kc[6] == 0, 'kanji N5 à N2 complets, sans doublon, avec sens et mots %s' % kc)
 

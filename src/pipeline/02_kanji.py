@@ -36,7 +36,7 @@ def kanji_json(html):
                 c = [td.get_text(' ', strip=True) for td in tr.find_all('td', recursive=False)]
                 if len(c) < 4 or not c[0]: continue
                 kw = []
-                for mm in _re.finditer(r'([^\s,、()（）]+)\s*[（(]([^)）]*)[)）]', c[4] if len(c) > 4 else ''):
+                for mm in _re.finditer(r'([^\s,、()（）]+)\s*[（(]([^)）]*)[)）]', (c[4] if len(c) > 4 else '').replace(' ＋ ', ', ')):
                     w, g = mm.group(1), mm.group(2)
                     if len(w) < 2 or w in _SKIP: continue
                     kw.append([w, _reading(w), g])

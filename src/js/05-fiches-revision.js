@@ -2,13 +2,20 @@
   var deck = document.createElement('div'); deck.className = 'deck'; deck.hidden = true;
   deck.innerHTML = '<div class="deck-top"><button class="x" aria-label="Fermer">×</button><div class="ttl"></div><div class="prog"></div></div><div class="card" id="card" tabindex="0"></div><div class="deck-btns"><button class="again">À revoir</button><button class="ok">Su</button></div>';
   var D = { cards: [], i: 0, flipped: false, title: '' };
+  function cellText(c) {
+    if (!c.querySelector('ruby, .kmore')) return c.textContent.replace(/\s+/g, ' ').trim();
+    var k = c.cloneNode(true);
+    k.querySelectorAll('ruby').forEach(function (r) { var rt = r.querySelector('rt'), t = rt ? rt.textContent : ''; if (rt) rt.remove(); r.replaceWith(r.textContent + (t ? '（' + t + '）' : '')); });
+    k.querySelectorAll('summary').forEach(function (x) { x.replaceWith(' ＋ '); });
+    return k.textContent.replace(/\s+/g, ' ').trim();
+  }
   function cardsFrom(sub, title) {
     var out = [];
     sub.querySelectorAll('table').forEach(function (t) {
       var heads = Array.prototype.map.call(t.querySelectorAll('thead th, tr:first-child th'), function (h) { return h.textContent.replace(/\s+/g, ' ').trim(); });
       t.querySelectorAll('tr').forEach(function (tr) {
         var tds = tr.querySelectorAll('td'); if (tds.length < 2) return;
-        var cells = Array.prototype.map.call(tds, function (c) { return c.textContent.replace(/\s+/g, ' ').trim(); });
+        var cells = Array.prototype.map.call(tds, cellText);
         if (!cells[0]) return;
         var back = []; for (var k = 1; k < cells.length; k++) if (cells[k]) back.push({ l: heads[k] || '', v: cells[k] });
         if (!back.length) return;

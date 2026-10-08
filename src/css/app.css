@@ -286,3 +286,16 @@ table.stack td.kdup > * { display: none; }
   :root[data-theme="dark"] .tabbar button.on { color: #e8dfd0; }
   :root[data-theme="dark"] .tabbar button.on::after { background: #b3a690; height: 4px; width: 30px; }
   :root[data-theme="dark"] .p-sel, :root[data-theme="dark"] .jm-p.jm-sel { stroke: #e8dfd0; stroke-width: 3; }
+
+/* Listes de kanji : mots clés avec lecture (ruby) et bouton « + » */
+td[data-label="Mots clés"] .kw { display: inline-block; margin: 0 .55rem .15rem 0; line-height: 1.8; vertical-align: top; }
+td[data-label="Mots clés"] .kw rt { font-size: .5em; color: var(--muted); letter-spacing: 0; font-weight: 400; }
+td[data-label="Mots clés"] .kw small { font-size: .78em; opacity: .85; line-height: 1.2; word-break: normal; overflow-wrap: normal; }
+.kmore { display: inline-block; vertical-align: middle; }
+.kmore[open] { display: block; margin-top: .25rem; padding-top: .25rem; border-top: 1px dashed var(--border); }
+.kmore > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 1.35rem; height: 1.35rem; border: 1px solid var(--border); border-radius: 50%; color: var(--gold); font-size: .95rem; line-height: 1; user-select: none; }
+.kmore > summary::-webkit-details-marker { display: none; }
+.kmore > summary::marker, .kmore > summary::after { content: none !important; display: none !important; }
+.kmore > summary::before { content: "+"; }
+.kmore[open] > summary { margin-bottom: .2rem; }
+.kmore[open] > summary::before { content: "−"; }
