@@ -3,14 +3,14 @@ import os, sys
 import re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from content import T, P, N, H
-import n3data_a, n3data_b, n3data_c, n3data_d
+import n3data_a, n3data_b, n3data_c, n3data_d, n3data_e
 
 def _gl(s):  # pas de parenthèses imbriquées dans les gloses
     return s.replace('(', ', ').replace(')', '').replace('（', ', ').replace('）', '').strip(' ,')
 
 def build(have):
     seen = set(have); groups = {}
-    for m in (n3data_a, n3data_b, n3data_c, n3data_d):
+    for m in (n3data_a, n3data_b, n3data_c, n3data_d, n3data_e):
         for g, lines in m.G.items():
             for ln in lines:
                 p = ln.split('|')

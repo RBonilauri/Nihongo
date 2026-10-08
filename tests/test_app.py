@@ -274,6 +274,11 @@ with sync_playwright() as p:
     ox = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => x.g.startsWith('Outils:')); return [v.length, v.filter(x => !x.ex || !x.ex[0] || !x.ex[1]).length]; }""")
     check(ox[0] >= 141 and ox[1] == 0, 'chaque mot Outils a un exemple (%s)' % ox)
 
+    print('Listes de kanji complètes')
+    kc = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); const c = {}; d.forEach(x => c[x.l] = (c[x.l] || 0) + 1);
+        return [c.N5, c.N4, c.N3, d.length - new Set(d.map(x => x.k)).size, d.filter(x => !x.kw.length || !x.s).length, '駅少多店世事発局機'.split('').filter(k => !d.some(x => x.k === k)).length]; }""")
+    check(kc[0] >= 116 and kc[1] >= 211 and kc[2] >= 472 and kc[3] == 0 and kc[4] == 0 and kc[5] == 0, 'kanji N5/N4/N3 complets, sans doublon, avec sens et mots %s' % kc)
+
     print('Grammaire N4 / N3')
     gn = pg.evaluate("""() => ['N4','N3'].map(j => { const s = [...document.querySelectorAll('main > details.sec')].find(d => d.querySelector(':scope > summary .jp').textContent.trim() === j); return s ? [s.querySelectorAll(':scope > .sec-body > details.sub').length, s.querySelectorAll('tbody tr').length] : null; })""")
     check(gn[0] and gn[1] and gn[0][0] >= 8 and gn[1][0] >= 8 and gn[0][1] >= 60 and gn[1][1] >= 70, 'pages Grammaire N4 et N3 présentes %s' % gn)
