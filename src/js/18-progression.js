@@ -28,7 +28,14 @@
     // 7 derniers jours
     var days = [], mx = 1, H = ST.hist || {}, DN = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
     for (var i = 6; i >= 0; i--) { var t = Date.now() - i * 864e5, k = dkey(t), v = H[k] || { n: 0, ok: 0 }; mx = Math.max(mx, v.n); days.push({ l: DN[new Date(t).getDay()], n: v.n, ok: v.ok, today: i === 0 }); }
-    var week = days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 100 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('');
+    var week = days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('');
+    var QK = [['k', 'Kanji', '漢'], ['v', 'Vocabulaire', '語'], ['c', 'Conjugaison', '動'], ['p', 'Particules', '助'], ['n', 'Compteurs', '数'], ['g', 'Géographie', '地']];
+    var detail = QK.map(function (z) {
+      var QH = (ST.qh || {})[z[0]] || {}, dd = [], m2 = 1, n7 = 0, ok7 = 0;
+      for (var i = 6; i >= 0; i--) { var t = Date.now() - i * 864e5, v = QH[dkey(t)] || { n: 0, ok: 0 }; m2 = Math.max(m2, v.n); n7 += v.n; ok7 += v.ok; dd.push({ l: DN[new Date(t).getDay()], n: v.n, today: i === 0 }); }
+      return '<div class="pg-sub"><div class="pg-h"><span class="pg-i">' + z[2] + '</span><b>' + esc(z[1]) + '</b><span class="pg-p">' + (n7 ? n7 + ' réponses · ' + Math.round(ok7 * 100 / n7) + ' %' : 'aucune cette semaine') + '</span></div>' +
+        '<div class="pg-week pg-mini">' + dd.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / m2) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('') + '</div></div>';
+    }).join('');
     var wk = days.reduce(function (a, d) { return a + d.n; }, 0), act = Object.keys(H).filter(function (k) { return H[k].n > 0; }).length;
     var D = dayState(), y = dkey(Date.now() - 864e5), strk = (ST.strk.last === D.d || ST.strk.last === y) ? ST.strk.n : 0;
     // points faibles (kanji + vocabulaire)
@@ -39,6 +46,7 @@
     var wh = weak.map(function (w) { return '<li><span class="pg-wt">' + esc(w.t) + '</span><span class="pg-wd">' + esc(w.d) + '</span><span class="pg-wx">' + w.x + '/' + w.n + ' ratés</span></li>'; });
     return '<div class="pg"><div class="pg-sum"><div><b>' + tq + '</b><small>réponses</small></div><div><b>' + (tq ? Math.round(tok * 100 / tq) : 0) + ' %</b><small>réussite</small></div><div><b>' + act + '</b><small>jours actifs</small></div><div><b>' + strk + '</b><small>série 🔥</small></div></div>' +
       '<h3 class="pg-t">7 derniers jours <small>' + wk + ' réponses</small></h3><div class="pg-week">' + week + '</div>' +
+      '<details class="pg-det"><summary>Détails par quiz</summary>' + detail + '</details>' +
       '<h3 class="pg-t">Par quiz</h3>' + cards +
       '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div>' +
       '<h3 class="pg-t">Points faibles</h3>' + (wh.length ? missBlock(wh, 'pg-weak', 'ul')  : '<p class="pg-empty">Rien à signaler pour l’instant : les mots ratés apparaîtront ici.</p>') + '</div>';
@@ -61,7 +69,7 @@
       '<div class="pg-k"><span><b>' + seen + '</b>' + (tot ? ' / ' + tot : '') + ' vus</span><span><b>' + mast + '</b> maîtrisés</span><span><b>' + wr + '</b> à revoir</span>' + (tot ? '<span><b>' + Math.round(mast * 100 / tot) + ' %</b> maîtrisé</span>' : '') + '</div>' +
       '<div class="pg-leg"><i class="m"></i> maîtrisés (3 bonnes d’affilée) <i class="w"></i> à revoir <i class="o"></i> en cours</div></div>';
     h += '<h4 class="q-h">7 derniers jours' + (n7 ? ' · ' + n7 + ' réponses' + (p7 !== null ? ' · ' + p7 + ' %' : '') : '') + '</h4><div class="pg-week pg-mini">' +
-      days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 100 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('') + '</div>';
+      days.map(function (d) { return '<div class="pg-d' + (d.today ? ' today' : '') + '"><span class="pg-n">' + (d.n || '') + '</span><div class="pg-col"><i style="height:' + (d.n * 78 / mx) + '%"></i></div><span class="pg-l">' + d.l + '</span></div>'; }).join('') + '</div>';
     if (trend) h += '<p class="pg-trend">' + trend + '</p>';
     return h;
   }
