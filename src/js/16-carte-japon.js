@@ -30,20 +30,30 @@
     if (o) line = '<div class="vq-reg"><b>Région</b> · ' + esc(M.reg[o.r][0]) + ' · ' + esc(M.reg[o.r][1]) + '</div>';
     return line + jpMiniSet(set, 'jm-mini');
   }
+  /* écriture des noms sur la carte et dans les régions à choisir : kanji, kana ou rōmaji (la fiche du bas ne change pas) */
+  function mapMode() { return ST.mapl === 'a' || ST.mapl === 'r' ? ST.mapl : 'k'; }
+  function regLabel(M, r, short) {
+    var m = mapMode(), k = M.reg[r][0], ro = M.reg[r][1];
+    if (m === 'a') return short ? (REGK[r] || k).split('・')[0] : (REGK[r] || k);
+    if (m === 'r') return short ? ro.split(' et ')[0].replace(/\s*\(.*\)/, '') : ro;
+    return short ? k.split('・')[0] : k;
+  }
+  function prefLabel(o) { var m = mapMode(); return m === 'a' ? o.k : m === 'r' ? o.ro : o.n; }
   function jpMapInit() {
     var host = document.querySelector('.jpmap-host'); if (!host || host.firstChild) return;
     var M = jpm(); if (!M) return;
-    var legend = M.ids.map(function (r, i) { return '<button type="button" class="jm-chip" data-r="' + r + '"><i style="background:' + JPCOL[i] + '"></i>' + esc(M.reg[r][0]) + '</button>'; }).join('');
+    var legend = M.ids.map(function (r, i) { return '<button type="button" class="jm-chip" data-r="' + r + '"><i style="background:' + JPCOL[i] + '"></i><span class="jm-cl">' + esc(regLabel(M, r)) + '</span></button>'; }).join('');
     var paths = M.p.map(function (o) { return '<path class="jm-p" data-n="' + o.n + '" data-r="' + o.r + '" style="fill:' + JPCOL[M.ids.indexOf(o.r)] + '" d="' + o.d + '"/>'; }).join('');
     var labels = M.ids.map(function (r) {
       var mem = M.p.filter(function (o) { return o.r === r && o.n !== '沖縄'; }), cx = 0, cy = 0;
       mem.forEach(function (o) { cx += o.c[0]; cy += o.c[1]; }); cx /= mem.length; cy /= mem.length;
-      return '<text class="jm-t" x="' + cx.toFixed(0) + '" y="' + cy.toFixed(0) + '">' + esc(M.reg[r][0].split('・')[0]) + '</text>';
+      return '<text class="jm-t" data-r="' + r + '" x="' + cx.toFixed(0) + '" y="' + cy.toFixed(0) + '">' + esc(regLabel(M, r, true)) + '</text>';
     }).join('');
-    host.innerHTML = '<div class="jm-leg">' + legend + '</div><div class="jm-box"><svg class="jm-svg" viewBox="' + M.vb.join(' ') + '">' + paths + jpFrame(M) + '<g class="jm-lab">' + labels + '</g><text class="jm-sl" id="jm-sl" x="0" y="0"></text></svg>' +
+    host.innerHTML = '<div class="seg jm-mode" role="group" aria-label="Écriture des noms">' + [['k', '漢字'], ['a', 'かな'], ['r', 'Rōmaji']].map(function (a) { return '<button type="button" data-ml="' + a[0] + '" aria-pressed="' + (mapMode() === a[0]) + '">' + a[1] + '</button>'; }).join('') + '</div><div class="jm-leg">' + legend + '</div><div class="jm-box"><svg class="jm-svg" viewBox="' + M.vb.join(' ') + '">' + paths + jpFrame(M) + '<g class="jm-lab">' + labels + '</g><text class="jm-sl" id="jm-sl" x="0" y="0"></text></svg>' +
       '<div class="jm-zb"><button type="button" data-z="in" aria-label="Zoom avant">+</button><button type="button" data-z="out" aria-label="Zoom arrière">−</button><button type="button" data-z="0" aria-label="Réinitialiser">⟲</button></div></div>' +
       '<div class="jm-card" id="jm-card"><p class="jm-hint">Touche une préfecture ou une région.</p></div>';
     var svg = host.querySelector('.jm-svg'), card = host.querySelector('#jm-card'), sl = host.querySelector('#jm-sl');
+    svg.classList.toggle('jm-lat', mapMode() !== 'k');
     var base = M.vb.slice(), vb = M.vb.slice(), moved = false, ptrs = {}, last = null, selR = null, selN = null;
     function setVb() { svg.setAttribute('viewBox', vb.join(' ')); svg.classList.toggle('jm-z', vb[2] < base[2] - 1); svg.style.setProperty('--lf', (vb[2] / base[2]).toFixed(3)); }
     function clamp() { vb[0] = Math.min(Math.max(vb[0], base[0]), base[0] + base[2] - vb[2]); vb[1] = Math.min(Math.max(vb[1], base[1]), base[1] + base[3] - vb[3]); }
@@ -59,7 +69,14 @@
       });
       host.querySelectorAll('.jm-chip').forEach(function (c) { c.classList.toggle('on', c.dataset.r === selR); });
       var p = selN && svg.querySelector('.jm-p[data-n="' + selN + '"]'); if (p) p.parentNode.insertBefore(p, svg.querySelector('.jm-fr'));
-      if (selN) { var o = M.by[selN]; sl.textContent = selN; sl.setAttribute('x', o.c[0]); sl.setAttribute('y', o.c[1]); } else sl.textContent = '';
+      if (selN) { var o = M.by[selN]; sl.textContent = prefLabel(o); sl.setAttribute('x', o.c[0]); sl.setAttribute('y', o.c[1]); } else sl.textContent = '';
+    }
+    function relabel() {
+      svg.classList.toggle('jm-lat', mapMode() !== 'k');
+      host.querySelectorAll('.jm-mode button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.ml === mapMode())); });
+      host.querySelectorAll('.jm-chip').forEach(function (c) { c.querySelector('.jm-cl').textContent = regLabel(M, c.dataset.r); });
+      svg.querySelectorAll('.jm-t').forEach(function (t) { t.textContent = regLabel(M, t.dataset.r, true); });
+      paint();
     }
     function showPref(n) {
       var o = M.by[n], r = M.reg[o.r]; selN = n; selR = o.r; paint();
@@ -75,6 +92,7 @@
     svg.addEventListener('click', function (e) { if (moved) { moved = false; return; } var p = e.target.closest && e.target.closest('.jm-p'); if (p) showPref(p.dataset.n); });
     host.addEventListener('click', function (e) {
       var t = e.target.closest('button'); if (!t) return;
+      if (t.dataset.ml) { ST.mapl = t.dataset.ml; save(); relabel(); return; }
       if (t.dataset.z) { if (t.dataset.z === 'in') zoomAt(.6, [vb[0] + vb[2] / 2, vb[1] + vb[3] / 2]); else if (t.dataset.z === 'out') zoomAt(1 / .6, [vb[0] + vb[2] / 2, vb[1] + vb[3] / 2]); else { vb = base.slice(); setVb(); selN = null; selR = null; paint(); card.innerHTML = '<p class="jm-hint">Touche une préfecture ou une région.</p>'; } }
       else if (t.classList.contains('jm-chip')) { if (selR === t.dataset.r && !selN) { selR = null; paint(); card.innerHTML = '<p class="jm-hint">Touche une préfecture ou une région.</p>'; } else showReg(t.dataset.r); }
       else if (t.classList.contains('jm-pb')) showPref(t.dataset.n);

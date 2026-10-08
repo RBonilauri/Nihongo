@@ -39,3 +39,5 @@
   .quizcard .qc-t { flex: 1; min-width: 0; font-weight: 600; }
   .quizcard .qc-t small { display: block; font-weight: 400; font-size: .72rem; color: var(--muted); }
   .quizcard .qc-go { color: var(--muted); font-size: 1.4rem; }
+  .jm-mode { margin: .6rem 0 0; }
+  .jm-lat .jm-t { font-size: calc(11px * var(--lf, 1)); } .jm-lat .jm-sl { font-size: calc(10px * var(--lf, 1)); } .jm-lat .jm-t, .jm-lat .jm-sl { stroke-width: 3px; }

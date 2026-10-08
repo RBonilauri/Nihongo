@@ -235,6 +235,16 @@ with sync_playwright() as p:
     check(len(got) == 25 and all(k in top25 for k in got), 'Top 25 : toutes les questions portent sur les 25 plus ratés')
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .x') && document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
 
+    print('Carte : noms en kanji, kana ou rōmaji')
+    r = pg.evaluate("""() => { var out = [], c = function () { return [].map.call(document.querySelectorAll('.jm-chip'), function (b) { return b.innerText.trim(); }).join('|'); };
+      document.querySelector('.jm-svg .jm-p[data-n="京都"]').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      ['k', 'a', 'r'].forEach(function (m) { document.querySelector('.jm-mode [data-ml="' + m + '"]').click(); out.push([c(), document.querySelector('#jm-sl').textContent, document.querySelector('#jm-card .jm-k').textContent, document.querySelector('.jm-t[data-r="kan"]').textContent]); });
+      document.querySelector('.jm-mode [data-ml="k"]').click(); return out; }""")
+    check(r[0][0].startswith('北海道|東北') and r[0][1] == '京都' and r[0][3] == '関東', 'carte en kanji')
+    check(r[1][0].startswith('ほっかいどう|とうほく') and r[1][1] == 'きょうと' and r[1][3] == 'かんとう', 'carte en kana : régions, carte et étiquette')
+    check(r[2][0].startswith('Hokkaidō|Tōhoku') and r[2][1] == 'Kyōto' and r[2][3] == 'Kantō', 'carte en rōmaji : régions, carte et étiquette')
+    check(all(x[2] == '京都' for x in r), 'la fiche du bas ne change pas')
+
     print('Ma progression')
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
     pg.click('.nstats'); pg.wait_for_timeout(300)
