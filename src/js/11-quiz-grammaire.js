@@ -147,6 +147,7 @@
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = TITLE; prog.textContent = ''; barI.style.width = '0';
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var hasC = cfg.types.indexOf('c2f') >= 0 || cfg.types.indexOf('f2c') >= 0, wc = wrongCount(), h = '';

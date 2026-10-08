@@ -117,6 +117,7 @@
 
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz vocabulaire'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var cnt = {}; VD.forEach(function (x) { cnt[x.c] = (cnt[x.c] || 0) + 1; });

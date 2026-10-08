@@ -114,6 +114,7 @@
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz compteurs'; prog.textContent = ''; barI.style.width = '0';
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';

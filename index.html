@@ -6182,6 +6182,7 @@ table.stack td.kdup > * { display: none; }
     } catch (e) {}
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
     cfg.types = cfg.types.filter(function (t) { return QT.some(function (z) { return z.id === t; }); });
+    if (!cfg.types.length) cfg.types = QT.map(function (t) { return t.id; });
     if (!Array.isArray(cfg.lv)) cfg.lv = (cfg.lv === 'ALL' || !cfg.lv) ? ['N5', 'N4', 'N3'] : [cfg.lv];
     cfg.lv = cfg.lv.filter(function (l) { return ['N5', 'N4', 'N3'].indexOf(l) >= 0; }); if (!cfg.lv.length) cfg.lv = ['N5'];
     var Q = null;
@@ -6304,6 +6305,7 @@ table.stack td.kdup > * { display: none; }
     /* — affichage — */
     function chipBtn(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz kanji'; prog.textContent = ''; barI.style.width = '0';
       var ps = poolSize(cfg.lv, cfg.types, cfg.wrong);
       if (cfg.n !== 0 && cfg.n > ps.q) cfg.n = 0;
@@ -6524,6 +6526,7 @@ table.stack td.kdup > * { display: none; }
 
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz vocabulaire'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var cnt = {}; VD.forEach(function (x) { cnt[x.c] = (cnt[x.c] || 0) + 1; });
@@ -6780,6 +6783,7 @@ table.stack td.kdup > * { display: none; }
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = TITLE; prog.textContent = ''; barI.style.width = '0';
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var hasC = cfg.types.indexOf('c2f') >= 0 || cfg.types.indexOf('f2c') >= 0, wc = wrongCount(), h = '';
@@ -7001,6 +7005,7 @@ table.stack td.kdup > * { display: none; }
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz compteurs'; prog.textContent = ''; barI.style.width = '0';
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
@@ -7420,6 +7425,7 @@ table.stack td.kdup > * { display: none; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function persist() { ST.gqc = cfg; save(); }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz géographie'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';

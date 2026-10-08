@@ -205,6 +205,15 @@ with sync_playwright() as p:
     check(pg.evaluate("!document.querySelector('.ntrip')"), 'option « masquer » : la carte disparaît')
     pg.click('#menu'); pg.wait_for_timeout(400); pg.click('#sw-trip'); pg.click('#trip-clear'); pg.click('#dr-close'); pg.wait_for_timeout(300)
 
+    print('Mode « seulement mes ratés » sans raté')
+    pg.evaluate("""() => { var s = JSON.parse(localStorage['jp-state']); ['kqc','vqc','gqc','gqc_c','gqc_p','cqc'].forEach(function (k) { if (s[k]) s[k].wrong = true; }); ['kq','vq','gq','gq_c','gq_p','cq'].forEach(function (k) { Object.keys(s[k] || {}).forEach(function (i) { s[k][i].w = false; }); }); localStorage['jp-state'] = JSON.stringify(s); }""")
+    for qi in range(6):
+        pg.reload(); pg.wait_for_timeout(900)
+        pg.evaluate("[...document.querySelectorAll('button.quizcard')][%d].click()" % qi); pg.wait_for_timeout(300)
+        r = pg.evaluate("(() => { var q = document.querySelector('.quiz:not([hidden])'), sw = q.querySelector('button.sw[role=switch]'), go = [...q.querySelectorAll('button')].find(b => /^Lancer/.test(b.innerText)); return [sw && sw.getAttribute('aria-checked'), go && !go.disabled]; })()")
+        check(r[0] == 'false' and r[1], 'quiz %d : aucun raté → mode ratés désactivé, lancement possible' % qi)
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
+
     print('Ma progression')
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
     pg.click('.nstats'); pg.wait_for_timeout(300)

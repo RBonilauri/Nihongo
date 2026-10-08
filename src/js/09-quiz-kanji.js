@@ -33,6 +33,7 @@
     } catch (e) {}
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
     cfg.types = cfg.types.filter(function (t) { return QT.some(function (z) { return z.id === t; }); });
+    if (!cfg.types.length) cfg.types = QT.map(function (t) { return t.id; });
     if (!Array.isArray(cfg.lv)) cfg.lv = (cfg.lv === 'ALL' || !cfg.lv) ? ['N5', 'N4', 'N3'] : [cfg.lv];
     cfg.lv = cfg.lv.filter(function (l) { return ['N5', 'N4', 'N3'].indexOf(l) >= 0; }); if (!cfg.lv.length) cfg.lv = ['N5'];
     var Q = null;
@@ -155,6 +156,7 @@
     /* — affichage — */
     function chipBtn(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz kanji'; prog.textContent = ''; barI.style.width = '0';
       var ps = poolSize(cfg.lv, cfg.types, cfg.wrong);
       if (cfg.n !== 0 && cfg.n > ps.q) cfg.n = 0;

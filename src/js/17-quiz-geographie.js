@@ -87,6 +87,7 @@
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function persist() { ST.gqc = cfg; save(); }
     function showSetup() {
+      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
       Q = null; ttl.textContent = 'Quiz géographie'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
