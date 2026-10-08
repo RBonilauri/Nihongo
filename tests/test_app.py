@@ -245,6 +245,14 @@ with sync_playwright() as p:
     check(r[2][0].startswith('Hokkaidō|Tōhoku') and r[2][1] == 'Kyōto' and r[2][3] == 'Kantō', 'carte en rōmaji : régions, carte et étiquette')
     check(all(x[2] == '京都' for x in r), 'la fiche du bas ne change pas')
 
+    print('Mode nuit : sélections renforcées')
+    pg.evaluate("document.documentElement.setAttribute('data-theme', 'dark')")
+    pg.evaluate("[...document.querySelectorAll('button.quizcard')].find(b => /quiz kanji/i.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    r = pg.evaluate("(() => { var c = document.querySelector('.quiz:not([hidden]) .qchip.on'), st = getComputedStyle(c), af = getComputedStyle(c, '::before'); return [st.backgroundColor, st.color, af.content]; })()")
+    check(r[0] == 'rgb(244, 239, 230)' and r[1] == 'rgb(28, 21, 16)' and '✓' in r[2], 'pastille sélectionnée : fond clair, texte sombre, coche (%s)' % r)
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
+    pg.evaluate("document.documentElement.setAttribute('data-theme', 'light')")
+
     print('Ma progression')
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
     pg.click('.nstats'); pg.wait_for_timeout(300)

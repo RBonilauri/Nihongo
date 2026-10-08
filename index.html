@@ -730,6 +730,28 @@ table.stack td.kdup > * { display: none; }
 }
 .exs { min-width: 12rem; }
 
+  /* ── mode nuit : sélections renforcées (daltonisme) : fond inversé, anneau, coche, gras ── */
+  @media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .qchip.on, :root:not([data-theme="light"]) .scopes .chip.on, :root:not([data-theme="light"]) .seg button[aria-pressed="true"], :root:not([data-theme="light"]) .jm-chip.on, :root:not([data-theme="light"]) .fab.on { background: #f4efe6; color: #1c1510; border-color: #ffffff; box-shadow: 0 0 0 2px #f4efe6; font-weight: 700; }
+  :root:not([data-theme="light"]) .qchip.on::before, :root:not([data-theme="light"]) .scopes .chip.on::before, :root:not([data-theme="light"]) .seg button[aria-pressed="true"]::before { content: "✓ "; }
+  :root:not([data-theme="light"]) .jm-chip.on i { border-color: #1c1510; }
+  :root:not([data-theme="light"]) .sw[aria-checked="true"] { background: #f4efe6; box-shadow: 0 0 0 2px #ffffff; }
+  :root:not([data-theme="light"]) .sw[aria-checked="true"] i { background: #1c1510; }
+  :root:not([data-theme="light"]) .sw[aria-checked="false"] { background: #3a3027; box-shadow: inset 0 0 0 2px #6d6054; }
+  :root:not([data-theme="light"]) .tabbar button.on { color: #ffffff; }
+  :root:not([data-theme="light"]) .tabbar button.on::after { background: #f4efe6; height: 4px; width: 30px; }
+  :root:not([data-theme="light"]) .p-sel, :root:not([data-theme="light"]) .jm-p.jm-sel { stroke: #ffffff; stroke-width: 3.2; }
+  }
+  :root[data-theme="dark"] .qchip.on, :root[data-theme="dark"] .scopes .chip.on, :root[data-theme="dark"] .seg button[aria-pressed="true"], :root[data-theme="dark"] .jm-chip.on, :root[data-theme="dark"] .fab.on { background: #f4efe6; color: #1c1510; border-color: #ffffff; box-shadow: 0 0 0 2px #f4efe6; font-weight: 700; }
+  :root[data-theme="dark"] .qchip.on::before, :root[data-theme="dark"] .scopes .chip.on::before, :root[data-theme="dark"] .seg button[aria-pressed="true"]::before { content: "✓ "; }
+  :root[data-theme="dark"] .jm-chip.on i { border-color: #1c1510; }
+  :root[data-theme="dark"] .sw[aria-checked="true"] { background: #f4efe6; box-shadow: 0 0 0 2px #ffffff; }
+  :root[data-theme="dark"] .sw[aria-checked="true"] i { background: #1c1510; }
+  :root[data-theme="dark"] .sw[aria-checked="false"] { background: #3a3027; box-shadow: inset 0 0 0 2px #6d6054; }
+  :root[data-theme="dark"] .tabbar button.on { color: #ffffff; }
+  :root[data-theme="dark"] .tabbar button.on::after { background: #f4efe6; height: 4px; width: 30px; }
+  :root[data-theme="dark"] .p-sel, :root[data-theme="dark"] .jm-p.jm-sel { stroke: #ffffff; stroke-width: 3.2; }
+
   /* ═══ NAVIGATION PAR PAGES ═══ */
   html.js .drawer { left: auto; right: 0; transform: translateX(104%); }
   html.js body.nav-open .drawer { transform: none; }
