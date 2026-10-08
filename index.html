@@ -1058,6 +1058,8 @@ table.stack td.kdup > * { display: none; }
   @keyframes qpop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes qbounce { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-8px) rotate(6deg); } }
   @media (prefers-reduced-motion: reduce) { .q-score.perfect, .q-crown .q-em { animation: none; } }
+  .qmiss { margin: .3rem 0 0; padding: .6rem 0 .2rem; }
+  .qmiss > small { display: block; color: var(--muted); font-size: .75rem; margin-bottom: .5rem; }
 </style>
 </head>
 <body>
@@ -5598,6 +5600,35 @@ table.stack td.kdup > * { display: none; }
   /* ── état persistant ── */
   var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, chart: 'bar', range: '7', fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
+  /* ── « plus ratés » : classement par erreurs cumulées, partagé par tous les quiz ── */
+  function missCnt(v) { return (v && (v.x || (v.w ? 1 : 0))) || 0; }
+  function missKeys(items, valid) {
+    items = items || {};
+    return Object.keys(items).filter(function (k) { return missCnt(items[k]) > 0 && (!valid || valid(k)); }).sort(function (a, b) {
+      var A = items[a], B = items[b], xa = missCnt(A), xb = missCnt(B); return xb - xa || (xb / (B.n || 1)) - (xa / (A.n || 1)) || (B.n || 0) - (A.n || 0);
+    });
+  }
+  function missFix(cfg, items, wc, valid) {
+    var hc = missKeys(items, valid).length;
+    if (!hc) { cfg.wrong = false; cfg.top = 0; }
+    else if (cfg.wrong) { if (cfg.top > 0 && cfg.top > hc) cfg.top = 'all'; if (!cfg.top && !wc) cfg.top = 'all'; }
+    return hc;
+  }
+  function missSet(cfg, items, valid) {
+    if (!cfg.wrong || !cfg.top) return null;
+    var ks = missKeys(items, valid), set = {}; (cfg.top === 'all' ? ks : ks.slice(0, cfg.top)).forEach(function (k) { set[k] = 1; }); return set;
+  }
+  function missPass(cfg, items, id, ts) { if (!cfg.wrong) return true; if (ts) return !!ts[id]; return !!(items[id] && items[id].w); }
+  function missUi(cfg, items, wc, valid) {
+    var hc = missKeys(items, valid).length, opts = [];
+    if (wc) opts.push([0, 'En cours · ' + wc]);
+    [10, 25, 50, 100].forEach(function (n) { if (hc >= n) opts.push([n, 'Top ' + n]); });
+    opts.push(['all', 'Tout l’historique · ' + hc]);
+    var cur = cfg.top || 0;
+    return '<div class="qmiss"><small>Cibler : ' + (cur === 0 ? 'les ratés pas encore corrigés' : cur === 'all' ? 'tout ce que tu as déjà raté' : 'les ' + cur + ' plus ratés (erreurs cumulées)') + '</small><div class="qchips">' +
+      opts.map(function (o) { return '<button type="button" class="qchip' + (cur === o[0] ? ' on' : '') + '" data-top="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div></div>';
+  }
+  function missTop(cfg, v) { cfg.top = v === 'all' ? 'all' : +v; if (cfg.top > 0) cfg.n = cfg.top; }
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
   function dkey(t) { var d = t ? new Date(t) : new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
@@ -6235,9 +6266,9 @@ table.stack td.kdup > * { display: none; }
     function senseToks(sn) { return sn.toLowerCase().split(/\s*[\/,;]\s*/).map(function (t) { return t.replace(/\(.*?\)/g, '').trim(); }).filter(Boolean); }
     function disjoint(a, b) { return !a.some(function (x) { return b.indexOf(x) >= 0; }); }
     function poolSize(lv, types, onlyWrong) {
-      var n = 0, kanji = 0;
+      var n = 0, kanji = 0, ts = onlyWrong ? missSet(cfg, ST.kq, function (k) { return !!byK[k]; }) : null;
       levelPool(lv).forEach(function (x) {
-        if (onlyWrong && !(ST.kq[x.k] && ST.kq[x.k].w)) return;
+        if (onlyWrong && !missPass(cfg, ST.kq, x.k, ts)) return;
         var c = types.filter(function (t) { return elig(x, t); }).length; if (c && types.indexOf('w2r') >= 0 && x.kw.length) c += Math.min(x.kw.length, WMAX) - 1; if (c) { n += c; kanji++; }
       });
       return { q: n, k: kanji };
@@ -6246,7 +6277,7 @@ table.stack td.kdup > * { display: none; }
     /* — sélection des questions — */
     function bucket(k) { var s = ST.kq[k]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function buildQuiz() {
-      var pool = levelPool(cfg.lv).filter(function (x) { return !cfg.wrong || (ST.kq[x.k] && ST.kq[x.k].w); });
+      var ts = missSet(cfg, ST.kq, function (k) { return !!byK[k]; }), pool = levelPool(cfg.lv).filter(function (x) { return missPass(cfg, ST.kq, x.k, ts); });
       var order = shuffle(pool.slice()).sort(function (a, b) { return bucket(a.k) - bucket(b.k); });
       var left = {}, wl = {}; order.forEach(function (x) { left[x.k] = shuffle(cfg.types.filter(function (t) { return elig(x, t); })); var nw = left[x.k].indexOf('w2r') >= 0 ? Math.min(x.kw.length, WMAX) : 0; for (var z = 1; z < nw; z++) left[x.k].push('w2r'); left[x.k] = shuffle(left[x.k]); wl[x.k] = shuffle(x.kw.slice()); });
       var tot = 0; order.forEach(function (x) { tot += left[x.k].length; });
@@ -6305,7 +6336,7 @@ table.stack td.kdup > * { display: none; }
     /* — affichage — */
     function chipBtn(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.kq, wrongCount(), function (k) { return !!byK[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz kanji'; prog.textContent = ''; barI.style.width = '0';
       var ps = poolSize(cfg.lv, cfg.types, cfg.wrong);
       if (cfg.n !== 0 && cfg.n > ps.q) cfg.n = 0;
@@ -6313,7 +6344,7 @@ table.stack td.kdup > * { display: none; }
       h += '<div class="q-sec"><h4>Niveau <small>(un ou plusieurs)</small></h4><div class="qchips" id="q-lv">' + ['N5', 'N4', 'N3'].map(function (l) { return chipBtn(l + ' · ' + levelPool(l).length, cfg.lv.indexOf(l) >= 0, 'data-lv="' + l + '"'); }).join('') + chipBtn('Tous · ' + KD.length, cfg.lv.length === 3, 'data-lv="ALL"') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + QT.map(function (t) { return chipBtn(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div><div class="qpre">' + QPRESETS.map(function (p, i) { return '<button type="button" class="mini" data-p="' + i + '">' + p.label + '</button>'; }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + QN.filter(function (n) { return n <= ps.q; }).map(function (n) { return chipBtn(n, cfg.n === n, 'data-n="' + n + '"', n > ps.q); }).join('') + chipBtn('Tout · ' + ps.q, cfg.n === 0, 'data-n="0"', ps.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' kanji à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.kq, wc, function (k) { return !!byK[k]; }) : '') + '</div>';
       var can = cfg.types.length && ps.q > 0;
       h += '<button type="button" class="mini qstat-btn" id="q-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="q-go"' + (can ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? ps.q : Math.min(cfg.n, ps.q)) + ' questions</button>';
@@ -6340,6 +6371,7 @@ table.stack td.kdup > * { display: none; }
       else if (b.dataset.t) { var i = cfg.types.indexOf(b.dataset.t); if (i >= 0) cfg.types.splice(i, 1); else cfg.types.push(b.dataset.t); persist(); showSetup(); }
       else if (b.dataset.p) { cfg.types = QPRESETS[+b.dataset.p].types.slice(); persist(); showSetup(); }
       else if (b.dataset.n !== undefined) { cfg.n = +b.dataset.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'q-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'q-go') { start(buildQuiz()); }
       else if (b.classList.contains('qopt')) answer(b);
@@ -6475,7 +6507,7 @@ table.stack td.kdup > * { display: none; }
     el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); });
 
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-    function pool() { return VD.filter(function (x) { return cfg.cats.indexOf(x.c) >= 0 && !(x.c === 'Vocabulaire' && cfg.vx && cfg.vx.indexOf(x.g) >= 0) && (!cfg.wrong || (ST.vq[x.i] && ST.vq[x.i].w)); }); }
+    function pool() { var ts = missSet(cfg, ST.vq, function (k) { return !!byI[k]; }); return VD.filter(function (x) { return cfg.cats.indexOf(x.c) >= 0 && !(x.c === 'Vocabulaire' && cfg.vx && cfg.vx.indexOf(x.g) >= 0) && missPass(cfg, ST.vq, x.i, ts); }); }
     function earOK(x) { return /[぀-ヿ㐀-鿿]/.test(x.jp) && x.jp.indexOf('…') < 0; }
     function elig(x, t) { return cands(x).length >= 2 && (t !== 'ear' || earOK(x)); }
     function bucket(x) { var s = ST.vq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
@@ -6526,7 +6558,7 @@ table.stack td.kdup > * { display: none; }
 
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.vq, wrongCount(), function (k) { return !!byI[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz vocabulaire'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var cnt = {}; VD.forEach(function (x) { cnt[x.c] = (cnt[x.c] || 0) + 1; });
@@ -6540,7 +6572,7 @@ table.stack td.kdup > * { display: none; }
       }
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + VN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"', n > av.q); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.vq, wc, function (k) { return !!byI[k]; }) : '') + '</div>';
       h += '<button type="button" class="mini qstat-btn" id="v-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="v-go"' + (cfg.cats.length && cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
       body.innerHTML = h; body.scrollTop = 0;
@@ -6562,6 +6594,7 @@ table.stack td.kdup > * { display: none; }
       else if (d.cw) { cfg.cats = ['Vocabulaire', 'Temps', 'Adjectifs', 'Outils']; persist(); showSetup(); }
       else if (d.t) { toggle(cfg.types, d.t); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'v-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'v-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
@@ -6718,7 +6751,7 @@ table.stack td.kdup > * { display: none; }
       return cfg.types.filter(function (t) { return (t === 'p' || t === 'pick' || t === 'role') ? x.c === 'p' && (t !== 'role' || x.p.r) : x.c === 'c' && cfg.fams.indexOf(x.fam) >= 0; }).filter(function (t) { return t !== 'f2c' || uniqueForm(x); });
     }
     function uniqueForm(x) { return Object.keys(x.v.f).every(function (l) { return l === x.l || x.v.f[l] !== x.v.f[x.l]; }); }
-    function pool() { return ALL.filter(function (x) { return typesFor(x).length && (!cfg.wrong || (ST[kq][x.i] && ST[kq][x.i].w)); }); }
+    function pool() { var ts = missSet(cfg, ST[kq], function (k) { return !!byI[k]; }); return ALL.filter(function (x) { return typesFor(x).length && missPass(cfg, ST[kq], x.i, ts); }); }
     function bucket(x) { var s = ST[kq][x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function avail() { var p = pool(), q = 0; p.forEach(function (x) { q += typesFor(x).length; }); return { q: q, k: p.length }; }
     function build() {
@@ -6783,7 +6816,7 @@ table.stack td.kdup > * { display: none; }
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST[kq], wrongCount(), function (k) { return !!byI[k]; }); persist();
       Q = null; ttl.textContent = TITLE; prog.textContent = ''; barI.style.width = '0';
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var hasC = cfg.types.indexOf('c2f') >= 0 || cfg.types.indexOf('f2c') >= 0, wc = wrongCount(), h = '';
@@ -6791,7 +6824,7 @@ table.stack td.kdup > * { display: none; }
       if (!isC) h += '<div class="q-sec"><h4>Contrastes</h4><div class="qchips">' + GPG.map(function (g) { return chip(g.label, cfg.pg.indexOf(g.id) >= 0, 'data-pg="' + g.id + '"'); }).join('') + '</div></div>';
       if (isC) h += '<div class="q-sec"><h4>Formes de conjugaison</h4><div class="qchips">' + GFAM.map(function (f) { return chip(f.label, cfg.fams.indexOf(f.id) >= 0, 'data-f="' + f.id + '"', !hasC); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + GN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"', n > av.q); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST[kq], wc, function (k) { return !!byI[k]; }) : '') + '</div>';
       h += '<button type="button" class="mini qstat-btn" id="g-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="g-go"' + (cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
       body.innerHTML = h; body.scrollTop = 0;
@@ -6810,6 +6843,7 @@ table.stack td.kdup > * { display: none; }
       else if (d.f) { toggle(cfg.fams, d.f); persist(); showSetup(); }
       else if (d.pg) { toggle(cfg.pg, d.pg); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'g-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'g-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
@@ -6959,7 +6993,7 @@ table.stack td.kdup > * { display: none; }
       var want = x.kind === 'r' ? ['rd', 'ear'] : x.kind === 'w' ? ['ct'] : ['us'];
       return ctypes(cfg.types).filter(function (t) { return want.indexOf(t) >= 0 && (t !== 'ear' || (x.r.c !== '階' && x.r.c !== '回')); });
     }
-    function pool() { return ALL.filter(function (x) { return typesFor(x).length && (!cfg.wrong || (ST.cq[x.i] && ST.cq[x.i].w)); }); }
+    function pool() { var ts = missSet(cfg, ST.cq, function (k) { return !!byI[k]; }); return ALL.filter(function (x) { return typesFor(x).length && missPass(cfg, ST.cq, x.i, ts); }); }
     function bucket(x) { var s = ST.cq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function avail() { var p = pool(), q = 0; p.forEach(function (x) { q += typesFor(x).length; }); return { q: q, k: p.length }; }
     function build() {
@@ -7005,14 +7039,14 @@ table.stack td.kdup > * { display: none; }
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.cq, wrongCount(), function (k) { return !!byI[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz compteurs'; prog.textContent = ''; barI.style.width = '0';
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Catégories</h4><div class="qchips">' + CG.map(function (g) { return chip(g.label, cfg.groups.indexOf(g.id) >= 0, 'data-g="' + g.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + CN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="k-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="k-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.cq, wc, function (k) { return !!byI[k]; }) : '') + '</div>';
       h += '<button type="button" class="mini qstat-btn" id="k-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="k-go"' + (cfg.types.length && cfg.groups.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
       body.innerHTML = h; body.scrollTop = 0;
@@ -7026,6 +7060,7 @@ table.stack td.kdup > * { display: none; }
       if (d.g) { toggle(cfg.groups, d.g); persist(); showSetup(); }
       else if (d.t) { toggle(cfg.types, d.t); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'k-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'k-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
@@ -7374,7 +7409,7 @@ table.stack td.kdup > * { display: none; }
       if ((t === 'cap' || t === 'c2p') && x.o.cap === x.o.n) return false;
       return true;
     }
-    function pool() { return ALL.filter(function (x) { return cfg.regs.indexOf(x.r) >= 0 && (!cfg.wrong || (ST.gq[x.i] && ST.gq[x.i].w)); }); }
+    function pool() { var ts = missSet(cfg, ST.gq, function (k) { return !!byI[k]; }); return ALL.filter(function (x) { return cfg.regs.indexOf(x.r) >= 0 && missPass(cfg, ST.gq, x.i, ts); }); }
     function countAvail() { var q = 0, p = pool(); p.forEach(function (x) { q += ctypes(cfg.types).filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
     function bucket(x) { var s = ST.gq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function build() {
@@ -7425,14 +7460,14 @@ table.stack td.kdup > * { display: none; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function persist() { ST.gqc = cfg; save(); }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.gq, wrongCount(), function (k) { return !!byI[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz géographie'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Régions</h4><div class="qchips">' + RIDS.map(function (r) { return chip(r === 'w' ? WLAB + ' · ' + GW.length : esc(M.reg[r][0]) + ' · ' + M.p.filter(function (o) { return o.r === r; }).length, cfg.regs.indexOf(r) >= 0, 'data-r="' + r + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + GN2.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.gq, wc, function (k) { return !!byI[k]; }) : '') + '</div>';
       h += '<button type="button" class="mini qstat-btn" id="g-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="g-go"' + (cfg.regs.length && cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
       body.innerHTML = h; body.scrollTop = 0;
@@ -7552,6 +7587,7 @@ table.stack td.kdup > * { display: none; }
       if (d.r) { toggle(cfg.regs, d.r); persist(); showSetup(); }
       else if (d.t) { toggle(cfg.types, d.t); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'g-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'g-go') { start(build()); }
       else if (b.id === 'g-stats') { showStats(); }

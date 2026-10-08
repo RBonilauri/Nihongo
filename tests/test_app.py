@@ -206,13 +206,34 @@ with sync_playwright() as p:
     pg.click('#menu'); pg.wait_for_timeout(400); pg.click('#sw-trip'); pg.click('#trip-clear'); pg.click('#dr-close'); pg.wait_for_timeout(300)
 
     print('Mode « seulement mes ratés » sans raté')
-    pg.evaluate("""() => { var s = JSON.parse(localStorage['jp-state']); ['kqc','vqc','gqc','gqc_c','gqc_p','cqc'].forEach(function (k) { if (s[k]) s[k].wrong = true; }); ['kq','vq','gq','gq_c','gq_p','cq'].forEach(function (k) { Object.keys(s[k] || {}).forEach(function (i) { s[k][i].w = false; }); }); localStorage['jp-state'] = JSON.stringify(s); }""")
+    pg.evaluate("""() => { var s = JSON.parse(localStorage['jp-state']); ['kqc','vqc','gqc','gqc_c','gqc_p','cqc'].forEach(function (k) { if (s[k]) s[k].wrong = true; }); ['kq','vq','gq','gq_c','gq_p','cq'].forEach(function (k) { Object.keys(s[k] || {}).forEach(function (i) { s[k][i].w = false; s[k][i].x = 0; }); }); localStorage['jp-state'] = JSON.stringify(s); }""")
     for qi in range(6):
         pg.reload(); pg.wait_for_timeout(900)
         pg.evaluate("[...document.querySelectorAll('button.quizcard')][%d].click()" % qi); pg.wait_for_timeout(300)
         r = pg.evaluate("(() => { var q = document.querySelector('.quiz:not([hidden])'), sw = q.querySelector('button.sw[role=switch]'), go = [...q.querySelectorAll('button')].find(b => /^Lancer/.test(b.innerText)); return [sw && sw.getAttribute('aria-checked'), go && !go.disabled]; })()")
         check(r[0] == 'false' and r[1], 'quiz %d : aucun raté → mode ratés désactivé, lancement possible' % qi)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
+
+    print('Quiz : cibler les plus ratés')
+    pg.reload(); pg.wait_for_timeout(900)
+    pg.evaluate("""() => { var kd = JSON.parse(document.getElementById('kanji-data').textContent), s = JSON.parse(localStorage['jp-state']); s.kq = {}; s.kqc = { lv: ['N5','N4','N3'], types: ['k2s'], n: 25, wrong: false, top: 0 };
+      kd.slice(0, 60).forEach(function (k, i) { s.kq[k.k] = { n: 20, st: 0, w: i < 3, x: 60 - i }; }); localStorage['jp-state'] = JSON.stringify(s); }""")
+    pg.reload(); pg.wait_for_timeout(900)
+    top25 = pg.evaluate("JSON.parse(document.getElementById('kanji-data').textContent).slice(0, 25).map(function (k) { return k.k; })")
+    pg.evaluate("[...document.querySelectorAll('button.quizcard')].find(b => /quiz kanji/i.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    pg.click('.quiz:not([hidden]) #q-wrong'); pg.wait_for_timeout(200)
+    opts = pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) .qmiss [data-top]')].map(b => b.dataset.top)")
+    check(opts == ['0', '10', '25', '50', 'all'], 'options Top 10/25/50 affichées, Top 100 masquée (60 ratés) : %s' % opts)
+    pg.click('.quiz:not([hidden]) [data-top="25"]'); pg.wait_for_timeout(200)
+    check(pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].some(b => /^Lancer · 25 questions/.test(b.innerText))"), 'Top 25 : 25 questions proposées')
+    pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Lancer/.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    got = []
+    for _ in range(25):
+        got.append((pg.evaluate("(document.querySelector('.quiz:not([hidden]) .q-big') || {innerText: ''}).innerText") or '').strip()[:1])
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
+        pg.evaluate("(() => { var n = document.querySelector('.quiz:not([hidden]) #q-next'); if (n) n.click(); })()"); pg.wait_for_timeout(60)
+    check(len(got) == 25 and all(k in top25 for k in got), 'Top 25 : toutes les questions portent sur les 25 plus ratés')
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .x') && document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
 
     print('Ma progression')
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)

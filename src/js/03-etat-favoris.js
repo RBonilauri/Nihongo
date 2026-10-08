@@ -1,6 +1,35 @@
   /* ── état persistant ── */
   var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, chart: 'bar', range: '7', fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
+  /* ── « plus ratés » : classement par erreurs cumulées, partagé par tous les quiz ── */
+  function missCnt(v) { return (v && (v.x || (v.w ? 1 : 0))) || 0; }
+  function missKeys(items, valid) {
+    items = items || {};
+    return Object.keys(items).filter(function (k) { return missCnt(items[k]) > 0 && (!valid || valid(k)); }).sort(function (a, b) {
+      var A = items[a], B = items[b], xa = missCnt(A), xb = missCnt(B); return xb - xa || (xb / (B.n || 1)) - (xa / (A.n || 1)) || (B.n || 0) - (A.n || 0);
+    });
+  }
+  function missFix(cfg, items, wc, valid) {
+    var hc = missKeys(items, valid).length;
+    if (!hc) { cfg.wrong = false; cfg.top = 0; }
+    else if (cfg.wrong) { if (cfg.top > 0 && cfg.top > hc) cfg.top = 'all'; if (!cfg.top && !wc) cfg.top = 'all'; }
+    return hc;
+  }
+  function missSet(cfg, items, valid) {
+    if (!cfg.wrong || !cfg.top) return null;
+    var ks = missKeys(items, valid), set = {}; (cfg.top === 'all' ? ks : ks.slice(0, cfg.top)).forEach(function (k) { set[k] = 1; }); return set;
+  }
+  function missPass(cfg, items, id, ts) { if (!cfg.wrong) return true; if (ts) return !!ts[id]; return !!(items[id] && items[id].w); }
+  function missUi(cfg, items, wc, valid) {
+    var hc = missKeys(items, valid).length, opts = [];
+    if (wc) opts.push([0, 'En cours · ' + wc]);
+    [10, 25, 50, 100].forEach(function (n) { if (hc >= n) opts.push([n, 'Top ' + n]); });
+    opts.push(['all', 'Tout l’historique · ' + hc]);
+    var cur = cfg.top || 0;
+    return '<div class="qmiss"><small>Cibler : ' + (cur === 0 ? 'les ratés pas encore corrigés' : cur === 'all' ? 'tout ce que tu as déjà raté' : 'les ' + cur + ' plus ratés (erreurs cumulées)') + '</small><div class="qchips">' +
+      opts.map(function (o) { return '<button type="button" class="qchip' + (cur === o[0] ? ' on' : '') + '" data-top="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div></div>';
+  }
+  function missTop(cfg, v) { cfg.top = v === 'all' ? 'all' : +v; if (cfg.top > 0) cfg.n = cfg.top; }
   function save() { try { localStorage.setItem('jp-state', JSON.stringify(ST)); } catch (e) {} }
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
   function dkey(t) { var d = t ? new Date(t) : new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }

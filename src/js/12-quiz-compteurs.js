@@ -68,7 +68,7 @@
       var want = x.kind === 'r' ? ['rd', 'ear'] : x.kind === 'w' ? ['ct'] : ['us'];
       return ctypes(cfg.types).filter(function (t) { return want.indexOf(t) >= 0 && (t !== 'ear' || (x.r.c !== '階' && x.r.c !== '回')); });
     }
-    function pool() { return ALL.filter(function (x) { return typesFor(x).length && (!cfg.wrong || (ST.cq[x.i] && ST.cq[x.i].w)); }); }
+    function pool() { var ts = missSet(cfg, ST.cq, function (k) { return !!byI[k]; }); return ALL.filter(function (x) { return typesFor(x).length && missPass(cfg, ST.cq, x.i, ts); }); }
     function bucket(x) { var s = ST.cq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function avail() { var p = pool(), q = 0; p.forEach(function (x) { q += typesFor(x).length; }); return { q: q, k: p.length }; }
     function build() {
@@ -114,14 +114,14 @@
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.cq, wrongCount(), function (k) { return !!byI[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz compteurs'; prog.textContent = ''; barI.style.width = '0';
       var av = avail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Catégories</h4><div class="qchips">' + CG.map(function (g) { return chip(g.label, cfg.groups.indexOf(g.id) >= 0, 'data-g="' + g.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + CN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="k-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="k-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.cq, wc, function (k) { return !!byI[k]; }) : '') + '</div>';
       h += '<button type="button" class="mini qstat-btn" id="k-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="k-go"' + (cfg.types.length && cfg.groups.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
       body.innerHTML = h; body.scrollTop = 0;
@@ -135,6 +135,7 @@
       if (d.g) { toggle(cfg.groups, d.g); persist(); showSetup(); }
       else if (d.t) { toggle(cfg.types, d.t); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'k-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'k-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);

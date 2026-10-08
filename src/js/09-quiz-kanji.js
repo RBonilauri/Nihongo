@@ -86,9 +86,9 @@
     function senseToks(sn) { return sn.toLowerCase().split(/\s*[\/,;]\s*/).map(function (t) { return t.replace(/\(.*?\)/g, '').trim(); }).filter(Boolean); }
     function disjoint(a, b) { return !a.some(function (x) { return b.indexOf(x) >= 0; }); }
     function poolSize(lv, types, onlyWrong) {
-      var n = 0, kanji = 0;
+      var n = 0, kanji = 0, ts = onlyWrong ? missSet(cfg, ST.kq, function (k) { return !!byK[k]; }) : null;
       levelPool(lv).forEach(function (x) {
-        if (onlyWrong && !(ST.kq[x.k] && ST.kq[x.k].w)) return;
+        if (onlyWrong && !missPass(cfg, ST.kq, x.k, ts)) return;
         var c = types.filter(function (t) { return elig(x, t); }).length; if (c && types.indexOf('w2r') >= 0 && x.kw.length) c += Math.min(x.kw.length, WMAX) - 1; if (c) { n += c; kanji++; }
       });
       return { q: n, k: kanji };
@@ -97,7 +97,7 @@
     /* — sélection des questions — */
     function bucket(k) { var s = ST.kq[k]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function buildQuiz() {
-      var pool = levelPool(cfg.lv).filter(function (x) { return !cfg.wrong || (ST.kq[x.k] && ST.kq[x.k].w); });
+      var ts = missSet(cfg, ST.kq, function (k) { return !!byK[k]; }), pool = levelPool(cfg.lv).filter(function (x) { return missPass(cfg, ST.kq, x.k, ts); });
       var order = shuffle(pool.slice()).sort(function (a, b) { return bucket(a.k) - bucket(b.k); });
       var left = {}, wl = {}; order.forEach(function (x) { left[x.k] = shuffle(cfg.types.filter(function (t) { return elig(x, t); })); var nw = left[x.k].indexOf('w2r') >= 0 ? Math.min(x.kw.length, WMAX) : 0; for (var z = 1; z < nw; z++) left[x.k].push('w2r'); left[x.k] = shuffle(left[x.k]); wl[x.k] = shuffle(x.kw.slice()); });
       var tot = 0; order.forEach(function (x) { tot += left[x.k].length; });
@@ -156,7 +156,7 @@
     /* — affichage — */
     function chipBtn(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.kq, wrongCount(), function (k) { return !!byK[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz kanji'; prog.textContent = ''; barI.style.width = '0';
       var ps = poolSize(cfg.lv, cfg.types, cfg.wrong);
       if (cfg.n !== 0 && cfg.n > ps.q) cfg.n = 0;
@@ -164,7 +164,7 @@
       h += '<div class="q-sec"><h4>Niveau <small>(un ou plusieurs)</small></h4><div class="qchips" id="q-lv">' + ['N5', 'N4', 'N3'].map(function (l) { return chipBtn(l + ' · ' + levelPool(l).length, cfg.lv.indexOf(l) >= 0, 'data-lv="' + l + '"'); }).join('') + chipBtn('Tous · ' + KD.length, cfg.lv.length === 3, 'data-lv="ALL"') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + QT.map(function (t) { return chipBtn(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div><div class="qpre">' + QPRESETS.map(function (p, i) { return '<button type="button" class="mini" data-p="' + i + '">' + p.label + '</button>'; }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + QN.filter(function (n) { return n <= ps.q; }).map(function (n) { return chipBtn(n, cfg.n === n, 'data-n="' + n + '"', n > ps.q); }).join('') + chipBtn('Tout · ' + ps.q, cfg.n === 0, 'data-n="0"', ps.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' kanji à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="q-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.kq, wc, function (k) { return !!byK[k]; }) : '') + '</div>';
       var can = cfg.types.length && ps.q > 0;
       h += '<button type="button" class="mini qstat-btn" id="q-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="q-go"' + (can ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? ps.q : Math.min(cfg.n, ps.q)) + ' questions</button>';
@@ -191,6 +191,7 @@
       else if (b.dataset.t) { var i = cfg.types.indexOf(b.dataset.t); if (i >= 0) cfg.types.splice(i, 1); else cfg.types.push(b.dataset.t); persist(); showSetup(); }
       else if (b.dataset.p) { cfg.types = QPRESETS[+b.dataset.p].types.slice(); persist(); showSetup(); }
       else if (b.dataset.n !== undefined) { cfg.n = +b.dataset.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'q-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'q-go') { start(buildQuiz()); }
       else if (b.classList.contains('qopt')) answer(b);

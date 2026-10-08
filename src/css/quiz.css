@@ -115,3 +115,5 @@
   @keyframes qpop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes qbounce { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-8px) rotate(6deg); } }
   @media (prefers-reduced-motion: reduce) { .q-score.perfect, .q-crown .q-em { animation: none; } }
+  .qmiss { margin: .3rem 0 0; padding: .6rem 0 .2rem; }
+  .qmiss > small { display: block; color: var(--muted); font-size: .75rem; margin-bottom: .5rem; }

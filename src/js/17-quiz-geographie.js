@@ -36,7 +36,7 @@
       if ((t === 'cap' || t === 'c2p') && x.o.cap === x.o.n) return false;
       return true;
     }
-    function pool() { return ALL.filter(function (x) { return cfg.regs.indexOf(x.r) >= 0 && (!cfg.wrong || (ST.gq[x.i] && ST.gq[x.i].w)); }); }
+    function pool() { var ts = missSet(cfg, ST.gq, function (k) { return !!byI[k]; }); return ALL.filter(function (x) { return cfg.regs.indexOf(x.r) >= 0 && missPass(cfg, ST.gq, x.i, ts); }); }
     function countAvail() { var q = 0, p = pool(); p.forEach(function (x) { q += ctypes(cfg.types).filter(function (t) { return elig(x, t); }).length; }); return { q: q, k: p.length }; }
     function bucket(x) { var s = ST.gq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function build() {
@@ -87,14 +87,14 @@
     function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
     function persist() { ST.gqc = cfg; save(); }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.gq, wrongCount(), function (k) { return !!byI[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz géographie'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var wc = wrongCount(), h = '';
       h += '<div class="q-sec"><h4>Régions</h4><div class="qchips">' + RIDS.map(function (r) { return chip(r === 'w' ? WLAB + ' · ' + GW.length : esc(M.reg[r][0]) + ' · ' + M.p.filter(function (o) { return o.r === r; }).length, cfg.regs.indexOf(r) >= 0, 'data-r="' + r + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + GN2.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"'); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="g-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.gq, wc, function (k) { return !!byI[k]; }) : '') + '</div>';
       h += '<button type="button" class="mini qstat-btn" id="g-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="g-go"' + (cfg.regs.length && cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
       body.innerHTML = h; body.scrollTop = 0;
@@ -214,6 +214,7 @@
       if (d.r) { toggle(cfg.regs, d.r); persist(); showSetup(); }
       else if (d.t) { toggle(cfg.types, d.t); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'g-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'g-go') { start(build()); }
       else if (b.id === 'g-stats') { showStats(); }

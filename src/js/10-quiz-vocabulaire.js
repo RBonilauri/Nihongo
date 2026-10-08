@@ -66,7 +66,7 @@
     el.querySelector('.x').addEventListener('click', function () { if (Q && Q.mix) { Q.mix.quit(); return; } open(false); });
 
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-    function pool() { return VD.filter(function (x) { return cfg.cats.indexOf(x.c) >= 0 && !(x.c === 'Vocabulaire' && cfg.vx && cfg.vx.indexOf(x.g) >= 0) && (!cfg.wrong || (ST.vq[x.i] && ST.vq[x.i].w)); }); }
+    function pool() { var ts = missSet(cfg, ST.vq, function (k) { return !!byI[k]; }); return VD.filter(function (x) { return cfg.cats.indexOf(x.c) >= 0 && !(x.c === 'Vocabulaire' && cfg.vx && cfg.vx.indexOf(x.g) >= 0) && missPass(cfg, ST.vq, x.i, ts); }); }
     function earOK(x) { return /[぀-ヿ㐀-鿿]/.test(x.jp) && x.jp.indexOf('…') < 0; }
     function elig(x, t) { return cands(x).length >= 2 && (t !== 'ear' || earOK(x)); }
     function bucket(x) { var s = ST.vq[x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
@@ -117,7 +117,7 @@
 
     function chip(label, on, data, dis) { return '<button type="button" class="qchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' ' + data + '>' + label + '</button>'; }
     function showSetup() {
-      if (cfg.wrong && !wrongCount()) { cfg.wrong = false; persist(); } /* plus aucun raté : le mode « seulement mes ratés » ne doit pas rester bloqué */
+      var hc = missFix(cfg, ST.vq, wrongCount(), function (k) { return !!byI[k]; }); persist();
       Q = null; ttl.textContent = 'Quiz vocabulaire'; prog.textContent = ''; barI.style.width = '0';
       var av = countAvail(); if (cfg.n !== 0 && cfg.n > av.q) cfg.n = 0;
       var cnt = {}; VD.forEach(function (x) { cnt[x.c] = (cnt[x.c] || 0) + 1; });
@@ -131,7 +131,7 @@
       }
       h += '<div class="q-sec"><h4>Types de questions</h4><div class="qchips">' + types.filter(function (t) { return !(ST.silent && t.id === 'ear'); }).map(function (t) { return chip(t.label, cfg.types.indexOf(t.id) >= 0, 'data-t="' + t.id + '"'); }).join('') + '</div></div>';
       h += '<div class="q-sec"><h4>Nombre de questions</h4><div class="qchips">' + VN.filter(function (n) { return n <= av.q; }).map(function (n) { return chip(n, cfg.n === n, 'data-n="' + n + '"', n > av.q); }).join('') + chip('Tout · ' + av.q, cfg.n === 0, 'data-n="0"', av.q === 0) + '</div></div>';
-      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (wc ? wc + ' à revoir' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (wc ? '' : ' disabled') + '><i></i></button></div></div>';
+      h += '<div class="q-sec"><div class="row"><span class="lab">Seulement mes ratés<small>' + (hc ? wc + ' à revoir · ' + hc + ' déjà ratés' : 'Aucun raté pour l’instant') + '</small></span><button class="sw" type="button" id="v-wrong" role="switch" aria-checked="' + !!cfg.wrong + '"' + (hc ? '' : ' disabled') + '><i></i></button></div>' + (cfg.wrong ? missUi(cfg, ST.vq, wc, function (k) { return !!byI[k]; }) : '') + '</div>';
       h += '<button type="button" class="mini qstat-btn" id="v-stats">📊 Statistiques</button>';
       h += '<button type="button" class="qgo" id="v-go"' + (cfg.cats.length && cfg.types.length && av.q ? '' : ' disabled') + '>Lancer · ' + (cfg.n === 0 ? av.q : Math.min(cfg.n, av.q)) + ' questions</button>';
       body.innerHTML = h; body.scrollTop = 0;
@@ -153,6 +153,7 @@
       else if (d.cw) { cfg.cats = ['Vocabulaire', 'Temps', 'Adjectifs', 'Outils']; persist(); showSetup(); }
       else if (d.t) { toggle(cfg.types, d.t); persist(); showSetup(); }
       else if (d.n !== undefined) { cfg.n = +d.n; persist(); showSetup(); }
+      else if (b.dataset.top !== undefined) { missTop(cfg, b.dataset.top); persist(); showSetup(); }
       else if (b.id === 'v-wrong') { cfg.wrong = !cfg.wrong; persist(); showSetup(); }
       else if (b.id === 'v-go') { start(build()); }
       else if (b.classList.contains('qopt')) answer(b);
