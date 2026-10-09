@@ -281,9 +281,25 @@ with sync_playwright() as p:
     km = pg.evaluate("""() => { const c = [...document.querySelectorAll('table.stack-kanji td[data-label="Mots clés"]')], rows = c;
         const nw = c.map(x => x.querySelectorAll(':scope > .kws > .kw').length);
         return [rows.length, c.filter(x => x.querySelector('details.kmore > summary')).length, c.filter(x => x.querySelector('ruby rt')).length, nw.filter(n => n >= 3).length, c.filter(x => /＋/.test(x.textContent)).length]; }""")
-    check(km[0] == 1395 and km[1] >= 900 and km[2] >= 1380 and km[3] >= 1250 and km[4] == 0, 'mots clés : lecture au-dessus des mots, 3 mots visibles, « + » pour plus d’exemples %s' % km)
-    check(kv == '', 'tout kanji du vocabulaire figure dans les listes N5 à N2 (%s)' % kv)
-    check(kc[0] == 103 and kc[1] == 181 and kc[2] >= 340 and kc[3] >= 700 and kc[4] == 0 and kc[5] == 0 and kc[6] == 0, 'kanji N5 à N2 complets, sans doublon, avec sens et mots %s' % kc)
+    check(km[0] == 2504 and km[1] >= 1800 and km[2] >= 2400 and km[3] >= 2250 and km[4] == 0, 'mots clés : lecture au-dessus des mots, 3 mots visibles, « + » pour plus d’exemples %s' % km)
+    check(kv == '', 'tout kanji du vocabulaire figure dans les listes N5 à N1 (%s)' % kv)
+    check(kc[0] == 103 and kc[1] == 181 and kc[2] >= 340 and kc[3] >= 350 and kc[4] == 0 and kc[5] == 0 and kc[6] == 0, 'kanji N5 à N2 complets, sans doublon, avec sens et mots %s' % kc)
+    n1 = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent), n1 = d.filter(x => x.l === 'N1'); const sec = [...document.querySelectorAll('.sec.cur .nsub')];
+        return [n1.length, new Set(n1.map(x => x.g)).size, n1.filter(x => !x.kw.length || !x.s).length, '嵐刀霧紡彗柚搾芹磯凱剝頰'.split('').filter(k => !n1.some(x => x.k === k) && !d.some(x => x.k === k)).length]; }""")
+    check(n1[0] >= 1400 and n1[1] >= 10 and n1[2] == 0 and n1[3] == 0, 'liste N1 : kanji, rubriques, sens et mots présents %s' % n1)
+
+    print('Quiz kanji : niveau N1')
+    pg.reload(); pg.wait_for_timeout(900)
+    pg.evaluate("[...document.querySelectorAll('button.quizcard')].find(b => /quiz kanji/i.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    lv = pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) #q-lv button')].map(b => b.innerText.replace(/\\s+/g, ' ').trim())")
+    check(len(lv) == 6 and lv[0].startswith('N5') and lv[3].startswith('N2') and lv[4].startswith('N1') and lv[5].startswith('Tous'), 'quiz kanji : puces de niveau N5 à N1 + Tous %s' % lv)
+    pg.click('.quiz:not([hidden]) [data-lv="ALL"]'); pg.wait_for_timeout(200)
+    lv2 = pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) #q-lv button')].map(b => b.classList.contains('on') || b.getAttribute('aria-pressed') === 'true')")
+    check(len(lv2) == 6 and all(lv2), 'quiz kanji : « Tous » sélectionne les 5 niveaux %s' % lv2)
+    pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Lancer/.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    big = pg.evaluate("(document.querySelector('.quiz:not([hidden]) .q-big') || {innerText: ''}).innerText.trim()")
+    check(len(big) > 0, 'quiz kanji tous niveaux : une question s’affiche')
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
 
     print('Grammaire N4 / N3')
     gn = pg.evaluate("""() => ['N4','N3'].map(j => { const s = [...document.querySelectorAll('main > details.sec')].find(d => d.querySelector(':scope > summary .jp').textContent.trim() === j); return s ? [s.querySelectorAll(':scope > .sec-body > details.sub').length, s.querySelectorAll('tbody tr').length] : null; })""")

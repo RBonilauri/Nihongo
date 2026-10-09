@@ -1,9 +1,9 @@
   function initMix(mainEl) {
-    var keys = ['kanji5', 'kanji4', 'kanji3', 'kanji2', 'vocab', 'conj', 'part', 'compt', 'geo'].filter(function (k) { return MIXREG[k]; });
+    var keys = ['kanji5', 'kanji4', 'kanji3', 'kanji2', 'kanji1', 'vocab', 'conj', 'part', 'compt', 'geo'].filter(function (k) { return MIXREG[k]; });
     if (keys.length < 2) return;
     var NS = [10, 25, 50, 100, 150, 200];
     var cfg = ST.mqc || { themes: keys.slice(), n: 25 };
-    if (cfg.themes.indexOf('kanji') >= 0) cfg.themes = cfg.themes.filter(function (k) { return k !== 'kanji'; }).concat(['kanji5', 'kanji4', 'kanji3', 'kanji2']);
+    if (cfg.themes.indexOf('kanji') >= 0) cfg.themes = cfg.themes.filter(function (k) { return k !== 'kanji'; }).concat(['kanji5', 'kanji4', 'kanji3', 'kanji2', 'kanji1']);
     cfg.themes = cfg.themes.filter(function (k) { return keys.indexOf(k) >= 0; }); if (!cfg.themes.length) cfg.themes = keys.slice();
     var S = null;
     var el = document.createElement('div'); el.className = 'quiz'; el.hidden = true;
