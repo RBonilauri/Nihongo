@@ -13,7 +13,7 @@ def _kwcell(txt):
     out = ' '.join(one(m) for m in _WRE.finditer(base))
     if more.strip():
         out += ' <details class="kmore"><summary title="Plus d’exemples" aria-label="Plus d’exemples"></summary>' + ' '.join(one(m) for m in _WRE.finditer(more)) + '</details>'
-    return out
+    return '<div class="kws">' + out + '</div>'
 # lectures du vocabulaire (plus fiables : 一日 = ついたち, 七日 = なのか…) prioritaires sur Sudachi
 _vk = {}
 for _x in _vall:
