@@ -5820,6 +5820,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
   var QN = [10, 25, 50, 100, 150, 200];
   function initQuiz(mainEl) {
     var KD = []; try { KD = JSON.parse(document.getElementById('kanji-data').textContent); } catch (e) {}
+    KD.forEach(function (x) { x.s = (x.s || "").replace(/\s*[(（][^)）]*[\u3040-\u9fff][^)）]*[)）]/g, "").trim(); });// le mot japonais entre parenthèses trahirait la réponse
     if (!KD.length) return;
     var byK = {}; KD.forEach(function (x) { byK[x.k] = x; });
     /* mots utiles : on complète les mots de chaque kanji avec ceux du vocabulaire (lecture + traduction) */
