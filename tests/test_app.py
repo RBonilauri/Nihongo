@@ -270,15 +270,15 @@ with sync_playwright() as p:
     pg.click('#tb-rec'); pg.wait_for_timeout(300)
     check('records' in title().lower(), 'page « Records » ouverte')
     check(pg.evaluate("document.querySelectorAll('.rc-row').length") == 6 and pg.evaluate("document.querySelectorAll('.rc-row svg.rc-cup').length") == 6, '6 types de quiz, chacun avec sa coupe')
-    check(pg.evaluate("document.querySelectorAll('.rc-spd > div').length") == 4 and pg.evaluate("document.querySelectorAll('.rc-grid > div').length") == 3, 'séries, meilleure journée, 4 tranches de rapidité')
+    check(pg.evaluate("document.querySelectorAll('.rc-spd > div').length") == 4 and pg.evaluate("document.querySelectorAll('.rc-grid > div').length") == 6, 'séries, meilleure journée, 4 tranches de rapidité')
     shown = pg.evaluate("+document.querySelector('.rc-hero b').textContent.replace(/\\s| /g, '')")
     check(shown == rc0[1], 'total affiché = total enregistré (%s)' % shown)
     st0 = pg.evaluate("localStorage.getItem('jp-state')")
-    fake = _j.loads(st0); fake['rc'].update({'bestRun': 37, 'bestStrk': 9, 'bd': {'p': 95.5, 'n': 40, 'd': '2026-10-01'}, 'spd': {'10': {'s': 3.4, 'd': '2026-10-02'}}}); fake['kq'] = {k['k']: {'n': 3, 'st': 3, 'w': False} for k in _j.loads(pg.evaluate("document.getElementById('kanji-data').textContent"))[:2100]}
+    fake = _j.loads(st0); fake['rc'].update({'bestRun': 37, 'bestStrk': 9, 'bd': {'p': 95.5, 'n': 40, 'd': '2026-10-01'}, 'big': {'n': 321, 'd': '2026-10-04'}, 'days': 12, 'spd': {'10': {'t': 84, 'd': '2026-10-02'}}}); fake['kq'] = {k['k']: {'n': 3, 'st': 3, 'w': False} for k in _j.loads(pg.evaluate("document.getElementById('kanji-data').textContent"))[:2100]}
     pg.evaluate("s=>localStorage.setItem('jp-state',s)", _j.dumps(fake)); pg.reload(); pg.wait_for_timeout(800)
     pg.click('#tb-rec'); pg.wait_for_timeout(300)
     txt = pg.evaluate("document.querySelector('.rc').innerText")
-    check('37' in txt and '95,5 %' in txt and '3,4 s' in txt and 'palier maximum atteint' in txt and '84 % maîtrisé' in txt, 'records affichés (série, meilleure journée, rapidité, palier de coupe)')
+    check('37' in txt and '95,5 %' in txt and '1 min 24 s' in txt and '321' in txt and 'palier maximum atteint' in txt and '84 % maîtrisé' in txt, 'records affichés (série, meilleure journée, rapidité, palier de coupe)')
     pg.evaluate("s=>localStorage.setItem('jp-state',s)", st0); pg.reload(); pg.wait_for_timeout(800)
     pg.click('#tb-rec'); pg.wait_for_timeout(200); pg.click('#tb-back'); pg.wait_for_timeout(300)
     check('Référence' in title() or 'REF' in title().upper(), 'retour depuis les records')

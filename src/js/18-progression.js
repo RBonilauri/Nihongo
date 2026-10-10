@@ -112,16 +112,23 @@
       h += '<div class="rc-row"><span class="pg-i">' + t[2] + '</span><div class="rc-m"><b>' + esc(t[1]) + '</b><small>' + fpct(c.pct) + ' % maîtrisé · ' + (c.next ? 'encore ' + c.left.toLocaleString('fr-FR') + ' pour la coupe ' + c.next.n.toLowerCase() : 'palier maximum atteint') + '</small></div><span class="rc-n">' + n.toLocaleString('fr-FR') + '</span>' + cupSvg(c.cur ? c.cur.c : '#8a8378', !c.cur) + '</div>';
     });
     h += '<div class="pg-leg rc-leg">' + CUPS.map(function (c) { return cupSvg(c.c).replace('width="30" height="30"', 'width="16" height="16"') + ' ' + c.n.toLowerCase() + ' ' + c.min + ' %'; }).join(' · ') + '</div>';
+    var big = R.big || { n: 0, d: '' };
+    Object.keys(H).forEach(function (k) { if (H[k].n > big.n) big = { n: H[k].n, d: k }; });
+    function dur(t) { t = Math.round(t); if (t < 60) return t + ' s'; var m = Math.floor(t / 60), r = t % 60; return m + ' min' + (r ? ' ' + r + ' s' : ''); }
     h += '<h3 class="pg-t">Séries</h3><div class="rc-grid">' +
       '<div><b>🔥 ' + bestStrk + '</b><small>jour' + (bestStrk > 1 ? 's' : '') + ' de suite (record)</small></div>' +
       '<div><b>✔ ' + (R.bestRun || 0) + '</b><small>bonnes réponses d’affilée</small></div></div>';
-    h += '<h3 class="pg-t">Meilleure journée</h3><div class="rc-grid one"><div>' + (bd.p ? '<b>' + fs(bd.p) + ' %</b><small>' + bd.n + ' réponses · ' + fd(bd.d) + '</small>' : '<b>—</b><small>joue au moins 10 questions dans la journée</small>') + '</div></div>';
-    h += '<h3 class="pg-t">Rapidité <small>moyenne par question, ≥ 80 % de bonnes réponses</small></h3><div class="rc-spd">';
+    h += '<h3 class="pg-t">Journées</h3><div class="rc-grid">' +
+      '<div>' + (bd.p ? '<b>' + fs(bd.p) + ' %</b><small>meilleure réussite · ' + bd.n + ' réponses · ' + fd(bd.d) + '</small>' : '<b>—</b><small>meilleure réussite : joue au moins 10 questions dans la journée</small>') + '</div>' +
+      '<div>' + (big.n ? '<b>' + big.n + '</b><small>plus de réponses en un jour · ' + fd(big.d) + '</small>' : '<b>—</b><small>plus de réponses en un jour</small>') + '</div>' +
+      '<div><b>' + Math.max(R.days || 0, 0) + '</b><small>jour' + (R.days > 1 ? 's' : '') + ' d’étude</small></div>' +
+      '<div><b>' + mTot.toLocaleString('fr-FR') + '</b><small>éléments maîtrisés sur ' + nTot.toLocaleString('fr-FR') + '</small></div></div>';
+    h += '<h3 class="pg-t">Rapidité <small>temps pour enchaîner une série de questions (≥ 80 % de bonnes réponses)</small></h3><div class="rc-spd">';
     SPD_N.forEach(function (N) {
-      var b = (R.spd || {})[N];
-      h += '<div><small>' + N + ' questions</small>' + (b ? '<b>' + fs(b.s) + ' s</b><small>' + fd(b.d) + '</small>' : '<b>—</b><small>à battre</small>') + '</div>';
+      var b = (R.spd || {})[N], t = b && (b.t || (b.s ? b.s * N : 0));
+      h += '<div><small>' + N + ' questions</small>' + (t ? '<b>' + dur(t) + '</b><small>' + fd(b.d) + '</small>' : '<b>—</b><small>à battre</small>') + '</div>';
     });
-    h += '</div><p class="pg-empty">La rapidité se mesure sur des questions enchaînées sans pause de plus d’une minute.</p></div>';
+    h += '</div><p class="pg-empty">Le chrono tourne sur des questions enchaînées, sans pause de plus d’une minute entre deux réponses.</p></div>';
     return h;
   }
 
