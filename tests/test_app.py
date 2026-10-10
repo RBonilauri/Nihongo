@@ -274,11 +274,11 @@ with sync_playwright() as p:
     shown = pg.evaluate("+document.querySelector('.rc-hero b').textContent.replace(/\\s| /g, '')")
     check(shown == rc0[1], 'total affiché = total enregistré (%s)' % shown)
     st0 = pg.evaluate("localStorage.getItem('jp-state')")
-    fake = _j.loads(st0); fake['rc'].update({'bestRun': 37, 'bestStrk': 9, 'bd': {'p': 95.5, 'n': 40, 'd': '2026-10-01'}, 'spd': {'10': {'s': 3.4, 'd': '2026-10-02'}}}); fake['rc']['cnt']['k'] = 1500
+    fake = _j.loads(st0); fake['rc'].update({'bestRun': 37, 'bestStrk': 9, 'bd': {'p': 95.5, 'n': 40, 'd': '2026-10-01'}, 'spd': {'10': {'s': 3.4, 'd': '2026-10-02'}}}); fake['kq'] = {k['k']: {'n': 3, 'st': 3, 'w': False} for k in _j.loads(pg.evaluate("document.getElementById('kanji-data').textContent"))[:2100]}
     pg.evaluate("s=>localStorage.setItem('jp-state',s)", _j.dumps(fake)); pg.reload(); pg.wait_for_timeout(800)
     pg.click('#tb-rec'); pg.wait_for_timeout(300)
     txt = pg.evaluate("document.querySelector('.rc').innerText")
-    check('37' in txt and '95,5 %' in txt and '3,4 s' in txt and 'coupe platine' in txt and pg.evaluate("document.querySelector('.rc-row small').textContent").startswith('encore'), 'records affichés (série, meilleure journée, rapidité, palier de coupe)')
+    check('37' in txt and '95,5 %' in txt and '3,4 s' in txt and 'palier maximum atteint' in txt and '84 % maîtrisé' in txt, 'records affichés (série, meilleure journée, rapidité, palier de coupe)')
     pg.evaluate("s=>localStorage.setItem('jp-state',s)", st0); pg.reload(); pg.wait_for_timeout(800)
     pg.click('#tb-rec'); pg.wait_for_timeout(200); pg.click('#tb-back'); pg.wait_for_timeout(300)
     check('Référence' in title() or 'REF' in title().upper(), 'retour depuis les records')
