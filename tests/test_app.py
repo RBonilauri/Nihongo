@@ -263,6 +263,26 @@ with sync_playwright() as p:
     pg.click('#tb-back'); pg.wait_for_timeout(300)
     check('Référence' in title() or 'REF' in title().upper(), 'retour à l’accueil')
 
+    print('Records')
+    rc0 = pg.evaluate("(() => { var r = JSON.parse(localStorage.getItem('jp-state')).rc; return [Object.keys(r.cnt).length, Object.values(r.cnt).reduce((a, b) => a + b, 0)]; })()")
+    check(rc0[0] == 6 and rc0[1] > 0, 'compteurs de records cumulés par type (%s)' % rc0)
+    check(pg.evaluate("!!document.querySelector('#tb-rec') && document.querySelector('#tb-rec').nextElementSibling.id === 'menu'"), 'bouton trophée à côté de l’engrenage')
+    pg.click('#tb-rec'); pg.wait_for_timeout(300)
+    check('records' in title().lower(), 'page « Records » ouverte')
+    check(pg.evaluate("document.querySelectorAll('.rc-row').length") == 6 and pg.evaluate("document.querySelectorAll('.rc-row svg.rc-cup').length") == 6, '6 types de quiz, chacun avec sa coupe')
+    check(pg.evaluate("document.querySelectorAll('.rc-spd > div').length") == 4 and pg.evaluate("document.querySelectorAll('.rc-grid > div').length") == 3, 'séries, meilleure journée, 4 tranches de rapidité')
+    shown = pg.evaluate("+document.querySelector('.rc-hero b').textContent.replace(/\\s| /g, '')")
+    check(shown == rc0[1], 'total affiché = total enregistré (%s)' % shown)
+    st0 = pg.evaluate("localStorage.getItem('jp-state')")
+    fake = _j.loads(st0); fake['rc'].update({'bestRun': 37, 'bestStrk': 9, 'bd': {'p': 95.5, 'n': 40, 'd': '2026-10-01'}, 'spd': {'10': {'s': 3.4, 'd': '2026-10-02'}}}); fake['rc']['cnt']['k'] = 1500
+    pg.evaluate("s=>localStorage.setItem('jp-state',s)", _j.dumps(fake)); pg.reload(); pg.wait_for_timeout(800)
+    pg.click('#tb-rec'); pg.wait_for_timeout(300)
+    txt = pg.evaluate("document.querySelector('.rc').innerText")
+    check('37' in txt and '95,5 %' in txt and '3,4 s' in txt and 'coupe platine' in txt and pg.evaluate("document.querySelector('.rc-row small').textContent").startswith('encore'), 'records affichés (série, meilleure journée, rapidité, palier de coupe)')
+    pg.evaluate("s=>localStorage.setItem('jp-state',s)", st0); pg.reload(); pg.wait_for_timeout(800)
+    pg.click('#tb-rec'); pg.wait_for_timeout(200); pg.click('#tb-back'); pg.wait_for_timeout(300)
+    check('Référence' in title() or 'REF' in title().upper(), 'retour depuis les records')
+
     print('Réponses non évidentes')
     leak = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent);
         const strip = s => String(s).replace(/\\s*[（(][^）)]*[぀-ヿ㐀-鿿][^）)]*[）)]/g, '').trim();

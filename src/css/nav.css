@@ -169,3 +169,20 @@
   .pg-line.dense .pg-pt.today { width: 8px; height: 8px; margin: -4px 0 0 -4px; }
   .pg-line.dense .pg-plot polyline { stroke-width: 1.6; }
   .pg-axis .pg-l { overflow: visible; white-space: nowrap; }
+
+  /* ═══ PAGE RECORDS ═══ */
+  .rc-hero { display: flex; align-items: center; gap: .9rem; border: 1px solid var(--border); background: var(--surface); border-radius: 14px; padding: .9rem 1rem; }
+  .rc-hero .rc-cup { width: 46px; height: 46px; }
+  .rc-hero b { display: block; font-size: 1.7rem; font-family: 'DM Mono', monospace; line-height: 1.1; }
+  .rc-hero small, .rc-grid small, .rc-spd small, .rc-m small { color: var(--muted); font-size: .7rem; }
+  .rc-cup.off { opacity: .35; }
+  .rc-row { display: flex; align-items: center; gap: .7rem; border: 1px solid var(--border); background: var(--surface); border-radius: 12px; padding: .55rem .8rem; margin-bottom: .4rem; }
+  .rc-m { flex: 1; min-width: 0; } .rc-m b { display: block; font-size: .9rem; }
+  .rc-n { font-family: 'DM Mono', monospace; font-weight: 600; }
+  .rc-leg { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .3rem; }
+  .rc-leg svg { vertical-align: -3px; }
+  .rc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; } .rc-grid.one { grid-template-columns: 1fr; }
+  .rc-grid div, .rc-spd div { border: 1px solid var(--border); background: var(--surface); border-radius: 12px; padding: .7rem .6rem; text-align: center; }
+  .rc-grid b, .rc-spd b { display: block; font-size: 1.25rem; font-family: 'DM Mono', monospace; }
+  .rc-spd { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .rc .pg-t small { display: block; text-transform: none; letter-spacing: 0; margin-top: .15rem; font-weight: 400; color: var(--muted); font-size: .66rem; }

@@ -1,6 +1,13 @@
   /* ── état persistant ── */
-  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, chart: 'bar', range: '7', mapl: 'k', fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
+  var ST = { ss: '', gq: {}, gqc: null, gqs: { sess: 0, q: 0, ok: 0, ty: {}, rg: {} }, qh: {}, sh: [], hist: {}, day: { d: '', n: 0, ok: 0 }, goal: 20, rc: { cnt: {}, seed: 0, run: 0, bestRun: 0, bestStrk: 0, bd: { p: 0, n: 0, d: '' }, spd: {} }, strk: { last: '', n: 0 }, fav: [], rec: [], su: {}, rv: {}, chart: 'bar', range: '7', mapl: 'k', fs: 1, aid: false, silent: false, trip: { d: '', s: '', show: true }, showRec: true, mqc: null, kq: {}, kqc: null, kqs: { sess: 0, q: 0, ok: 0, ty: {} }, vq: {}, vqc: null, gq_c: {}, gqc_c: null, gqs_c: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, cq: {}, cqc: null, cqs: { sess: 0, q: 0, ok: 0, ty: {}, ct: {} }, gq_p: {}, gqc_p: null, gqs_p: { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} }, vqs: { sess: 0, q: 0, ok: 0, ty: {}, cat: {} } };
   try { var raw0 = localStorage.getItem('jp-state'); if (raw0) { var o0 = JSON.parse(raw0); Object.keys(ST).forEach(function (k) { if (o0[k] !== undefined) ST[k] = o0[k]; }); } } catch (e) {}
+  /* ── records : compteurs cumulés (survivent aux remises à zéro des quiz), initialisés avec l'existant ── */
+  (function () {
+    var R = ST.rc = ST.rc || {}; R.cnt = R.cnt || {}; R.spd = R.spd || {}; R.bd = R.bd || { p: 0, n: 0, d: '' };
+    ['run', 'bestRun', 'bestStrk'].forEach(function (k) { R[k] = R[k] || 0; });
+    if (!R.seed) { var m = { k: 'kqs', v: 'vqs', c: 'gqs_c', p: 'gqs_p', n: 'cqs', g: 'gqs' }; Object.keys(m).forEach(function (k) { R.cnt[k] = (ST[m[k]] && ST[m[k]].q) || 0; }); R.seed = 1; }
+  })();
+  var _AB = [];
   /* ── « plus ratés » : classement par erreurs cumulées, partagé par tous les quiz ── */
   function missCnt(v) { return (v && (v.x || (v.w ? 1 : 0))) || 0; }
   function missKeys(items, valid) {
@@ -34,13 +41,32 @@
   /* ── objectif du jour : compte chaque réponse de quiz, série de jours consécutifs ── */
   function dkey(t) { var d = t ? new Date(t) : new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function dayState() { var k = dkey(); if (!ST.day || ST.day.d !== k) ST.day = { d: k, n: 0, ok: 0 }; return ST.day; }
+  /* records : total par type, série de bonnes réponses, meilleur % d'une journée (≥ 10 réponses), vitesse sur 10/25/50/100 questions (≥ 80 % de réussite, pause max 60 s) */
+  var SPD_N = [10, 25, 50, 100];
+  function rcHit(good, key, D) {
+    var R = ST.rc, now = Date.now();
+    if (key) R.cnt[key] = (R.cnt[key] || 0) + 1;
+    R.run = good ? (R.run || 0) + 1 : 0; if (R.run > R.bestRun) R.bestRun = R.run;
+    if (D.n >= 10) { var p = Math.round(D.ok * 1000 / D.n) / 10; if (p > R.bd.p || (p === R.bd.p && D.n > R.bd.n)) R.bd = { p: p, n: D.n, d: D.d }; }
+    if (_AB.length && now - _AB[_AB.length - 1].t > 60000) _AB = [];
+    _AB.push({ t: now, g: good ? 1 : 0 }); if (_AB.length > 100) _AB.shift();
+    SPD_N.forEach(function (N) {
+      if (_AB.length < N) return;
+      var w = _AB.slice(-N), ok = w.reduce(function (a, e) { return a + e.g; }, 0);
+      if (ok / N < 0.8) return;
+      var sec = Math.round((w[N - 1].t - w[0].t) / (N - 1) / 100) / 10, b = R.spd[N];
+      if (sec > 0 && (!b || sec < b.s)) R.spd[N] = { s: sec, d: D.d };
+    });
+  }
   function dayHit(good, key) {
     var D = dayState(); D.n++; if (good) D.ok++;
+    rcHit(good, key, D);
     if (key) { var QH = ST.qh = ST.qh || {}, H1 = QH[key] = QH[key] || {}, e = H1[D.d] = H1[D.d] || { n: 0, ok: 0 }; e.n++; if (good) e.ok++; var hk1 = Object.keys(H1).sort(); while (hk1.length > 60) delete H1[hk1.shift()]; }
     ST.hist = ST.hist || {}; ST.hist[D.d] = { n: D.n, ok: D.ok }; var hk = Object.keys(ST.hist).sort(); while (hk.length > 60) delete ST.hist[hk.shift()];
     if (D.n === ST.goal) {
       var y = dkey(Date.now() - 864e5);
       ST.strk = { last: D.d, n: ST.strk.last === y ? ST.strk.n + 1 : (ST.strk.last === D.d ? ST.strk.n : 1) };
+      if (ST.strk.n > ST.rc.bestStrk) ST.rc.bestStrk = ST.strk.n;
       try { toast('Objectif du jour atteint 🎉'); } catch (e) {}
     }
     save();

@@ -74,6 +74,50 @@
       '<h3 class="pg-t">Points faibles</h3>' + (wh.length ? missBlock(wh, 'pg-weak', 'ul')  : '<p class="pg-empty">Rien à signaler pour l’instant : les mots ratés apparaîtront ici.</p>') + '</div>';
   }
 
+
+  /* ═══════════ PAGE « RECORDS » ═══════════ */
+  var CUPS = [
+    { n: 'Bronze', min: 100, c: '#b87333' }, { n: 'Argent', min: 500, c: '#aab2bd' },
+    { n: 'Or', min: 1500, c: '#e0b13a' }, { n: 'Platine', min: 5000, c: '#5cc8d8' }
+  ];
+  function cupSvg(c, off) {
+    return '<svg class="rc-cup' + (off ? ' off' : '') + '" viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M6 3h12v6a6 6 0 0 1-12 0z" fill="' + c + '" stroke="' + c + '" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 5H3v2a3 3 0 0 0 3 3M18 5h3v2a3 3 0 0 1-3 3M12 15v3M9 18h6M8 21h8" fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+  function cupFor(n) {
+    var cur = -1; CUPS.forEach(function (c, i) { if (n >= c.min) cur = i; });
+    var nx = CUPS[cur + 1];
+    return { cur: cur >= 0 ? CUPS[cur] : null, next: nx || null, left: nx ? nx.min - n : 0 };
+  }
+  function recordsHtml() {
+    var R = ST.rc || {}, cnt = R.cnt || {}, D = dayState(), y = dkey(Date.now() - 864e5);
+    var curStrk = (ST.strk.last === D.d || ST.strk.last === y) ? ST.strk.n : 0, bestStrk = Math.max(R.bestStrk || 0, curStrk);
+    var bd = R.bd || { p: 0, n: 0, d: '' }, H = ST.hist || {};
+    Object.keys(H).forEach(function (k) { var v = H[k]; if (v.n >= 10) { var p = Math.round(v.ok * 1000 / v.n) / 10; if (p > bd.p || (p === bd.p && v.n > bd.n)) bd = { p: p, n: v.n, d: k }; } });
+    var T = [['k', 'Kanji', '漢'], ['v', 'Vocabulaire & phrases', '語'], ['c', 'Conjugaison', '動'], ['p', 'Particules', '助'], ['n', 'Compteurs', '数'], ['g', 'Géographie', '地']];
+    var tot = T.reduce(function (a, t) { return a + (cnt[t[0]] || 0); }, 0);
+    function fd(k) { return k ? new Date(k + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
+    function fs(n) { return String(n).replace('.', ','); }
+    var tc = cupFor(tot);
+    var h = '<div class="pg rc"><div class="rc-hero">' + cupSvg(tc.cur ? tc.cur.c : '#8a8378', !tc.cur) + '<div><b>' + tot.toLocaleString('fr-FR') + '</b><small>réponses au total' + (tc.cur ? ' · coupe ' + tc.cur.n.toLowerCase() : '') + '</small></div></div>';
+    h += '<h3 class="pg-t">Par type de quiz</h3>';
+    T.forEach(function (t) {
+      var n = cnt[t[0]] || 0, c = cupFor(n);
+      h += '<div class="rc-row"><span class="pg-i">' + t[2] + '</span><div class="rc-m"><b>' + esc(t[1]) + '</b><small>' + (c.next ? 'encore ' + c.left.toLocaleString('fr-FR') + ' pour la coupe ' + c.next.n.toLowerCase() : 'palier maximum atteint') + '</small></div><span class="rc-n">' + n.toLocaleString('fr-FR') + '</span>' + cupSvg(c.cur ? c.cur.c : '#8a8378', !c.cur) + '</div>';
+    });
+    h += '<div class="pg-leg rc-leg">' + CUPS.map(function (c) { return cupSvg(c.c).replace('width="30" height="30"', 'width="16" height="16"') + ' ' + c.n.toLowerCase() + ' ' + c.min.toLocaleString('fr-FR'); }).join(' · ') + '</div>';
+    h += '<h3 class="pg-t">Séries</h3><div class="rc-grid">' +
+      '<div><b>🔥 ' + bestStrk + '</b><small>jour' + (bestStrk > 1 ? 's' : '') + ' de suite (record)</small></div>' +
+      '<div><b>✔ ' + (R.bestRun || 0) + '</b><small>bonnes réponses d’affilée</small></div></div>';
+    h += '<h3 class="pg-t">Meilleure journée</h3><div class="rc-grid one"><div>' + (bd.p ? '<b>' + fs(bd.p) + ' %</b><small>' + bd.n + ' réponses · ' + fd(bd.d) + '</small>' : '<b>—</b><small>joue au moins 10 questions dans la journée</small>') + '</div></div>';
+    h += '<h3 class="pg-t">Rapidité <small>moyenne par question, ≥ 80 % de bonnes réponses</small></h3><div class="rc-spd">';
+    SPD_N.forEach(function (N) {
+      var b = (R.spd || {})[N];
+      h += '<div><small>' + N + ' questions</small>' + (b ? '<b>' + fs(b.s) + ' s</b><small>' + fd(b.d) + '</small>' : '<b>—</b><small>à battre</small>') + '</div>';
+    });
+    h += '</div><p class="pg-empty">La rapidité se mesure sur des questions enchaînées sans pause de plus d’une minute.</p></div>';
+    return h;
+  }
+
   /* bloc commun aux écrans « Statistiques » de chaque quiz : avancement, 7 jours, tendance */
   function qsExtra(key, items, total) {
     items = items || {};

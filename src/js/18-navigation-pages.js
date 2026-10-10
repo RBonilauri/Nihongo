@@ -38,6 +38,7 @@
         '<button type="button" class="nstats" data-act="stats"><i>📈</i>Ma progression<small>Réussite, jours actifs, points faibles</small></button>' + rvCard();
     } else if (v === 'search') { title = ['日本語', 'Recherche'];
     } else if (v === 'stats') { title = ['日本語', 'Ma progression']; h = statsHtml();
+    } else if (v === 'records') { title = ['日本語', 'Records']; h = recordsHtml();
     } else if (v === 'learn') {
       title = ['日本語', 'Apprendre'];
       h = POLES.map(function (p) { var ss = p.secs.map(function (j) { return secBy[j]; }).filter(Boolean); return '<button type="button" class="npole" data-p="' + p.id + '"><span class="ni">' + p.jp + '</span><span class="nt">' + esc(p.label) + '<small>' + ss.map(secLb).map(esc).join(' · ') + '</small></span><span class="ch">›</span></button>'; }).join('') ;
@@ -89,6 +90,7 @@
       var b = e.target.closest('button'); if (!b) return;
       if (b.dataset.tab) { if (TAB === b.dataset.tab && NAV.length === 1) { window.scrollTo(0, 0); return; } navReset(b.dataset.tab); }
     });
+    document.getElementById('tb-rec').addEventListener('click', function () { if (NAV[NAV.length - 1].v !== 'records') navPush({ v: 'records' }); });
     document.getElementById('tb-back').addEventListener('click', function () { if (pushed > 0) history.back(); else { NAV = [NAV[0]]; navRender(); } });
     navRender();
     if (window.__deep) { var dp = window.__deep; window.__deep = null; openTo(dp); }
