@@ -520,7 +520,8 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .deck-top .x { width: 44px; height: 44px; margin-left: -10px; border: 0; background: none; font-size: 1.6rem; color: var(--ink); cursor: pointer; }
   .deck-top .ttl { flex: 1; min-width: 0; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .deck-top .prog { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .card { flex: 1; min-height: 0; margin: .5rem 0 1rem; border: 1px solid var(--border); background: var(--surface); padding: 1.5rem 1.2rem; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .8rem; cursor: pointer; }
+  .card { flex: 1; min-height: 0; margin: .5rem 0 1rem; border: 1px solid var(--border); background: var(--surface); padding: 1.5rem 1.2rem; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; gap: .8rem; cursor: pointer; }
+  .card > :first-child { margin-top: auto; } .card > :last-child { margin-bottom: auto; }   /* centré, mais défile depuis le haut si la fiche est longue */
   .card .front { font-family: 'Noto Serif JP', serif; font-size: 1.6rem; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
   .card .flab { font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); }
   .card .tap { font-size: .75rem; color: var(--muted); }
@@ -5706,20 +5707,11 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = sub; D.all = all;
     deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
-  /* fiches regroupées : plusieurs sous-rubriques dans un seul paquet (ex. tous les temps de la conjugaison) */
-  function multiCards(subs) {
-    var out = [];
-    subs.forEach(function (sub) {
-      var id = Object.keys(subMap).filter(function (k) { return subMap[k].sub === sub; })[0]; if (!id) return;
-      var t = sub.querySelector(':scope > summary').firstChild.textContent.trim().split(' — '), name = t.length > 1 ? t.slice(1).join(' — ') : t[0];
-      cardsFrom(sub, id).forEach(function (c) { c.fl = name + (c.fl ? ' · ' + c.fl : ''); out.push(c); });
-    });
-    return out;
-  }
-  function startDeckMulti(subs, title, onlyTodo) {
-    D.rv = false; var all = multiCards(subs), list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
-    if (!list.length) list = all; if (!all.length) return;
-    D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = null; D.multi = subs; D.all = all;
+  /* paquet de fiches préparées à l'avance (ex. conjugaison) : ordre conservé, les connues sont passées */
+  function startDeckList(cards, title, onlyTodo) {
+    D.rv = false; var all = cards.slice(), list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
+    if (!all.length) return; if (!list.length) list = all;
+    D.cards = list.slice(); D.i = 0; D.title = title; D.sub = null; D.multi = cards; D.all = all;
     deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
   function startRv(id) {
@@ -5735,12 +5727,183 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       if (b.classList.contains('x') || b.classList.contains('close')) bkClose(hideDeck);
       else if (b.classList.contains('again')) answer(false);
       else if (b.classList.contains('ok')) answer(true);
-      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else if (D.multi) startDeckMulti(D.multi, D.title, true); else startDeck(D.sub, D.title, true); }
+      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else if (D.multi) startDeckList(D.multi, D.title, true); else startDeck(D.sub, D.title, true); }
       return;
     }
     if (e.target.closest('#card')) flip();
   });
 
+  /* ── fiches de conjugaison : un paquet uniforme (sens, contexte, formation par groupe, exemple lu et traduit) ──
+     Chaque fiche a toujours les mêmes rubriques, dans le même ordre. Verbes modèles : 書く（G1）· 食べる（G2）· する / 来る（irréguliers). */
+  var CJ_G1 = 'Groupe 1（五段 · verbes en -u）', CJ_G2 = 'Groupe 2（一段 · -iru / -eru）', CJ_IR = 'Irréguliers（する・来る）';
+  function cj(id, name, jp, reg, sens, ctx, g1, g2, ir, exJ, exK, exF) {
+    return { id: 'cj', key: 'cj|' + id, cj: id, fl: jp + ' · ' + reg, front: name, back: [
+      { l: 'Sens', v: sens }, { l: 'Contexte', v: ctx }, { l: CJ_G1, v: g1 }, { l: CJ_G2, v: g2 }, { l: CJ_IR, v: ir },
+      { l: 'Exemple', v: exJ }, { l: 'Lecture', v: exK }, { l: 'Traduction', v: exF }
+    ] };
+  }
+  var CJ_CARDS = [
+    { id: 'cj', key: 'cj|groupes', cj: 'groupes', fl: '動詞のグループ · à connaître d’abord', front: 'Les 3 groupes de verbes', back: [
+      { l: 'Sens', v: 'Avant de conjuguer, on repère le groupe du verbe : la formation change selon le groupe.' },
+      { l: 'Contexte', v: 'À faire à chaque nouveau verbe. La forme du dictionnaire se termine toujours par -u.' },
+      { l: CJ_G1, v: 'Finale -u : く ぐ す つ ぬ ぶ む う る · 書く（かく）écrire, 飲む（のむ）boire, 話す（はなす）parler, 買う（かう）acheter' },
+      { l: CJ_G2, v: 'Finale -iru ou -eru : on retire る · 食べる（たべる）manger, 見る（みる）voir, 起きる（おきる）se lever, 寝る（ねる）dormir' },
+      { l: CJ_IR, v: 'Seulement 2 verbes : する faire · 来る（くる）venir (et leurs composés : 勉強する, 持って来る)' },
+      { l: 'Exemple', v: 'Piège : 帰る・入る・走る・切る・知る finissent en -iru / -eru mais sont du groupe 1' },
+      { l: 'Lecture', v: '帰る（かえる）→ 帰らない（かえらない）· 食べる（たべる）→ 食べない（たべない）' },
+      { l: 'Traduction', v: 'rentrer → ne pas rentrer · manger → ne pas manger' }
+    ] },
+
+    cj('masu', 'Présent poli', 'ます形', 'poli · affirmatif', 'je mange, je mangerai (présent et futur)',
+      'Forme polie de tous les jours : inconnus, collègues, magasins, professeurs.',
+      '-u → -i + ます : 書く（かく）→ 書きます ; 買う（かう）→ 買います',
+      'on retire る + ます : 食べる（たべる）→ 食べます',
+      'する → します ; 来る（くる）→ 来ます（きます）',
+      '毎朝、パンを食べます。', 'まいあさ、パンを たべます。', 'Je mange du pain chaque matin.'),
+    cj('masen', 'Présent poli négatif', 'ません', 'poli · négatif', 'je ne mange pas, je ne mangerai pas',
+      'Même registre que ます : on remplace ます par ません.',
+      '-u → -i + ません : 書く → 書きません ; 飲む（のむ）→ 飲みません',
+      '食べる → 食べません',
+      'する → しません ; 来る → 来ません（きません）',
+      'お酒は飲みません。', 'おさけは のみません。', 'Je ne bois pas d’alcool.'),
+    cj('mashita', 'Passé poli', 'ました', 'poli · passé', 'j’ai mangé (action terminée)',
+      'Raconter ce qui s’est passé, poliment : on remplace ます par ました.',
+      '-u → -i + ました : 書く → 書きました ; 買う → 買いました',
+      '食べる → 食べました',
+      'する → しました ; 来る → 来ました（きました）',
+      '昨日、映画を見ました。', 'きのう、えいがを みました。', 'Hier, j’ai vu un film.'),
+    cj('masendeshita', 'Passé poli négatif', 'ませんでした', 'poli · passé négatif', 'je n’ai pas mangé',
+      'Passé négatif poli : ません + でした.',
+      '-u → -i + ませんでした : 行く（いく）→ 行きませんでした',
+      '食べる → 食べませんでした',
+      'する → しませんでした ; 来る → 来ませんでした（きませんでした）',
+      '昨日は学校に行きませんでした。', 'きのうは がっこうに いきませんでした。', 'Hier, je ne suis pas allé à l’école.'),
+    cj('mashou', 'Invitation', 'ましょう', 'poli · volitif', 'allons… / faisons… ; je vais…',
+      'Proposer quelque chose à plusieurs ; ましょうか = « on le fait ? » / « je le fais pour vous ? ».',
+      '-u → -i + ましょう : 行く → 行きましょう ; 飲む → 飲みましょう',
+      '食べる → 食べましょう',
+      'する → しましょう ; 来る → 来ましょう（きましょう）',
+      '一緒に昼ご飯を食べましょう。', 'いっしょに ひるごはんを たべましょう。', 'Déjeunons ensemble.'),
+
+    cj('nai', 'Négatif familier', 'ない形', 'familier · négatif', 'ne… pas (présent / futur)',
+      'Entre amis, en famille. Sert de base à なかった, ないで, なければ… Le verbe ある (il y a) fait ない.',
+      '-u → -a + ない : 書く → 書かない ; 飲む → 飲まない ; 買う（かう）→ 買わない（う → わ）',
+      'on retire る + ない : 食べる → 食べない',
+      'する → しない ; 来る → 来ない（こない）',
+      '今日は何も食べない。', 'きょうは なにも たべない。', 'Aujourd’hui, je ne mange rien.'),
+    cj('nakatta', 'Passé négatif familier', 'なかった', 'familier · passé négatif', 'je n’ai pas mangé',
+      'On prend la forme ない et on remplace ない par なかった.',
+      '書く → 書かなかった ; 買う → 買わなかった',
+      '食べる → 食べなかった',
+      'する → しなかった ; 来る → 来なかった（こなかった）',
+      '朝ご飯を食べなかった。', 'あさごはんを たべなかった。', 'Je n’ai pas pris de petit-déjeuner.'),
+    cj('ta', 'Passé familier', 'た形', 'familier · passé', 'j’ai mangé (action terminée)',
+      'Entre amis. Se forme exactement comme la forme en て, avec た à la place de て.',
+      'く → いた : 書いた ; ぐ → いだ : 泳いだ（およいだ） ; す → した : 話した ; つ・る・う → った : 待った・帰った・買った ; ぬ・ぶ・む → んだ : 飲んだ・遊んだ ; exception 行く → 行った',
+      '食べる → 食べた',
+      'する → した ; 来る → 来た（きた）',
+      '昨日、友達と遊んだ。', 'きのう、ともだちと あそんだ。', 'Hier, j’ai joué avec un ami.'),
+
+    cj('te', 'Forme en て', 'て形', 'base · liaison', 'relie des actions (« …puis… ») ; sert à demander, décrire un état',
+      'Forme la plus utile : ている (en train de), てください (s’il vous plaît), てから (après avoir), てもいい (permission).',
+      'く → いて : 書いて ; ぐ → いで : 泳いで ; す → して : 話して ; つ・る・う → って : 待って・帰って・買って ; ぬ・ぶ・む → んで : 飲んで・遊んで ; exception 行く → 行って',
+      '食べる → 食べて',
+      'する → して ; 来る → 来て（きて）',
+      '朝起きて、顔を洗います。', 'あさ おきて、かおを あらいます。', 'Le matin, je me lève, puis je me lave le visage.'),
+    cj('naide', 'Négatif en て', 'ないで', 'base · sans faire', 'sans faire… ; ne fais pas… (ないでください)',
+      'On prend la forme ない et on remplace ない par ないで. Pour une cause : なくて (食べなくて = parce que je ne mange pas).',
+      '書く → 書かないで ; 買う → 買わないで',
+      '食べる → 食べないで',
+      'する → しないで ; 来る → 来ないで（こないで）',
+      '朝ご飯を食べないで、学校に行きました。', 'あさごはんを たべないで、がっこうに いきました。', 'Je suis allé à l’école sans prendre de petit-déjeuner.'),
+
+    cj('tai', 'Désir', 'たい形', 'désir · affirmatif', 'vouloir… (faire)',
+      'Exprime le désir de celui qui parle. Se conjugue ensuite comme un adjectif en -i (たかった = je voulais). Pour une 3e personne : たがる.',
+      '-u → -i + たい : 書く → 書きたい ; 行く → 行きたい',
+      '食べる → 食べたい',
+      'する → したい ; 来る → 来たい（きたい）',
+      '日本で寿司を食べたい。', 'にほんで すしを たべたい。', 'Je veux manger des sushis au Japon.'),
+    cj('takunai', 'Désir négatif', 'たくない', 'désir · négatif', 'ne pas vouloir… (faire)',
+      'たい se conjugue comme un adjectif en -i : たい → たくない (poli : たくないです / たくありません).',
+      '書く → 書きたくない ; 飲む → 飲みたくない',
+      '食べる → 食べたくない',
+      'する → したくない ; 来る → 来たくない（きたくない）',
+      '今日は何もしたくない。', 'きょうは なにも したくない。', 'Aujourd’hui, je n’ai envie de rien faire.'),
+
+    cj('ba', 'Conditionnel en ば', 'ば形', 'condition · générale', 'si… (condition, conseil, règle générale)',
+      'Insiste sur la condition : « si on fait X, alors Y ». Très courant dans les proverbes et les conseils.',
+      '-u → -e + ば : 書く → 書けば ; 買う → 買えば',
+      'る → れば : 食べる → 食べれば',
+      'する → すれば ; 来る → 来れば（くれば）',
+      '急げば、間に合います。', 'いそげば、まにあいます。', 'Si tu te dépêches, tu seras à l’heure.'),
+    cj('tara', 'Conditionnel en たら', 'たら形', 'condition · quand / si', 'si… ; quand… (une fois que c’est fait)',
+      'Le plus courant à l’oral. On prend la forme en た et on ajoute ら. Peut annoncer une action, un ordre ou une demande.',
+      '書く → 書いたら ; 飲む → 飲んだら',
+      '食べる → 食べたら',
+      'する → したら ; 来る → 来たら（きたら）',
+      '家に着いたら、電話します。', 'いえに ついたら、でんわします。', 'Quand je serai arrivé à la maison, je t’appellerai.'),
+    cj('to', 'Conditionnel en と', 'と', 'condition · automatique', 'dès que… ; chaque fois que… (conséquence naturelle)',
+      'Forme du dictionnaire + と. Résultat automatique ou découverte ; pas d’ordre ni de volonté dans la suite de la phrase.',
+      '書く → 書くと ; 押す（おす）→ 押すと',
+      '食べる → 食べると',
+      'する → すると ; 来る → 来ると（くると）',
+      'このボタンを押すと、ドアが開きます。', 'このボタンを おすと、ドアが あきます。', 'Quand on appuie sur ce bouton, la porte s’ouvre.'),
+    cj('nara', 'Conditionnel en なら', 'なら', 'condition · hypothèse', 'si c’est le cas… ; si tu dis que…',
+      'Reprend ce que dit l’autre ou une situation : « dans ce cas-là… ». Forme du dictionnaire + なら.',
+      '行く → 行くなら ; 買う → 買うなら',
+      '食べる → 食べるなら',
+      'する → するなら ; 来る → 来るなら（くるなら）',
+      '行くなら、早く準備して。', 'いくなら、はやく じゅんびして。', 'Si tu y vas, prépare-toi vite.'),
+
+    cj('pot', 'Potentiel', '可能形', 'pouvoir · capacité', 'pouvoir faire ; savoir faire',
+      'Le complément prend souvent が au lieu de を. Le potentiel d’un verbe se conjugue ensuite comme un verbe du groupe 2.',
+      '-u → -e + る : 書く → 書ける ; 話す（はなす）→ 話せる ; 買う → 買える',
+      'る → られる : 食べる → 食べられる',
+      'する → できる ; 来る → 来られる（こられる）',
+      '私は日本語が話せます。', 'わたしは にほんごが はなせます。', 'Je sais parler japonais.'),
+    cj('pas', 'Passif', '受身形', 'passif · subir', 'être fait par… ; subir (parfois avec un désagrément)',
+      'L’agent est marqué par に. Sert aussi à dire qu’on a « subi » quelque chose (ex. : la pluie, un vol). Se conjugue comme un verbe du groupe 2.',
+      '-u → -a + れる : 書く → 書かれる ; 買う → 買われる',
+      'る → られる : 食べる → 食べられる',
+      'する → される ; 来る → 来られる（こられる）',
+      '先生にほめられました。', 'せんせいに ほめられました。', 'J’ai été félicité par le professeur.'),
+    cj('caus', 'Causatif', '使役形', 'faire faire · laisser faire', 'faire faire… ; laisser faire…',
+      'Celui qui est obligé ou autorisé à agir prend に (ou を). Se conjugue comme un verbe du groupe 2.',
+      '-u → -a + せる : 書く → 書かせる ; 行く → 行かせる',
+      'る → させる : 食べる → 食べさせる',
+      'する → させる ; 来る → 来させる（こさせる）',
+      '先生は学生に本を読ませた。', 'せんせいは がくせいに ほんを よませた。', 'Le professeur a fait lire un livre aux étudiants.'),
+
+    cj('vol', 'Volitif familier', '意向形', 'familier · volitif', 'allons… ; je vais… ; décidons de… (suivi de と思う : j’ai l’intention de)',
+      'Version familière de ましょう : invitation entre amis, décision, résolution.',
+      '-u → -o + う : 書く → 書こう ; 飲む → 飲もう ; 買う → 買おう',
+      'る → よう : 寝る（ねる）→ 寝よう',
+      'する → しよう ; 来る → 来よう（こよう）',
+      '今夜は早く寝よう。', 'こんやは はやく ねよう。', 'Ce soir, couchons-nous tôt.'),
+    cj('imp', 'Impératif', '命令形', 'ordre · brusque', 'fais ! (ordre direct)',
+      'Brusque et masculin : sports, bagarre, panneaux. Entre adultes on préfère なさい ou てください.',
+      '-u → -e : 書く → 書け ; 走る（はしる）→ 走れ',
+      'る → ろ : 食べる → 食べろ',
+      'する → しろ ; 来る → 来い（こい）',
+      '早く起きろ！', 'はやく おきろ！', 'Lève-toi vite !'),
+    cj('impneg', 'Défense', 'な', 'ordre · négatif', 'ne fais pas ! (interdiction directe)',
+      'Forme du dictionnaire + な : brusque, comme l’impératif. Plus doux : ないでください.',
+      '書く → 書くな ; 走る → 走るな',
+      '食べる → 食べるな',
+      'する → するな ; 来る → 来るな（くるな）',
+      'ここで走るな。', 'ここで はしるな。', 'Ne cours pas ici.'),
+    cj('nasai', 'Ordre ferme mais poli', 'なさい', 'ordre · parental', 'fais (ordre d’un parent, d’un enseignant)',
+      'Ordre ferme sans être brusque. Se forme sur la base de ます (sans ます).',
+      '-u → -i + なさい : 書く → 書きなさい ; 行く → 行きなさい',
+      '食べる → 食べなさい',
+      'する → しなさい ; 来る → 来なさい（きなさい）',
+      '早く寝なさい。', 'はやく ねなさい。', 'Va te coucher vite.')
+  ];
+  /* sous-rubriques de la conjugaison → fiches correspondantes */
+  var CJ_SUBS = { 'ます': ['masu', 'masen', 'mashita', 'masendeshita', 'mashou'], 'ない': ['nai', 'nakatta', 'naide'], 'た': ['ta', 'nakatta'], 'て': ['te', 'naide'], 'たい': ['tai', 'takunai'], 'ば': ['ba'],
+    '可能形': ['pot'], '受身形': ['pas'], '使役形': ['caus'], '意向形': ['mashou', 'vol'], '条件': ['tara', 'to', 'nara', 'ba'], '命令形': ['imp', 'impneg', 'nasai'] };
+  function cjFor(ids) { return CJ_CARDS.filter(function (c) { return ids.indexOf(c.cj) >= 0; }).sort(function (a, b) { return ids.indexOf(a.cj) - ids.indexOf(b.cj); }); }
+  var CJ_ALL = CJ_CARDS;   /* tous les temps : paquet complet, dans l'ordre pédagogique (le rappel des groupes vient en premier) */
   /* ── écoute (synthèse vocale japonaise) ── */
   var JP = /[぀-ヿ㐀-鿿々〜ー]+/g, listening = false, voice = null;
   var fab = document.createElement('button'); fab.className = 'fab'; fab.setAttribute('aria-label', 'Mode écoute'); fab.textContent = '🔊';
@@ -6919,7 +7082,13 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       var b = document.createElement('button'); b.className = 'fav'; b.type = 'button'; b.dataset.id = id; b.setAttribute('aria-label', 'Favori');
       b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); var k = ST.fav.indexOf(id); if (k >= 0) ST.fav.splice(k, 1); else ST.fav.unshift(id); save(); syncFavButtons(); renderHome(); });
       sm.appendChild(b);
-      if (cardsFrom(r.sub, id).length >= 3) {
+      var cjIds = CJ_SUBS[splitT(sm.firstChild.textContent.trim()).jp], isV = r.sec.querySelector(':scope > summary .jp').textContent.trim() === '動詞';
+      if (cjIds && isV) {
+        /* conjugaison : fiches uniformes (sens, contexte, groupes, exemple) */
+        var cb = r.sub.querySelector(':scope > .sub-body'), cbtn = document.createElement('button'); cbtn.className = 'deckbtn'; cbtn.type = 'button'; cbtn.textContent = '🃏 Réviser en fiches';
+        cbtn.addEventListener('click', function () { startDeckList(cjFor(cjIds), splitT(sm.firstChild.textContent.trim()).fr, true); });
+        cb.insertBefore(cbtn, cb.firstChild);
+      } else if (cardsFrom(r.sub, id).length >= 3) {
         var body = r.sub.querySelector(':scope > .sub-body');
         var rb = document.createElement('button'); rb.className = 'deckbtn'; rb.type = 'button'; rb.textContent = '🃏 Réviser en fiches';
         rb.addEventListener('click', function () { startDeck(r.sub, id, true); });
@@ -7435,7 +7604,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     navMain.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.classList.contains('nsub')) { var d = subById[b.dataset.id], cur = NAV[NAV.length - 1]; navPush({ v: 'sub', s: cur.s, d: d }); }
-      else if (b.classList.contains('ndeck')) { var TN = ['ます', 'ない', 'た', 'たい', 'ば', '可能形', '受身形', '使役形', '意向形', '条件', '命令形']; startDeckMulti(subsOf(secBy['動詞']).filter(function (d) { return TN.indexOf(splitT(d.querySelector(':scope > summary').firstChild.textContent.trim()).jp) >= 0; }), 'Conjugaison · tous les temps', true); }
+      else if (b.classList.contains('ndeck')) startDeckList(CJ_ALL, 'Conjugaison · tous les temps', true);
       else if (b.classList.contains('nquiz')) { var q = QMAP[b.dataset.qj]; launchQuiz(q[0], q[1]); }
       else if (b.classList.contains('npole') && b.dataset.p) navPush({ v: 'pole', p: b.dataset.p });
       else if (b.classList.contains('nsec')) { var sc = secBy[b.dataset.sj], su = subsOf(sc); navPush(su.length === 1 ? { v: 'sub', s: sc, d: su[0] } : { v: 'sec', s: sc }); }

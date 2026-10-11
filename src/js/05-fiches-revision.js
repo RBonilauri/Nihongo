@@ -51,20 +51,11 @@
     D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = sub; D.all = all;
     deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
-  /* fiches regroupées : plusieurs sous-rubriques dans un seul paquet (ex. tous les temps de la conjugaison) */
-  function multiCards(subs) {
-    var out = [];
-    subs.forEach(function (sub) {
-      var id = Object.keys(subMap).filter(function (k) { return subMap[k].sub === sub; })[0]; if (!id) return;
-      var t = sub.querySelector(':scope > summary').firstChild.textContent.trim().split(' — '), name = t.length > 1 ? t.slice(1).join(' — ') : t[0];
-      cardsFrom(sub, id).forEach(function (c) { c.fl = name + (c.fl ? ' · ' + c.fl : ''); out.push(c); });
-    });
-    return out;
-  }
-  function startDeckMulti(subs, title, onlyTodo) {
-    D.rv = false; var all = multiCards(subs), list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
-    if (!list.length) list = all; if (!all.length) return;
-    D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = null; D.multi = subs; D.all = all;
+  /* paquet de fiches préparées à l'avance (ex. conjugaison) : ordre conservé, les connues sont passées */
+  function startDeckList(cards, title, onlyTodo) {
+    D.rv = false; var all = cards.slice(), list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
+    if (!all.length) return; if (!list.length) list = all;
+    D.cards = list.slice(); D.i = 0; D.title = title; D.sub = null; D.multi = cards; D.all = all;
     deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
   function startRv(id) {
@@ -80,7 +71,7 @@
       if (b.classList.contains('x') || b.classList.contains('close')) bkClose(hideDeck);
       else if (b.classList.contains('again')) answer(false);
       else if (b.classList.contains('ok')) answer(true);
-      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else if (D.multi) startDeckMulti(D.multi, D.title, true); else startDeck(D.sub, D.title, true); }
+      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else if (D.multi) startDeckList(D.multi, D.title, true); else startDeck(D.sub, D.title, true); }
       return;
     }
     if (e.target.closest('#card')) flip();

@@ -53,7 +53,8 @@
   .deck-top .x { width: 44px; height: 44px; margin-left: -10px; border: 0; background: none; font-size: 1.6rem; color: var(--ink); cursor: pointer; }
   .deck-top .ttl { flex: 1; min-width: 0; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .deck-top .prog { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .card { flex: 1; min-height: 0; margin: .5rem 0 1rem; border: 1px solid var(--border); background: var(--surface); padding: 1.5rem 1.2rem; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .8rem; cursor: pointer; }
+  .card { flex: 1; min-height: 0; margin: .5rem 0 1rem; border: 1px solid var(--border); background: var(--surface); padding: 1.5rem 1.2rem; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; gap: .8rem; cursor: pointer; }
+  .card > :first-child { margin-top: auto; } .card > :last-child { margin-bottom: auto; }   /* centré, mais défile depuis le haut si la fiche est longue */
   .card .front { font-family: 'Noto Serif JP', serif; font-size: 1.6rem; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
   .card .flab { font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); }
   .card .tap { font-size: .75rem; color: var(--muted); }

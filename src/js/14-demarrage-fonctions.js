@@ -6,7 +6,13 @@
       var b = document.createElement('button'); b.className = 'fav'; b.type = 'button'; b.dataset.id = id; b.setAttribute('aria-label', 'Favori');
       b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); var k = ST.fav.indexOf(id); if (k >= 0) ST.fav.splice(k, 1); else ST.fav.unshift(id); save(); syncFavButtons(); renderHome(); });
       sm.appendChild(b);
-      if (cardsFrom(r.sub, id).length >= 3) {
+      var cjIds = CJ_SUBS[splitT(sm.firstChild.textContent.trim()).jp], isV = r.sec.querySelector(':scope > summary .jp').textContent.trim() === '動詞';
+      if (cjIds && isV) {
+        /* conjugaison : fiches uniformes (sens, contexte, groupes, exemple) */
+        var cb = r.sub.querySelector(':scope > .sub-body'), cbtn = document.createElement('button'); cbtn.className = 'deckbtn'; cbtn.type = 'button'; cbtn.textContent = '🃏 Réviser en fiches';
+        cbtn.addEventListener('click', function () { startDeckList(cjFor(cjIds), splitT(sm.firstChild.textContent.trim()).fr, true); });
+        cb.insertBefore(cbtn, cb.firstChild);
+      } else if (cardsFrom(r.sub, id).length >= 3) {
         var body = r.sub.querySelector(':scope > .sub-body');
         var rb = document.createElement('button'); rb.className = 'deckbtn'; rb.type = 'button'; rb.textContent = '🃏 Réviser en fiches';
         rb.addEventListener('click', function () { startDeck(r.sub, id, true); });
