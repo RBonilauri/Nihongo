@@ -65,7 +65,8 @@
     // listes de sous-rubriques + bouton quiz, dans chaque rubrique
     Object.keys(secBy).forEach(function (j) {
       var s = secBy[j], subs = subsOf(s), body = s.querySelector(':scope > .sec-body'), ns = document.createElement('div'); ns.className = 'navsubs';
-      var q = QMAP[j], h = q ? '<button type="button" class="nquiz" data-qj="' + esc(j) + '">❓ Quiz de cette rubrique</button>' : '';
+      var q = QMAP[j], h = j === '動詞' ? '<button type="button" class="deckbtn ndeck" data-deck="tenses">🃏 Fiches de tous les temps</button>' : '';
+      h += q ? '<button type="button" class="nquiz" data-qj="' + esc(j) + '">❓ Quiz de cette rubrique</button>' : '';
       h += subs.map(function (d) { var t = splitT(d.querySelector(':scope > summary').firstChild.textContent.trim()); return '<button type="button" class="nsub" data-id="' + esc(d.dataset.id) + '"><span class="nj">' + esc(t.jp) + '</span><span class="nt">' + esc(t.fr) + '</span><span class="ch">›</span></button>'; }).join('');
       ns.innerHTML = h; if (!h) return;
       body.insertBefore(ns, subs[0] || body.firstChild);
@@ -73,6 +74,7 @@
     navMain.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.classList.contains('nsub')) { var d = subById[b.dataset.id], cur = NAV[NAV.length - 1]; navPush({ v: 'sub', s: cur.s, d: d }); }
+      else if (b.classList.contains('ndeck')) { var TN = ['ます', 'ない', 'た', 'たい', 'ば', '可能形', '受身形', '使役形', '意向形', '条件', '命令形']; startDeckMulti(subsOf(secBy['動詞']).filter(function (d) { return TN.indexOf(splitT(d.querySelector(':scope > summary').firstChild.textContent.trim()).jp) >= 0; }), 'Conjugaison · tous les temps', true); }
       else if (b.classList.contains('nquiz')) { var q = QMAP[b.dataset.qj]; launchQuiz(q[0], q[1]); }
       else if (b.classList.contains('npole') && b.dataset.p) navPush({ v: 'pole', p: b.dataset.p });
       else if (b.classList.contains('nsec')) { var sc = secBy[b.dataset.sj], su = subsOf(sc); navPush(su.length === 1 ? { v: 'sub', s: sc, d: su[0] } : { v: 'sec', s: sc }); }

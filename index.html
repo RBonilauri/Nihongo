@@ -957,6 +957,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
   .rc-grid b, .rc-spd b { display: block; font-size: 1.25rem; font-family: 'DM Mono', monospace; }
   .rc-spd { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
   .rc .pg-t small { display: block; text-transform: none; letter-spacing: 0; margin-top: .15rem; font-weight: 400; color: var(--muted); font-size: .66rem; }
+  .ndeck { display: flex; justify-content: center; width: 100%; margin: 0 0 .6rem; }
   .jm-leg { display: flex; flex-wrap: wrap; gap: 6px; margin: .6rem 0; }
   .jm-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; font: inherit; font-size: .8rem; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
   .jm-chip i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.35); }
@@ -5699,16 +5700,32 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
   }
   function hideDeck() { deck.hidden = true; document.body.style.overflow = ''; if (window.__navHomeRefresh) window.__navHomeRefresh(); }
   function startDeck(sub, title, onlyTodo) {
-    D.rv = false; var all = cardsFrom(sub, title);
+    D.rv = false; D.multi = null; var all = cardsFrom(sub, title);
     var list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
     if (!list.length) { list = all; }
     D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = sub; D.all = all;
     deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
+  /* fiches regroupées : plusieurs sous-rubriques dans un seul paquet (ex. tous les temps de la conjugaison) */
+  function multiCards(subs) {
+    var out = [];
+    subs.forEach(function (sub) {
+      var id = Object.keys(subMap).filter(function (k) { return subMap[k].sub === sub; })[0]; if (!id) return;
+      var t = sub.querySelector(':scope > summary').firstChild.textContent.trim().split(' — '), name = t.length > 1 ? t.slice(1).join(' — ') : t[0];
+      cardsFrom(sub, id).forEach(function (c) { c.fl = name + (c.fl ? ' · ' + c.fl : ''); out.push(c); });
+    });
+    return out;
+  }
+  function startDeckMulti(subs, title, onlyTodo) {
+    D.rv = false; var all = multiCards(subs), list = onlyTodo ? all.filter(function (c) { return !ST.su[c.key]; }) : all;
+    if (!list.length) list = all; if (!all.length) return;
+    D.cards = shuffle(list.slice()); D.i = 0; D.title = title; D.sub = null; D.multi = subs; D.all = all;
+    deck.querySelector('.ttl').textContent = title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
+  }
   function startRv(id) {
     var list = Object.keys(ST.rv).map(function (k) { var c = ST.rv[k]; return { id: c.id, key: k, fl: c.fl, front: c.front, back: c.back }; }).filter(function (c) { return !id || c.id === id; });
     if (!list.length) return;
-    D.cards = shuffle(list); D.i = 0; D.title = id && subMap[id] ? subMap[id].title + ' · à revoir' : 'Fiches à revoir'; D.sub = null; D.all = list; D.rv = id || true;
+    D.cards = shuffle(list); D.i = 0; D.title = id && subMap[id] ? subMap[id].title + ' · à revoir' : 'Fiches à revoir'; D.sub = null; D.multi = null; D.all = list; D.rv = id || true;
     deck.querySelector('.ttl').textContent = D.title; if (deck.hidden) bkPush(hideDeck); deck.hidden = false; document.body.style.overflow = 'hidden'; showCard();
   }
   function answer(ok) { var c = D.cards[D.i]; if (!c) return; if (ok) { ST.su[c.key] = 1; delete ST.rv[c.key]; } else { delete ST.su[c.key]; ST.rv[c.key] = { id: c.id, fl: c.fl, front: c.front, back: c.back }; } save(); D.i++; showCard(); }
@@ -5718,7 +5735,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       if (b.classList.contains('x') || b.classList.contains('close')) bkClose(hideDeck);
       else if (b.classList.contains('again')) answer(false);
       else if (b.classList.contains('ok')) answer(true);
-      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else startDeck(D.sub, D.title, true); }
+      else if (b.classList.contains('restart')) { if (D.rv) startRv(D.rv === true ? '' : D.rv); else if (D.multi) startDeckMulti(D.multi, D.title, true); else startDeck(D.sub, D.title, true); }
       return;
     }
     if (e.target.closest('#card')) flip();
@@ -7409,7 +7426,8 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     // listes de sous-rubriques + bouton quiz, dans chaque rubrique
     Object.keys(secBy).forEach(function (j) {
       var s = secBy[j], subs = subsOf(s), body = s.querySelector(':scope > .sec-body'), ns = document.createElement('div'); ns.className = 'navsubs';
-      var q = QMAP[j], h = q ? '<button type="button" class="nquiz" data-qj="' + esc(j) + '">❓ Quiz de cette rubrique</button>' : '';
+      var q = QMAP[j], h = j === '動詞' ? '<button type="button" class="deckbtn ndeck" data-deck="tenses">🃏 Fiches de tous les temps</button>' : '';
+      h += q ? '<button type="button" class="nquiz" data-qj="' + esc(j) + '">❓ Quiz de cette rubrique</button>' : '';
       h += subs.map(function (d) { var t = splitT(d.querySelector(':scope > summary').firstChild.textContent.trim()); return '<button type="button" class="nsub" data-id="' + esc(d.dataset.id) + '"><span class="nj">' + esc(t.jp) + '</span><span class="nt">' + esc(t.fr) + '</span><span class="ch">›</span></button>'; }).join('');
       ns.innerHTML = h; if (!h) return;
       body.insertBefore(ns, subs[0] || body.firstChild);
@@ -7417,6 +7435,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     navMain.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.classList.contains('nsub')) { var d = subById[b.dataset.id], cur = NAV[NAV.length - 1]; navPush({ v: 'sub', s: cur.s, d: d }); }
+      else if (b.classList.contains('ndeck')) { var TN = ['ます', 'ない', 'た', 'たい', 'ば', '可能形', '受身形', '使役形', '意向形', '条件', '命令形']; startDeckMulti(subsOf(secBy['動詞']).filter(function (d) { return TN.indexOf(splitT(d.querySelector(':scope > summary').firstChild.textContent.trim()).jp) >= 0; }), 'Conjugaison · tous les temps', true); }
       else if (b.classList.contains('nquiz')) { var q = QMAP[b.dataset.qj]; launchQuiz(q[0], q[1]); }
       else if (b.classList.contains('npole') && b.dataset.p) navPush({ v: 'pole', p: b.dataset.p });
       else if (b.classList.contains('nsec')) { var sc = secBy[b.dataset.sj], su = subsOf(sc); navPush(su.length === 1 ? { v: 'sub', s: sc, d: su[0] } : { v: 'sec', s: sc }); }

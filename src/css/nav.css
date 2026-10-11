@@ -186,3 +186,4 @@
   .rc-grid b, .rc-spd b { display: block; font-size: 1.25rem; font-family: 'DM Mono', monospace; }
   .rc-spd { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
   .rc .pg-t small { display: block; text-transform: none; letter-spacing: 0; margin-top: .15rem; font-weight: 400; color: var(--muted); font-size: .66rem; }
+  .ndeck { display: flex; justify-content: center; width: 100%; margin: 0 0 .6rem; }

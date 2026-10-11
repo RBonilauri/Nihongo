@@ -283,6 +283,20 @@ with sync_playwright() as p:
     pg.click('#tb-rec'); pg.wait_for_timeout(200); pg.click('#tb-back'); pg.wait_for_timeout(300)
     check('Référence' in title() or 'REF' in title().upper(), 'retour depuis les records')
 
+    print('Fiches de tous les temps')
+    pg.click('#tabbar [data-tab=learn]'); pg.wait_for_timeout(200)
+    pg.click('.npole[data-p=gram]'); pg.wait_for_timeout(200)
+    pg.evaluate("[...document.querySelectorAll('.nsec')].find(b => b.dataset.sj === '動詞').click()"); pg.wait_for_timeout(300)
+    check(pg.evaluate("(() => { const d = document.querySelector('main > details.sec.cur .ndeck'), q = document.querySelector('main > details.sec.cur .nquiz'); return !!d && !!q && d.nextElementSibling === q; })()"), 'bouton « Fiches de tous les temps » juste au-dessus du quiz')
+    pg.evaluate("document.querySelector('main > details.sec.cur .ndeck').click()"); pg.wait_for_timeout(300)
+    nprog = pg.evaluate("(() => { const d = document.querySelector('.deck'); return [!d.hidden, +d.querySelector('.prog').textContent.split('/')[1], d.querySelector('.ttl').textContent, d.querySelector('#card .flab') ? d.querySelector('#card .flab').textContent : '']; })()")
+    check(nprog[0] and nprog[1] >= 30 and 'tous les temps' in nprog[2] and nprog[3] != '', 'paquet de fiches regroupées ouvert (%s)' % nprog)
+    pg.evaluate("document.querySelector('.deck #card').click()"); pg.wait_for_timeout(100)
+    check(pg.evaluate("!!document.querySelector('.deck #card .back')"), 'la fiche se retourne')
+    pg.evaluate("document.querySelector('.deck .x').click()"); pg.wait_for_timeout(300)
+    check(pg.evaluate("document.querySelector('.deck').hidden"), 'paquet fermé')
+    pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(300)
+
     print('Réponses non évidentes')
     leak = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent);
         const strip = s => String(s).replace(/\\s*[（(][^）)]*[぀-ヿ㐀-鿿][^）)]*[）)]/g, '').trim();
