@@ -22,6 +22,7 @@ _kd = _json.loads(_KJ)
 for _k in _kd:
     for _w in _k['kw']:
         if _w[0] in _vk: _w[1] = _vk[_w[0]]
+        _w.append(_seg(_w[0], _w[1]))
 _KJ = _json.dumps(_kd, ensure_ascii=False, separators=(',', ':'))
 _reading0 = _reading
 def _reading(w): return _vk.get(w) or _reading0(w)

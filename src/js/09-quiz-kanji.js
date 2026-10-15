@@ -223,10 +223,16 @@
       else if (q.t === 'k2kun') { ask = 'Quelle est la lecture Kun de ce kanji ?'; big = bigKanji(x.k); }
       else if (q.t === 'r2w') { ask = 'Quel est ce mot ?'; big = '<div class="q-big word">' + esc(q.w[1]) + '</div>'; }
       else if (q.t === 's2w') { ask = 'Comment s’écrit ce mot ?'; big = '<div class="q-big sens">' + esc(q.w[2]) + '</div>'; if (opts.length > 1) hint = hintBtn(opts.map(function (o) { return o.k; }).join('\n')); }
-      else { ask = q.t === 'w2s' ? 'Que signifie ce mot ?' : 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; }
+      else { ask = q.t === 'w2s' ? 'Que signifie ce mot ?' : 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; if (q.t === 'w2r') hint = hintBtn(otherReadings(q.w, x.k)); }
       var gl = (opts.length < 2) ? '<p class="conj-note">Pas assez de choix pour ce kanji.</p>' : '';
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div>' + gl +
         '<div class="q-opts">' + opts.map(function (o, i) { return '<button type="button" class="qopt' + (q.t === 's2k' ? ' kj' : '') + '" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="q-fb"></div>';
+    }
+    function otherReadings(w, tk) {
+      var seg = (w[3] || '').split('|'), out = [], ki = 0, chars = w[0].split(''), isK = function (c) { return /[\u4e00-\u9fff\u3005]/.test(c); };
+      var nk = chars.filter(isK).length; if (!w[3] || seg.length !== nk || nk < 2) return '';
+      chars.forEach(function (c) { if (!isK(c)) return; var r = seg[ki++]; if (c !== tk && r) out.push(c + ' → ' + r); });
+      return out.join('\n');
     }
     function answer(b) {
       var cur = Q.cur; if (cur.done) return; cur.done = true;

@@ -337,6 +337,27 @@ with sync_playwright() as p:
     check(len(big) > 0, 'quiz kanji tous niveaux : une question s’affiche')
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
 
+    print('Quiz kanji : ampoule des lectures')
+    sg = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); let w = 0, s = 0; d.forEach(x => x.kw.forEach(k => { w++; if (k[3]) s++; })); const m = d.find(x => x.k === '満').kw.find(k => k[0] === '満室'); return [w, s, m && m[3]]; }""")
+    check(sg[1] / sg[0] > 0.9 and sg[2] == 'まん|しつ', 'découpage des lectures par kanji : >90 %% des mots, 満室 = まん|しつ %s' % sg)
+    pg.evaluate("[...document.querySelectorAll('button.quizcard')].find(b => /quiz kanji/i.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    pg.click('.quiz:not([hidden]) [data-lv="ALL"]'); pg.wait_for_timeout(200)
+    pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Mots$/.test(b.innerText.trim()))?.click()"); pg.wait_for_timeout(150)
+    pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Lancer/.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    amp = []
+    for _ in range(40):
+        info = pg.evaluate("""() => { const q = document.querySelector('.quiz:not([hidden]) .q-card'); if (!q) return null; const w = q.querySelector('.q-big.word'); if (!w) return null;
+            const h = q.querySelector('.qhint'); const n = [...w.textContent].filter(c => /[\\u4e00-\\u9fff\\u3005]/.test(c)).length; const t = w.querySelector('b'); return { ask: q.querySelector('.q-ask').textContent, n, hint: h ? h.dataset.k : null, tk: t ? t.textContent : '' }; }""")
+        if info and 'lit ce mot' in info['ask']:
+            amp.append(info)
+        if not pg.evaluate("!!document.querySelector('.quiz:not([hidden]) .qopt')"): break
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
+        pg.evaluate("(document.querySelector('.quiz:not([hidden]) #q-next') || [...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /Suivant|Continuer|Résultat/.test(b.innerText)) || {click(){}}).click()"); pg.wait_for_timeout(60)
+    multi = [a for a in amp if a['n'] >= 2 and a['hint']]
+    check(len(amp) >= 5 and len(multi) >= 3 and all((a['tk'] + ' →') not in a['hint'] and ' → ' in a['hint'] for a in multi) and all(not a['hint'] for a in amp if a['n'] < 2),
+          'questions « Comment se lit ce mot ? » : ampoule avec la lecture des autres kanji (sans celui à lire) %s' % amp[:3])
+    pg.evaluate("(document.querySelector('.quiz:not([hidden]) .x') || {click(){}}).click()"); pg.wait_for_timeout(200)
+
     print('Grammaire N4 / N3')
     gn = pg.evaluate("""() => ['N4','N3'].map(j => { const s = [...document.querySelectorAll('main > details.sec')].find(d => d.querySelector(':scope > summary .jp').textContent.trim() === j); return s ? [s.querySelectorAll(':scope > .sec-body > details.sub').length, s.querySelectorAll('tbody tr').length] : null; })""")
     check(gn[0] and gn[1] and gn[0][0] >= 8 and gn[1][0] >= 8 and gn[0][1] >= 60 and gn[1][1] >= 70, 'pages Grammaire N4 et N3 présentes %s' % gn)
