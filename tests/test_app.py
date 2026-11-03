@@ -230,7 +230,6 @@ with sync_playwright() as p:
     got = []
     for _ in range(25):
         got.append((pg.evaluate("(document.querySelector('.quiz:not([hidden]) .q-big') || {innerText: ''}).innerText") or '').strip()[:1])
-        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
         pg.evaluate("(() => { var n = document.querySelector('.quiz:not([hidden]) #q-next'); if (n) n.click(); })()"); pg.wait_for_timeout(60)
     check(len(got) == 25 and all(k in top25 for k in got), 'Top 25 : toutes les questions portent sur les 25 plus ratés')
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .x') && document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
@@ -344,7 +343,7 @@ with sync_playwright() as p:
     pg.click('.quiz:not([hidden]) [data-lv="ALL"]'); pg.wait_for_timeout(200)
     pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Mots$/.test(b.innerText.trim()))?.click()"); pg.wait_for_timeout(150)
     pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Lancer/.test(b.innerText)).click()"); pg.wait_for_timeout(300)
-    amp = []
+    amp = []; dets = []
     for _ in range(40):
         info = pg.evaluate("""() => { const q = document.querySelector('.quiz:not([hidden]) .q-card'); if (!q) return null; const w = q.querySelector('.q-big.word'); if (!w) return null;
             const h = q.querySelector('.qhint'); const n = [...w.textContent].filter(c => /[\\u4e00-\\u9fff\\u3005]/.test(c)).length; const t = w.querySelector('b'); return { ask: q.querySelector('.q-ask').textContent, n, hint: h ? h.dataset.k : null, tk: t ? t.textContent : '' }; }""")
@@ -352,10 +351,17 @@ with sync_playwright() as p:
             amp.append(info)
         if not pg.evaluate("!!document.querySelector('.quiz:not([hidden]) .qopt')"): break
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
+        if info and 'lit ce mot' in info['ask']:
+            dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent]; }""")
+            dets.append((info['n'], dt))
         pg.evaluate("(document.querySelector('.quiz:not([hidden]) #q-next') || [...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /Suivant|Continuer|Résultat/.test(b.innerText)) || {click(){}}).click()"); pg.wait_for_timeout(60)
     multi = [a for a in amp if a['n'] >= 2 and a['hint']]
     check(len(amp) >= 5 and len(multi) >= 3 and all((a['tk'] + ' →') not in a['hint'] and ' → ' in a['hint'] for a in multi) and all(not a['hint'] for a in amp if a['n'] < 2),
           'questions « Comment se lit ce mot ? » : ampoule avec la lecture des autres kanji (sans celui à lire) %s' % amp[:3])
+    mk = [d for n, d in dets if n >= 2]
+    check(len(mk) >= 3 and all(d and d[0] >= 1 and d[1] >= 3 * d[0] and d[2] == d[0] for d in mk), 'réponse d’un mot composé : rubrique « Détails » avec On/Kun/Sens et bouton écouter pour chaque autre kanji %s' % mk[:3])
+    check(all(d is None for n, d in dets if n < 2), 'mot d’un seul kanji : pas de rubrique « Détails »')
     pg.evaluate("(document.querySelector('.quiz:not([hidden]) .x') || {click(){}}).click()"); pg.wait_for_timeout(200)
 
     print('Grammaire N4 / N3')

@@ -121,3 +121,9 @@
 .vq-exh{font-size:.72rem;text-transform:uppercase;opacity:.7;letter-spacing:.04em}
 .vq-exjp{font-size:1.05rem;margin-top:2px}
 .vq-exfr{font-size:.85rem;opacity:.8;font-style:italic}
+
+.fbd { margin: .7rem 0 .2rem; border-top: 1px dashed var(--border); padding-top: .5rem; }
+.fbd > summary { cursor: pointer; font-weight: 600; font-size: .95rem; padding: .3rem 0; }
+.fbd-k { margin-top: .6rem; padding-top: .5rem; border-top: 1px solid var(--border); }
+.fbd-k:first-of-type { border-top: 0; }
+.q-fb .fbd-k .fbb .mini { flex: 0 1 auto; }

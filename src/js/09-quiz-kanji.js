@@ -197,7 +197,7 @@
       else if (b.id === 'q-go') { start(buildQuiz()); }
       else if (b.classList.contains('qopt')) answer(b);
       else if (b.id === 'q-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
-      else if (b.id === 'q-say') { speak(JSON.parse(b.dataset.say)); }
+      else if (b.id === 'q-say' || b.classList.contains('qsay2')) { speak(JSON.parse(b.dataset.say)); }
       else if (b.id === 'q-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
       else if (b.id === 'q-new' || b.id === 'q-back') { showSetup(); }
       else if (b.id === 'q-stats') { showStats(); }
@@ -245,11 +245,20 @@
       var say = [];
       if (WT.indexOf(q.t) >= 0) say = [q.w[1]]; else { if (x.on) say = say.concat(parts(x.on)); if (x.kun) say = say.concat(parts(x.kun)); }
       var kw = x.kw.slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
-      var last = Q.i + 1 >= Q.items.length;
+      var last = Q.i + 1 >= Q.items.length, det = '';
+      if (q.w) {
+        var seen = {}, oth = q.w[0].split('').filter(function (c) { if (c === x.k || seen[c] || !byK[c]) return false; return (seen[c] = 1); });
+        det = oth.length ? '<details class="fbd"><summary>Détails · ' + (oth.length > 1 ? 'les autres kanji' : 'l’autre kanji') + ' (' + esc(oth.join(' ')) + ')</summary>' + oth.map(function (c) {
+          var y = byK[c], sy = []; if (y.on) sy = sy.concat(parts(y.on)); if (y.kun) sy = sy.concat(parts(y.kun));
+          var kw2 = y.kw.slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
+          return '<div class="fbd-k"><div class="fbk">' + esc(y.k) + '</div><div class="fbi"><div><b>On</b> ' + esc(y.on || '—') + '</div><div><b>Kun</b> ' + esc(y.kun || '—') + '</div><div><b>Sens</b> ' + esc(y.s) + '</div>' + (kw2 ? '<div><b>Mots</b> ' + kw2 + '</div>' : '') + '</div>' +
+            '<div class="fbb"><button type="button" class="mini qsay2" data-say=\'' + esc(JSON.stringify(sy)) + '\'>🔊 Écouter</button></div></div>';
+        }).join('') + '</details>' : '';
+      }
       document.getElementById('q-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
         (WT.indexOf(q.t) >= 0 ? '<div class="fbw"><b>' + esc(q.w[0]) + '</b><span>' + esc(q.w[1]) + '</span><em>' + esc(q.w[2]) + '</em></div>' : '') +
         '<div class="fbk">' + esc(x.k) + '</div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
-                (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' +
+                (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' + det +
         '<div class="fbb"><button type="button" class="mini" id="q-say" data-say=\'' + esc(JSON.stringify(say)) + '\'>🔊 Écouter</button><button type="button" class="qgo" id="q-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       document.getElementById('q-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
