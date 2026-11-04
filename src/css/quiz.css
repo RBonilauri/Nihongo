@@ -127,3 +127,9 @@
 .fbd-k { margin-top: .6rem; padding-top: .5rem; border-top: 1px solid var(--border); }
 .fbd-k:first-of-type { border-top: 0; }
 .q-fb .fbd-k .fbb .mini { flex: 0 1 auto; }
+
+.lvp { display: inline-block; padding: .1rem .55rem; border-radius: 999px; border: 1px solid var(--gold, #c9a84c); color: var(--gold, #c9a84c); font-size: .72rem; font-weight: 700; letter-spacing: .04em; line-height: 1.4; }
+.q-tag.lvp { background: transparent; }
+.q-card > .q-tag.lvp { display: block; width: max-content; margin: 0 auto .5rem; color: var(--gold, #c9a84c); }
+.fbkr { display: flex; align-items: center; gap: .7rem; }
+.fbkr .fbk { margin-right: 0; }

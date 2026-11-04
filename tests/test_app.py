@@ -1,6 +1,6 @@
 """Tests de non-régression de l'application (navigateur mobile simulé).
 Lancer :  python3 tests/test_app.py   (ou  make test)   — sort avec un code ≠ 0 en cas d'échec."""
-import os, sys
+import os, re, sys
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -346,20 +346,21 @@ with sync_playwright() as p:
     amp = []; dets = []
     for _ in range(40):
         info = pg.evaluate("""() => { const q = document.querySelector('.quiz:not([hidden]) .q-card'); if (!q) return null; const w = q.querySelector('.q-big.word'); if (!w) return null;
-            const h = q.querySelector('.qhint'); const n = [...w.textContent].filter(c => /[\\u4e00-\\u9fff\\u3005]/.test(c)).length; const t = w.querySelector('b'); return { ask: q.querySelector('.q-ask').textContent, n, hint: h ? h.dataset.k : null, tk: t ? t.textContent : '' }; }""")
+            const h = q.querySelector('.qhint'); const n = [...w.textContent].filter(c => /[\\u4e00-\\u9fff\\u3005]/.test(c)).length; const t = w.querySelector('b'); return { ask: q.querySelector('.q-ask').textContent, n, hint: h ? h.dataset.k : null, tk: t ? t.textContent : '', lv: (q.querySelector(':scope > .lvp') || {}).textContent || '' }; }""")
         if info and 'lit ce mot' in info['ask']:
             amp.append(info)
         if not pg.evaluate("!!document.querySelector('.quiz:not([hidden]) .qopt')"): break
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
         if info and 'lit ce mot' in info['ask']:
-            dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent]; }""")
+            dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent, (document.querySelector('.q-fb > .fbkr .lvp') || {}).textContent || '', (d.querySelector('.fbd-k .lvp') || {}).textContent || '']; }""")
             dets.append((info['n'], dt))
         pg.evaluate("(document.querySelector('.quiz:not([hidden]) #q-next') || [...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /Suivant|Continuer|Résultat/.test(b.innerText)) || {click(){}}).click()"); pg.wait_for_timeout(60)
     multi = [a for a in amp if a['n'] >= 2 and a['hint']]
     check(len(amp) >= 5 and len(multi) >= 3 and all((a['tk'] + ' →') not in a['hint'] and ' → ' in a['hint'] for a in multi) and all(not a['hint'] for a in amp if a['n'] < 2),
           'questions « Comment se lit ce mot ? » : ampoule avec la lecture des autres kanji (sans celui à lire) %s' % amp[:3])
     mk = [d for n, d in dets if n >= 2]
+    check(len(amp) >= 5 and all(re.fullmatch(r'N[1-5]', a['lv']) for a in amp) and all(re.fullmatch(r'N[1-5]', d[4]) and re.fullmatch(r'N[1-5]', d[5]) for d in mk), 'pastille de niveau : sur chaque question (quiz multi-niveaux) et à côté de chaque kanji de la réponse %s' % [a['lv'] for a in amp[:5]])
     check(len(mk) >= 3 and all(d and d[0] >= 1 and d[1] >= 3 * d[0] and d[2] == d[0] for d in mk), 'réponse d’un mot composé : rubrique « Détails » avec On/Kun/Sens et bouton écouter pour chaque autre kanji %s' % mk[:3])
     check(all(d is None for n, d in dets if n < 2), 'mot d’un seul kanji : pas de rubrique « Détails »')
     pg.evaluate("(document.querySelector('.quiz:not([hidden]) .x') || {click(){}}).click()"); pg.wait_for_timeout(200)
