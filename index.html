@@ -1137,6 +1137,9 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
 .q-card > .q-tag.lvp { display: block; width: max-content; margin: 0 auto .5rem; color: var(--gold, #c9a84c); }
 .fbkr { display: flex; align-items: center; gap: .7rem; }
 .fbkr .fbk { margin-right: 0; }
+
+.fbkr .kspk { margin-left: auto; flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); color: var(--ink); font-size: 1.2rem; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.fbkr .kspk:active { background: var(--aged); }
 </style>
 </head>
 <body>
@@ -6277,6 +6280,8 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       chars.forEach(function (c) { if (!isK(c)) return; var r = seg[ki++]; if (c !== tk && r) out.push(c + ' → ' + r); });
       return out.join('\n');
     }
+    function kSay(y) { var r = []; if (y.on) r = r.concat(parts(y.on)); if (y.kun) r = r.concat(parts(y.kun)); return r; }
+    function spk(y) { return '<button type="button" class="qsay2 kspk" aria-label="Écouter les lectures on et kun" title="Écouter" data-say=\'' + esc(JSON.stringify(kSay(y))) + '\'>🔊</button>'; }
     function answer(b) {
       var cur = Q.cur; if (cur.done) return; cur.done = true;
       var o = cur.opts[+b.dataset.i], q = cur.q, x = byK[q.k], good = !!o.ok;
@@ -6292,17 +6297,17 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       if (q.w) {
         var seen = {}, oth = q.w[0].split('').filter(function (c) { if (c === x.k || seen[c] || !byK[c]) return false; return (seen[c] = 1); });
         det = oth.length ? '<details class="fbd"><summary>Détails · ' + (oth.length > 1 ? 'les autres kanji' : 'l’autre kanji') + ' (' + esc(oth.join(' ')) + ')</summary>' + oth.map(function (c) {
-          var y = byK[c], sy = []; if (y.on) sy = sy.concat(parts(y.on)); if (y.kun) sy = sy.concat(parts(y.kun));
+          var y = byK[c];
           var kw2 = y.kw.slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
-          return '<div class="fbd-k"><div class="fbkr"><div class="fbk">' + esc(y.k) + '</div><span class="lvp lv-' + esc(y.l) + '">' + esc(y.l) + '</span></div><div class="fbi"><div><b>On</b> ' + esc(y.on || '—') + '</div><div><b>Kun</b> ' + esc(y.kun || '—') + '</div><div><b>Sens</b> ' + esc(y.s) + '</div>' + (kw2 ? '<div><b>Mots</b> ' + kw2 + '</div>' : '') + '</div>' +
-            '<div class="fbb"><button type="button" class="mini qsay2" data-say=\'' + esc(JSON.stringify(sy)) + '\'>🔊 Écouter</button></div></div>';
+          return '<div class="fbd-k"><div class="fbkr"><div class="fbk">' + esc(y.k) + '</div><span class="lvp lv-' + esc(y.l) + '">' + esc(y.l) + '</span>' + spk(y) + '</div><div class="fbi"><div><b>On</b> ' + esc(y.on || '—') + '</div><div><b>Kun</b> ' + esc(y.kun || '—') + '</div><div><b>Sens</b> ' + esc(y.s) + '</div>' + (kw2 ? '<div><b>Mots</b> ' + kw2 + '</div>' : '') + '</div>' +
+            '</div>';
         }).join('') + '</details>' : '';
       }
       document.getElementById('q-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
         (WT.indexOf(q.t) >= 0 ? '<div class="fbw"><b>' + esc(q.w[0]) + '</b><span>' + esc(q.w[1]) + '</span><em>' + esc(q.w[2]) + '</em></div>' : '') +
-        '<div class="fbkr"><div class="fbk">' + esc(x.k) + '</div><span class="lvp lv-' + esc(x.l) + '">' + esc(x.l) + '</span></div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
+        '<div class="fbkr"><div class="fbk">' + esc(x.k) + '</div><span class="lvp lv-' + esc(x.l) + '">' + esc(x.l) + '</span>' + spk(x) + '</div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
                 (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' + det +
-        '<div class="fbb"><button type="button" class="mini" id="q-say" data-say=\'' + esc(JSON.stringify(say)) + '\'>🔊 Écouter</button><button type="button" class="qgo" id="q-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
+        '<div class="fbb">' + (WT.indexOf(q.t) >= 0 ? '<button type="button" class="mini" id="q-say" data-say=\'' + esc(JSON.stringify(say)) + '\'>🔊 Écouter le mot</button>' : '') + '<button type="button" class="qgo" id="q-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       document.getElementById('q-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {

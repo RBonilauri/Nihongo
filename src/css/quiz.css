@@ -133,3 +133,6 @@
 .q-card > .q-tag.lvp { display: block; width: max-content; margin: 0 auto .5rem; color: var(--gold, #c9a84c); }
 .fbkr { display: flex; align-items: center; gap: .7rem; }
 .fbkr .fbk { margin-right: 0; }
+
+.fbkr .kspk { margin-left: auto; flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); color: var(--ink); font-size: 1.2rem; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.fbkr .kspk:active { background: var(--aged); }
