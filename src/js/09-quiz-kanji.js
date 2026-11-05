@@ -259,7 +259,7 @@
         }).join('') + '</details>' : '';
       }
       document.getElementById('q-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
-        (WT.indexOf(q.t) >= 0 ? '<div class="fbw"><b>' + esc(q.w[0]) + '</b><span>' + esc(q.w[1]) + '</span><em>' + esc(q.w[2]) + '</em></div>' : '') +
+        (WT.indexOf(q.t) >= 0 ? '<div class="fbw"><b>' + esc(q.w[0]) + '</b><span>' + esc(q.w[1]) + '</span><em>' + esc(q.w[2]) + '</em>' + (q.w[4] ? '<div class="fbex"><span class="fbex-j">' + esc(q.w[4][0]) + '</span><span class="fbex-f">' + esc(q.w[4][1]) + '</span></div>' : '') + '</div>' : '') +
         '<div class="fbkr"><div class="fbk">' + esc(x.k) + '</div><span class="lvp lv-' + esc(x.l) + '">' + esc(x.l) + '</span>' + spk(x) + '</div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
                 (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' + det +
         '<div class="fbb">' + (WT.indexOf(q.t) >= 0 ? '<button type="button" class="mini" id="q-say" data-say=\'' + esc(JSON.stringify(say)) + '\'>🔊 Écouter le mot</button>' : '') + '<button type="button" class="qgo" id="q-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';

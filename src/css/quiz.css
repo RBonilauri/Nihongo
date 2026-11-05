@@ -136,3 +136,7 @@
 
 .fbkr .kspk { margin-left: auto; flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); color: var(--ink); font-size: 1.2rem; display: grid; place-items: center; cursor: pointer; padding: 0; }
 .fbkr .kspk:active { background: var(--aged); }
+
+.fbw .fbex { flex-basis: 100%; margin-top: .45rem; padding: .5rem .7rem; border-left: 3px solid var(--gold, #c9a84c); background: rgba(127,127,127,.1); border-radius: 0 8px 8px 0; display: flex; flex-direction: column; gap: .15rem; }
+.fbex-j { font-size: 1.05rem; font-weight: 500; }
+.fbex-f { font-size: .9rem; color: var(--muted); }

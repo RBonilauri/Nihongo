@@ -353,7 +353,7 @@ with sync_playwright() as p:
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
         if info and 'lit ce mot' in info['ask']:
-            dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent, (document.querySelector('.q-fb > .fbkr .lvp') || {}).textContent || '', (d.querySelector('.fbd-k .lvp') || {}).textContent || '']; }""")
+            dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent, (document.querySelector('.q-fb > .fbkr .lvp') || {}).textContent || '', (d.querySelector('.fbd-k .lvp') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-j') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-f') || {}).textContent || '']; }""")
             dets.append((info['n'], dt))
             if info['n'] >= 2 and not spk:
                 spk = pg.evaluate("""() => new Promise(r => { window.__said = []; window.SpeechSynthesisUtterance = function (t) { window.__said.push(t); }; speechSynthesis.speak = () => {}; speechSynthesis.cancel = () => {};
@@ -366,6 +366,9 @@ with sync_playwright() as p:
           'questions « Comment se lit ce mot ? » : ampoule avec la lecture des autres kanji (sans celui à lire) %s' % amp[:3])
     check(spk and spk['n'] >= 1 and spk['w1'] and spk['w2'] and spk['s1'][:1] == spk['w1'][:1] and spk['s2'][:1] == spk['w2'][:1] and spk['bottom'], 'haut-parleur à droite de chaque kanji : lit les lectures on et kun (kanji de la question et kanji supplémentaires) %s' % spk)
     mk = [d for n, d in dets if n >= 2]
+    check(len(mk) >= 3 and all(len(d[6]) >= 4 and len(d[7]) >= 4 for d in mk), 'réponse d’un mot : phrase d’exemple japonaise + traduction française sous le sens %s' % [d[6:] for d in mk[:2]])
+    ex = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); let n = 0, ok = 0, lg = 0; d.forEach(x => x.kw.forEach(k => { n++; const e = k[4]; if (e && e[0] && e[1] && (e[0].includes(k[0]) || e[0].includes(k[0].slice(0, -1)) || e[0].includes(k[0].slice(0, -2)))) ok++; if (e && e[0].length > 28) lg++; })); return [n, ok, lg]; }""")
+    check(ex[0] == ex[1] and ex[2] == 0, 'chaque mot de chaque liste de kanji a une phrase d’exemple courte contenant le mot %s' % ex)
     check(len(amp) >= 5 and all(re.fullmatch(r'N[1-5]', a['lv']) for a in amp) and all(re.fullmatch(r'N[1-5]', d[4]) and re.fullmatch(r'N[1-5]', d[5]) for d in mk), 'pastille de niveau : sur chaque question (quiz multi-niveaux) et à côté de chaque kanji de la réponse %s' % [a['lv'] for a in amp[:5]])
     check(len(mk) >= 3 and all(d and d[0] >= 1 and d[1] >= 3 * d[0] and d[2] == d[0] for d in mk), 'réponse d’un mot composé : rubrique « Détails » avec On/Kun/Sens et bouton écouter pour chaque autre kanji %s' % mk[:3])
     check(all(d is None for n, d in dets if n < 2), 'mot d’un seul kanji : pas de rubrique « Détails »')
