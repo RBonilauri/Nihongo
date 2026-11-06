@@ -120,6 +120,8 @@ with sync_playwright() as p:
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
 
     kk = [(n, k) for n, k in KDS if k['has']]
+    kx = pg.evaluate("() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => x.c === 'Keigo'); return [v.length, v.filter(x => x.ex && x.ex[0] && x.ex[1]).length]; }")
+    check(kx[0] >= 90 and kx[0] == kx[1], 'vocabulaire Keigo : phrase d’exemple pour chaque expression %s' % kx)
     cqk = [k for n, k in KDS if n == 'Quiz compteurs']
     check(len(cqk) >= 3 and all(k['ex'] and k['cd'] and k['nc'] >= 4 for k in cqk), 'réponses compteurs : phrase d’exemple + menu déroulant des lectures (%d réponses)' % len(cqk))
     cx = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('counter-data').textContent); let n = 0, ok = 0; const ids = d.reads.map(r => 'r:' + r.k); d.counters.forEach(c => { if (c.k !== 'つ') ids.push('c:' + c.k); c.ex.forEach(w => ids.push('w:' + w[0])); }); ids.forEach(i => { n++; const e = d.exs[i]; if (e && e.length >= 2 && e[0][0] !== e[1][0]) ok++; }); return [n, ok]; }""")

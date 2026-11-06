@@ -2,6 +2,9 @@
 # Exécuté par build.py dans un espace de noms partagé (variables main, css, js…).
 import hashlib as _hl
 from outils_exemples import EX as _OX
+import os as _os3, json as _json3
+_KXF = _os3.path.join(HERE, 'data', 'keigo_exemples.json')
+_KXW = _json3.load(open(_KXF, encoding='utf-8')) if _os3.path.exists(_KXF) else {}
 _CAT = {'旅行': 'Voyage', '会話': 'Conversation', '敬語': 'Keigo', '語彙': 'Vocabulaire', '常用': 'Vocabulaire', '時間': 'Temps', '形容詞': 'Adjectifs', '道具': 'Outils', '表現': 'Expressions', '助詞': 'Particules'}
 def vocab_json(html):
     soup = _BS(html, 'html.parser'); out = []; seen = set()
@@ -15,6 +18,7 @@ def vocab_json(html):
             _sub = g.split(':', 1)[1]
             _e = _OX.get(_sub + '|' + jp + '|' + _it['kk']) or _OX.get(_sub + '|' + jp)
             if _e: _it['ex'] = list(_e)
+        if not _it.get('ex') and _it['i'] in _KXW: _it['ex'] = list(_KXW[_it['i']])
         out.append(_it)
     for sec in soup.select('details.sec'):
         head = sec.summary.get_text(' ', strip=True).split()[0]
