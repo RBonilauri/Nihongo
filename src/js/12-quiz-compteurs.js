@@ -182,11 +182,13 @@
       save();
       var last = Q.i + 1 >= Q.items.length, c = x.kind === 'r' ? cinfo[x.r.c] : x.c;
       var h = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div><div class="vq-ans">';
-      if (x.kind === 'r') h += '<div class="vq-jp">' + esc(x.r.k) + '</div><div>' + esc(x.r.y) + (x.r.irr ? ' ⚠ irrégulier' : '') + '</div>';
-      else if (x.kind === 'w') h += '<div class="vq-jp">' + esc(x.w[0]) + ' → ' + esc(x.c.k) + '</div><div>' + esc(x.w[1]) + '</div>';
-      else h += '<div class="vq-jp">' + esc(x.c.k) + '</div><div>' + esc(x.c.u) + '</div>';
+      var ln2;
+      if (x.kind === 'r') { h += '<div class="vq-jp">' + esc(x.r.k) + '</div>'; ln2 = esc(x.r.y) + (x.r.irr ? ' ⚠ irrégulier' : ''); }
+      else if (x.kind === 'w') { h += '<div class="vq-jp">' + esc(x.w[0]) + ' → ' + esc(x.c.k) + '</div>'; ln2 = (x.w[2] && x.w[2] !== x.w[0] ? esc(x.w[2]) + ' · ' : '') + esc(x.w[1]); }
+      else { h += '<div class="vq-jp">' + esc(x.c.k) + '</div>'; ln2 = esc(x.c.b || '') + (x.c.ro ? ' (' + esc(x.c.ro) + ')' : ''); }
+      h += '<div>' + ln2 + '</div>';
       if (c) {
-        h += '<div class="vq-ro"><b>' + esc(c.k) + '</b> (' + esc(c.ro) + ') : ' + esc(c.u) + '</div>';
+        h += '<div class="vq-ro">' + (x.kind === 'c' ? '' : '<b>' + esc(c.k) + '</b> (' + esc(c.ro) + ') : ') + esc(c.u) + '</div>';
         var exl = (CD.exs || {})[x.i];
         if (exl && exl.length) { var e = exl[(st.n - 1) % exl.length]; h += '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(e[0]) + '</div><div class="vq-exfr">' + esc(e[1]) + '</div></div>'; }
         var rs = CD.reads.filter(function (r) { return r.c === c.k; });
