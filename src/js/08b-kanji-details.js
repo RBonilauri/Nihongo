@@ -23,7 +23,7 @@
   /* ajoute la rubrique à un encadré de correction (.q-fb) des quiz hors kanji, d'après les kanji de la réponse affichée */
   function kdetAdd(host) {
     var fb = host && host.querySelector('.q-fb'); if (!fb || fb.querySelector('.fbd')) return;
-    var c = fb.cloneNode(true); c.querySelectorAll('.fbh,.fbb,.vq-ex,.jm-mini,.vq-tr,.cq-row,.fbd').forEach(function (n) { n.remove(); });
+    var c = fb.cloneNode(true); c.querySelectorAll('.fbh,.fbb,.vq-ex,.jm-mini,.vq-tr,.cq-row,.cq-det,.fbd').forEach(function (n) { n.remove(); });
     var h = kdetHtml(c.textContent, ''), bar = fb.querySelector('.fbb');
     if (h && bar) bar.insertAdjacentHTML('beforebegin', h);
   }

@@ -1,3 +1,4 @@
+import os as _os
 # Particules et compteurs
 # Exécuté par build.py dans un espace de noms partagé (variables main, css, js…).
 from parts_bank import PB as _PARTS
@@ -48,6 +49,8 @@ def counters_json(html):
         counters.append({'k': k, 'ro': v['ro'], 'u': v['u'], 'g': gmap[k], 'b': _CBASE[k], 'ex': ex})
     counters.append({'k': 'つ', 'ro': 'tsu', 'u': _CEXTRA['つ'][1], 'g': 'tsu', 'b': 'つ', 'ex': []})
     print('compteurs', len(counters), 'lectures', len(reads), 'mots', sum(len(c['ex']) for c in counters))
-    return _json.dumps({'reads': reads, 'counters': counters}, ensure_ascii=False, separators=(',', ':'))
+    _exf = _os.path.join(HERE, 'data', 'compteurs_exemples.json')
+    exs = _json.load(open(_exf, encoding='utf-8')) if _os.path.exists(_exf) else {}
+    return _json.dumps({'reads': reads, 'counters': counters, 'exs': exs}, ensure_ascii=False, separators=(',', ':'))
 _CJ = counters_json(main)
 _GJ = _json.dumps({'verbs': list(_GV.values()), 'parts': parts_json()}, ensure_ascii=False, separators=(',', ':'))

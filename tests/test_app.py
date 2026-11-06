@@ -112,14 +112,18 @@ with sync_playwright() as p:
             for _ in range(6):
                 if not pg.query_selector(Q + ' .qopt'): break
                 pg.evaluate("document.querySelector('%s .qopt').click()" % Q); pg.wait_for_timeout(80)
-                kd = pg.evaluate("""(Q) => { const fb = document.querySelector(Q + ' .q-fb'); if (!fb) return null; const c = fb.cloneNode(true); c.querySelectorAll('.fbh,.fbb,.vq-ex,.jm-mini,.vq-tr,.cq-row,.fbd').forEach(n => n.remove());
-                    const K = new Set(JSON.parse(document.getElementById('kanji-data').textContent).map(x => x.k)); const has = !c.querySelector('.fbk') && [...c.textContent].some(ch => K.has(ch)); const d = fb.querySelector('details.fbd'); return { fbk: !!c.querySelector('.fbk'), has, det: !!d, sp: d ? d.querySelectorAll('.kspk').length : 0 }; }""", Q)
+                kd = pg.evaluate("""(Q) => { const fb = document.querySelector(Q + ' .q-fb'); if (!fb) return null; const c = fb.cloneNode(true); c.querySelectorAll('.fbh,.fbb,.vq-ex,.jm-mini,.vq-tr,.cq-row,.cq-det,.fbd').forEach(n => n.remove());
+                    const K = new Set(JSON.parse(document.getElementById('kanji-data').textContent).map(x => x.k)); const has = !c.querySelector('.fbk') && [...c.textContent].some(ch => K.has(ch)); const d = fb.querySelector('details.fbd'); return { ex: !!fb.querySelector('.vq-ex'), cd: !!fb.querySelector('details.cq-det'), nc: fb.querySelectorAll('.cq-c').length, fbk: !!c.querySelector('.fbk'), has, det: !!d, sp: d ? d.querySelectorAll('.kspk').length : 0 }; }""", Q)
                 if kd: KDS.append((name, kd))
                 pg.evaluate("(document.querySelector('%s .q-fb .qgo')||{click(){}}).click()" % Q); pg.wait_for_timeout(80)
         check(ok, 'quiz « %s » : lancement et questions' % name)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
 
     kk = [(n, k) for n, k in KDS if k['has']]
+    cqk = [k for n, k in KDS if n == 'Quiz compteurs']
+    check(len(cqk) >= 3 and all(k['ex'] and k['cd'] and k['nc'] >= 4 for k in cqk), 'réponses compteurs : phrase d’exemple + menu déroulant des lectures (%d réponses)' % len(cqk))
+    cx = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('counter-data').textContent); let n = 0, ok = 0; const ids = d.reads.map(r => 'r:' + r.k); d.counters.forEach(c => { if (c.k !== 'つ') ids.push('c:' + c.k); c.ex.forEach(w => ids.push('w:' + w[0])); }); ids.forEach(i => { n++; const e = d.exs[i]; if (e && e.length >= 2 && e[0][0] !== e[1][0]) ok++; }); return [n, ok]; }""")
+    check(cx[0] == cx[1] and cx[0] > 300, 'chaque élément du quiz compteurs a 2 phrases d’exemple différentes %s' % cx)
     check(len(kk) >= 8 and all(k['det'] and k['sp'] >= 1 for n, k in kk) and all(not k['det'] for n, k in KDS if not k['has'] and not k['fbk']), 'réponse contenant un kanji : rubrique « Détails » dans tous les quiz (%d réponses, quiz : %s)' % (len(kk), [(n, k) for n, k in KDS if (k['has'] and not (k['det'] and k['sp'] >= 1)) or (not k['has'] and k['det'] and not k['fbk'])][:4]))
     print('Statistiques des quiz')
     dayn = lambda: pg.evaluate("(JSON.parse(localStorage.getItem('jp-state')).day||{}).n||0")

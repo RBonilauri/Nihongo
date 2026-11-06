@@ -187,8 +187,15 @@
       else h += '<div class="vq-jp">' + esc(x.c.k) + '</div><div>' + esc(x.c.u) + '</div>';
       if (c) {
         h += '<div class="vq-ro"><b>' + esc(c.k) + '</b> (' + esc(c.ro) + ') : ' + esc(c.u) + '</div>';
-        var row = CD.reads.filter(function (r) { return r.c === c.k; }).map(function (r) { return esc(r.k) + ' ' + esc(r.y) + (r.irr ? '⚠' : ''); }).join(' · ');
-        if (row) h += '<div class="vq-ro cq-row">' + row + '</div>';
+        var exl = (CD.exs || {})[x.i];
+        if (exl && exl.length) { var e = exl[(st.n - 1) % exl.length]; h += '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(e[0]) + '</div><div class="vq-exfr">' + esc(e[1]) + '</div></div>'; }
+        var rs = CD.reads.filter(function (r) { return r.c === c.k; });
+        if (rs.length) {
+          var nn = rs.map(function (r) { return r.n; }), nw = nn.indexOf('何') >= 0, num = nn.filter(function (v) { return v !== '何'; });
+          h += '<details class="cq-det"><summary>Lectures de ' + esc(c.k) + ' · ' + esc(num[0]) + ' → ' + esc(num[num.length - 1]) + (nw ? ', 何' : '') + '</summary><div class="cq-grid">' + rs.map(function (r) {
+            return '<div class="cq-c' + (x.kind === 'r' && r.k === x.r.k ? ' cur' : '') + (r.irr ? ' irr' : '') + '"><b>' + esc(r.k) + '</b><span>' + esc(r.y) + '</span>' + (r.irr ? '<i title="lecture irrégulière">⚠</i>' : '') + '</div>';
+          }).join('') + '</div></details>';
+        }
       }
       h += '</div><div class="fbb">' + (canSpeak && x.kind === 'r' ? '<button type="button" class="mini" id="k-say" data-id="' + esc(x.i) + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="k-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('k-fb').innerHTML = h;
