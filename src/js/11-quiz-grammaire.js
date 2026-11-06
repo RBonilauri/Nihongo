@@ -226,6 +226,7 @@
       if (trv.length) h += '<div class="vq-tr" id="g-trb" hidden><small>Traduction approximative</small>' + trv.map(esc).join('<br>') + '</div>';
       h += '</div><div class="fbb">' + (trv.length ? '<button type="button" class="mini" id="g-tr">👁 Traduction</button>' : '') + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + esc(x.i) + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('g-fb').innerHTML = h;
+      kdetAdd($('g-fb'));
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {

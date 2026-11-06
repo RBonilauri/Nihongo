@@ -98,6 +98,7 @@ with sync_playwright() as p:
     pg.click('.nstats') if False else pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(300)
 
     print('Quiz')
+    KDS = []
     pg.click('#tabbar [data-tab=quiz]'); pg.wait_for_timeout(200)
     cards = pg.evaluate("[...document.querySelectorAll('.quizlist .quizcard')].map(e=>e.querySelector('.qc-t').firstChild.textContent)")
     check(len(cards) >= 7, '%d quiz : %s' % (len(cards), cards))
@@ -111,10 +112,15 @@ with sync_playwright() as p:
             for _ in range(6):
                 if not pg.query_selector(Q + ' .qopt'): break
                 pg.evaluate("document.querySelector('%s .qopt').click()" % Q); pg.wait_for_timeout(80)
+                kd = pg.evaluate("""(Q) => { const fb = document.querySelector(Q + ' .q-fb'); if (!fb) return null; const c = fb.cloneNode(true); c.querySelectorAll('.fbh,.fbb,.vq-ex,.jm-mini,.vq-tr,.cq-row,.fbd').forEach(n => n.remove());
+                    const K = new Set(JSON.parse(document.getElementById('kanji-data').textContent).map(x => x.k)); const has = !c.querySelector('.fbk') && [...c.textContent].some(ch => K.has(ch)); const d = fb.querySelector('details.fbd'); return { fbk: !!c.querySelector('.fbk'), has, det: !!d, sp: d ? d.querySelectorAll('.kspk').length : 0 }; }""", Q)
+                if kd: KDS.append((name, kd))
                 pg.evaluate("(document.querySelector('%s .q-fb .qgo')||{click(){}}).click()" % Q); pg.wait_for_timeout(80)
         check(ok, 'quiz « %s » : lancement et questions' % name)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
 
+    kk = [(n, k) for n, k in KDS if k['has']]
+    check(len(kk) >= 8 and all(k['det'] and k['sp'] >= 1 for n, k in kk) and all(not k['det'] for n, k in KDS if not k['has'] and not k['fbk']), 'réponse contenant un kanji : rubrique « Détails » dans tous les quiz (%d réponses, quiz : %s)' % (len(kk), [(n, k) for n, k in KDS if (k['has'] and not (k['det'] and k['sp'] >= 1)) or (not k['has'] and k['det'] and not k['fbk'])][:4]))
     print('Statistiques des quiz')
     dayn = lambda: pg.evaluate("(JSON.parse(localStorage.getItem('jp-state')).day||{}).n||0")
     pg.click('#tabbar [data-tab=quiz]'); pg.wait_for_timeout(200)

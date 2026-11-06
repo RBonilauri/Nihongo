@@ -6047,6 +6047,39 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     return sec.querySelector('.quizlist');
   }
 
+  /* ═══ « Détails » des kanji d'une réponse (commun à tous les quiz) ═══ */
+  var KDMAP = null;
+  function kdetBind(m) { KDMAP = m; }
+  function kdetMap() {
+    if (!KDMAP) {
+      KDMAP = {};
+      try { JSON.parse(document.getElementById('kanji-data').textContent).forEach(function (x) { x.s = (x.s || '').replace(/\s*[(（][^)）]*[぀-鿿][^)）]*[)）]/g, '').trim(); KDMAP[x.k] = x; }); } catch (e) {}
+    }
+    return KDMAP;
+  }
+  function kdetParts(cell) { return String(cell || '').split(/[・･]/).map(function (p) { return p.replace(/[()（）]/g, '').trim(); }).filter(Boolean); }
+  function kdetSay(y) { return kdetParts(y.on).concat(kdetParts(y.kun)); }
+  function kdetSpk(y) { return '<button type="button" class="qsay2 kspk" aria-label="Écouter les lectures on et kun" title="Écouter" data-say=\'' + esc(JSON.stringify(kdetSay(y))) + '\'>🔊</button>'; }
+  /* HTML de la rubrique déroulante pour les kanji de `text` (hors `skip`), '' s'il n'y en a aucun */
+  function kdetHtml(text, skip) {
+    var M = kdetMap(), seen = {}, oth = String(text || '').split('').filter(function (c) { if (c === skip || seen[c] || !M[c]) return false; return (seen[c] = 1); }).slice(0, 12);
+    if (!oth.length) return '';
+    return '<details class="fbd"><summary>Détails · ' + (skip ? (oth.length > 1 ? 'les autres kanji' : 'l’autre kanji') : (oth.length > 1 ? 'les kanji' : 'le kanji')) + ' (' + esc(oth.join(' ')) + ')</summary>' + oth.map(function (c) {
+      var y = M[c], kw2 = (y.kw || []).slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
+      return '<div class="fbd-k"><div class="fbkr"><div class="fbk">' + esc(y.k) + '</div><span class="lvp lv-' + esc(y.l) + '">' + esc(y.l) + '</span>' + kdetSpk(y) + '</div><div class="fbi"><div><b>On</b> ' + esc(y.on || '—') + '</div><div><b>Kun</b> ' + esc(y.kun || '—') + '</div><div><b>Sens</b> ' + esc(y.s) + '</div>' + (kw2 ? '<div><b>Mots</b> ' + kw2 + '</div>' : '') + '</div></div>';
+    }).join('') + '</details>';
+  }
+  /* ajoute la rubrique à un encadré de correction (.q-fb) des quiz hors kanji, d'après les kanji de la réponse affichée */
+  function kdetAdd(host) {
+    var fb = host && host.querySelector('.q-fb'); if (!fb || fb.querySelector('.fbd')) return;
+    var c = fb.cloneNode(true); c.querySelectorAll('.fbh,.fbb,.vq-ex,.jm-mini,.vq-tr,.cq-row,.fbd').forEach(function (n) { n.remove(); });
+    var h = kdetHtml(c.textContent, ''), bar = fb.querySelector('.fbb');
+    if (h && bar) bar.insertAdjacentHTML('beforebegin', h);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.qsay2'); if (!b) return;
+    try { speak(JSON.parse(b.dataset.say)); } catch (x) {}
+  });
   /* ═══════════ QUIZ KANJI ═══════════ */
   var QT = [
     { id: 'k2s', label: 'Kanji → sens', short: 'Sens' },
@@ -6068,7 +6101,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     var KD = []; try { KD = JSON.parse(document.getElementById('kanji-data').textContent); } catch (e) {}
     KD.forEach(function (x) { x.s = (x.s || "").replace(/\s*[(（][^)）]*[\u3040-\u9fff][^)）]*[)）]/g, "").trim(); });// le mot japonais entre parenthèses trahirait la réponse
     if (!KD.length) return;
-    var byK = {}; KD.forEach(function (x) { byK[x.k] = x; });
+    var byK = {}; KD.forEach(function (x) { byK[x.k] = x; }); kdetBind(byK);
     /* mots utiles : on complète les mots de chaque kanji avec ceux du vocabulaire (lecture + traduction) */
     try {
       var VD = JSON.parse(document.getElementById('vocab-data').textContent), HKJ = /[一-鿿々]/;
@@ -6246,7 +6279,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       else if (b.id === 'q-go') { start(buildQuiz()); }
       else if (b.classList.contains('qopt')) answer(b);
       else if (b.id === 'q-next') { if (Q.mix) { Q.mix.next(Q.ok > 0); return; } Q.i++; showQ(); }
-      else if (b.id === 'q-say' || b.classList.contains('qsay2')) { speak(JSON.parse(b.dataset.say)); }
+      else if (b.id === 'q-say') { speak(JSON.parse(b.dataset.say)); }
       else if (b.id === 'q-again') { if (Q.wrongList.length) start(Q.wrongList.slice()); }
       else if (b.id === 'q-new' || b.id === 'q-back') { showSetup(); }
       else if (b.id === 'q-stats') { showStats(); }
@@ -6284,8 +6317,6 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       chars.forEach(function (c) { if (!isK(c)) return; var r = seg[ki++]; if (c !== tk && r) out.push(c + ' → ' + r); });
       return out.join('\n');
     }
-    function kSay(y) { var r = []; if (y.on) r = r.concat(parts(y.on)); if (y.kun) r = r.concat(parts(y.kun)); return r; }
-    function spk(y) { return '<button type="button" class="qsay2 kspk" aria-label="Écouter les lectures on et kun" title="Écouter" data-say=\'' + esc(JSON.stringify(kSay(y))) + '\'>🔊</button>'; }
     function answer(b) {
       var cur = Q.cur; if (cur.done) return; cur.done = true;
       var o = cur.opts[+b.dataset.i], q = cur.q, x = byK[q.k], good = !!o.ok;
@@ -6298,18 +6329,10 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       if (WT.indexOf(q.t) >= 0) say = [q.w[1]]; else { if (x.on) say = say.concat(parts(x.on)); if (x.kun) say = say.concat(parts(x.kun)); }
       var kw = x.kw.slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
       var last = Q.i + 1 >= Q.items.length, det = '';
-      if (q.w) {
-        var seen = {}, oth = q.w[0].split('').filter(function (c) { if (c === x.k || seen[c] || !byK[c]) return false; return (seen[c] = 1); });
-        det = oth.length ? '<details class="fbd"><summary>Détails · ' + (oth.length > 1 ? 'les autres kanji' : 'l’autre kanji') + ' (' + esc(oth.join(' ')) + ')</summary>' + oth.map(function (c) {
-          var y = byK[c];
-          var kw2 = y.kw.slice(0, 4).map(function (w) { return esc(w[0]) + ' (' + esc(w[1]) + ') ' + esc(w[2]); }).join(' · ');
-          return '<div class="fbd-k"><div class="fbkr"><div class="fbk">' + esc(y.k) + '</div><span class="lvp lv-' + esc(y.l) + '">' + esc(y.l) + '</span>' + spk(y) + '</div><div class="fbi"><div><b>On</b> ' + esc(y.on || '—') + '</div><div><b>Kun</b> ' + esc(y.kun || '—') + '</div><div><b>Sens</b> ' + esc(y.s) + '</div>' + (kw2 ? '<div><b>Mots</b> ' + kw2 + '</div>' : '') + '</div>' +
-            '</div>';
-        }).join('') + '</details>' : '';
-      }
+      if (q.w) det = kdetHtml(q.w[0], x.k);
       document.getElementById('q-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
         (WT.indexOf(q.t) >= 0 ? '<div class="fbw"><b>' + esc(q.w[0]) + '</b><span>' + esc(q.w[1]) + '</span><em>' + esc(q.w[2]) + '</em>' + (q.w[4] ? '<div class="fbex"><span class="fbex-j">' + esc(q.w[4][0]) + '</span><span class="fbex-f">' + esc(q.w[4][1]) + '</span></div>' : '') + '</div>' : '') +
-        '<div class="fbkr"><div class="fbk">' + esc(x.k) + '</div><span class="lvp lv-' + esc(x.l) + '">' + esc(x.l) + '</span>' + spk(x) + '</div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
+        '<div class="fbkr"><div class="fbk">' + esc(x.k) + '</div><span class="lvp lv-' + esc(x.l) + '">' + esc(x.l) + '</span>' + kdetSpk(x) + '</div><div class="fbi"><div><b>On</b> ' + esc(x.on || '—') + '</div><div><b>Kun</b> ' + esc(x.kun || '—') + '</div><div><b>Sens</b> ' + esc(x.s) + '</div>' +
                 (kw ? '<div><b>Mots</b> ' + kw + '</div>' : '') + '</div>' + det +
         '<div class="fbb">' + (WT.indexOf(q.t) >= 0 ? '<button type="button" class="mini" id="q-say" data-say=\'' + esc(JSON.stringify(say)) + '\'>🔊 Écouter le mot</button>' : '') + '<button type="button" class="qgo" id="q-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       document.getElementById('q-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -6528,6 +6551,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       $('v-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
         '<div class="vq-ans"><div class="vq-jp">' + esc(x.jp) + '</div>' + (x.ka ? '<div>' + esc(x.ka) + '</div>' : '') + (x.ro ? '<div class="vq-ro">' + esc(x.ro) + '</div>' : '') + '<div><b>' + esc(x.fr) + '</b></div></div>' + jpMini(x) + (x.ex ? '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(x.ex[0]) + '</div><div class="vq-exfr">' + esc(x.ex[1]) + '</div></div>' : '') +
         '<div class="fbb">' + (canSpeak && earOK(x) ? '<button type="button" class="mini" id="v-say" data-id="' + x.i + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="v-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
+      kdetAdd($('v-fb'));
       $('v-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {
@@ -6783,6 +6807,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       if (trv.length) h += '<div class="vq-tr" id="g-trb" hidden><small>Traduction approximative</small>' + trv.map(esc).join('<br>') + '</div>';
       h += '</div><div class="fbb">' + (trv.length ? '<button type="button" class="mini" id="g-tr">👁 Traduction</button>' : '') + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + esc(x.i) + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('g-fb').innerHTML = h;
+      kdetAdd($('g-fb'));
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {
@@ -7005,6 +7030,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       }
       h += '</div><div class="fbb">' + (canSpeak && x.kind === 'r' ? '<button type="button" class="mini" id="k-say" data-id="' + esc(x.i) + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="k-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('k-fb').innerHTML = h;
+      kdetAdd($('k-fb'));
       $('k-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {
@@ -7481,6 +7507,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
       var last = Q.i + 1 >= Q.items.length;
       $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' || x.k === 'w' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
         '<div class="fbb">' + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + x.i + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
+      kdetAdd($('g-fb'));
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {

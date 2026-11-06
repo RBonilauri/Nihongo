@@ -196,6 +196,7 @@
       var last = Q.i + 1 >= Q.items.length;
       $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' || x.k === 'w' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
         '<div class="fbb">' + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + x.i + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
+      kdetAdd($('g-fb'));
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {

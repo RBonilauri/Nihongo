@@ -192,6 +192,7 @@
       }
       h += '</div><div class="fbb">' + (canSpeak && x.kind === 'r' ? '<button type="button" class="mini" id="k-say" data-id="' + esc(x.i) + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="k-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       $('k-fb').innerHTML = h;
+      kdetAdd($('k-fb'));
       $('k-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     function showResult() {
