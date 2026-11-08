@@ -355,7 +355,7 @@ with sync_playwright() as p:
     pg.click('.quiz:not([hidden]) [data-lv="ALL"]'); pg.wait_for_timeout(200)
     pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Mots$/.test(b.innerText.trim()))?.click()"); pg.wait_for_timeout(150)
     pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Lancer/.test(b.innerText)).click()"); pg.wait_for_timeout(300)
-    amp = []; dets = []; spk = None
+    amp = []; dets = []; cmp_ = []; cmp_ = []; spk = None
     for _ in range(40):
         info = pg.evaluate("""() => { const q = document.querySelector('.quiz:not([hidden]) .q-card'); if (!q) return null; const w = q.querySelector('.q-big.word'); if (!w) return null;
             const h = q.querySelector('.qhint'); const n = [...w.textContent].filter(c => /[\\u4e00-\\u9fff\\u3005]/.test(c)).length; const t = w.querySelector('b'); return { ask: q.querySelector('.q-ask').textContent, n, hint: h ? h.dataset.k : null, tk: t ? t.textContent : '', lv: (q.querySelector(':scope > .lvp') || {}).textContent || '' }; }""")
@@ -367,6 +367,7 @@ with sync_playwright() as p:
         if info and 'lit ce mot' in info['ask']:
             dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent, (document.querySelector('.q-fb > .fbkr .lvp') || {}).textContent || '', (d.querySelector('.fbd-k .lvp') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-j') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-f') || {}).textContent || '']; }""")
             dets.append((info['n'], dt))
+            cmp_.append(pg.evaluate("() => { const f = document.querySelector('.quiz:not([hidden]) .q-fb'); return [f.querySelectorAll('.fbwr').length, f.querySelectorAll('.fbwl > b').length, f.querySelectorAll('details.fbc').length, f.querySelectorAll('details.fbc .fbcc b').length, f.querySelectorAll('.fbi .fbwr, .fbi details').length]; }"))
             if info['n'] >= 2 and not spk:
                 spk = pg.evaluate("""() => new Promise(r => { window.__said = []; window.SpeechSynthesisUtterance = function (t) { window.__said.push(t); }; speechSynthesis.speak = () => {}; speechSynthesis.cancel = () => {};
                     const f = document.querySelector('.quiz:not([hidden]) .q-fb'), m = f.querySelector(':scope > .fbkr .kspk'), d = f.querySelectorAll('details.fbd .kspk');
@@ -378,6 +379,9 @@ with sync_playwright() as p:
           'questions « Comment se lit ce mot ? » : ampoule avec la lecture des autres kanji (sans celui à lire) %s' % amp[:3])
     check(spk and spk['n'] >= 1 and spk['w1'] and spk['w2'] and spk['s1'][:1] == spk['w1'][:1] and spk['s2'][:1] == spk['w2'][:1] and spk['bottom'], 'haut-parleur à droite de chaque kanji : lit les lectures on et kun (kanji de la question et kanji supplémentaires) %s' % spk)
     mk = [d for n, d in dets if n >= 2]
+    check(len(cmp_) >= 5 and all(c[0] >= 1 and c[1] >= 1 and c[0] >= c[1] for c in cmp_) and sum(1 for c in cmp_ if c[2] >= 1 and c[3] >= 1) >= 3 and all(c[4] == 0 for c in cmp_), '« Mots » en liste (mot, lecture, sens) et menu « Composants » (radical + éléments) dans les détails de kanji %s' % cmp_[:3])
+    cpd = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); const K = new Set(d.map(x => x.k)); let n = 0, bad = 0, wc = 0; d.forEach(x => { if (!x.cp) return; n++; if (x.cp[0] === x.k || (x.cp[1] && (x.cp[1].length < 2 || x.cp[1].length > 4 || x.cp[1].includes(x.k)))) bad++; }); const w = d.find(x => x.k === '望'); return [n, bad, w && w.cp]; }""")
+    check(cpd[0] >= 2000 and cpd[1] == 0 and cpd[2] == ['月', '亡月王'], 'données de composants : radical + 2 à 4 éléments, 望 = 亡 + 月 + 王 %s' % cpd)
     check(len(mk) >= 3 and all(len(d[6]) >= 4 and len(d[7]) >= 4 for d in mk), 'réponse d’un mot : phrase d’exemple japonaise + traduction française sous le sens %s' % [d[6:] for d in mk[:2]])
     ex = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); let n = 0, ok = 0, lg = 0; d.forEach(x => x.kw.forEach(k => { n++; const e = k[4]; if (e && e[0] && e[1] && (e[0].includes(k[0]) || e[0].includes(k[0].slice(0, -1)) || e[0].includes(k[0].slice(0, -2)))) ok++; if (e && e[0].length > 28) lg++; })); return [n, ok, lg]; }""")
     check(ex[0] == ex[1] and ex[2] == 0, 'chaque mot de chaque liste de kanji a une phrase d’exemple courte contenant le mot %s' % ex)

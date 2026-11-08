@@ -149,3 +149,18 @@
 .cq-c span { color: var(--muted); }
 .cq-c i { font-style: normal; color: #c97a1a; margin-left: auto; }
 .cq-c.cur { outline: 2px solid var(--gold, #c9a84c); background: rgba(201,168,76,.18); }
+/* « Mots » en liste + menu « Composants » des détails de kanji */
+.fbwl { margin-top: .5rem; font-size: .88rem; }
+.fbwr { display: grid; grid-template-columns: auto auto 1fr; gap: .1rem .6rem; align-items: baseline; padding: .25rem 0; border-top: 1px dotted var(--border); }
+.fbwj { font-family: 'Noto Serif JP', serif; font-size: 1.05rem; }
+.fbwy { color: var(--muted); font-size: .8rem; }
+.fbwm { min-width: 0; }
+.fbc { margin: .45rem 0 0; font-size: .88rem; }
+.fbc > summary { cursor: pointer; font-weight: 600; padding: .2rem 0; }
+.fbcr { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .5rem; padding: .25rem 0; }
+.fbcl { color: var(--muted); font-size: .78rem; min-width: 4.2rem; }
+.fbcc { display: inline-flex; align-items: baseline; gap: .3rem; padding: .1rem .5rem; border: 1px solid var(--border); border-radius: 8px; }
+.fbcc b { font-family: 'Noto Serif JP', serif; font-size: 1.2rem; font-weight: 400; }
+.fbcc i { font-style: normal; font-size: .78rem; color: var(--muted); }
+.fbcp { color: var(--muted); }
+.fbcrad { border-color: var(--gold); }

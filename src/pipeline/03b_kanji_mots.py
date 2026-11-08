@@ -20,9 +20,12 @@ for _x in _vall:
     if _x.get('kk') and _x['jp'] not in _vk: _vk[_x['jp']] = _x['kk'].split('・')[0]
 _kd = _json.loads(_KJ)
 import os as _os
+_CPF = _os.path.join(HERE, 'data', 'kanji_composants.json')
+_CP = _json.load(open(_CPF, encoding='utf-8')) if _os.path.exists(_CPF) else {}
 _EXF = _os.path.join(HERE, 'data', 'kanji_exemples.json')
 _EXW = _json.load(open(_EXF, encoding='utf-8')) if _os.path.exists(_EXF) else {}
 for _k in _kd:
+    if _k['k'] in _CP: _k['cp'] = _CP[_k['k']]
     for _w in _k['kw']:
         if _w[0] in _vk: _w[1] = _vk[_w[0]]
         _w.append(_seg(_w[0], _w[1]))
