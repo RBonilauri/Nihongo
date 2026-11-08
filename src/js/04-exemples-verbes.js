@@ -24,17 +24,29 @@
     var sk = /[一-鿿]/.test(jp) && kana !== jp ? '<span class="ex-k">' + esc(kana) + '。</span>' : '';
     return '<div class="ex-s"><b class="ex-t">' + EX_LB[tense] + '</b><span class="ex-jp">' + esc(jp) + '。</span>' + sk + '<span class="ex-fr">' + esc(fr) + '</span></div>';
   }
-  function exFill(d) {
-    var b = d.querySelector('.exb'); if (!b) return;
-    var ex, ex2 = null; try { ex = JSON.parse(d.dataset.ex); if (d.dataset.ex2) ex2 = JSON.parse(d.dataset.ex2); } catch (e) { return; }
+  /* HTML des 2 phrases (présent + un temps tiré au hasard, ≠ du précédent), '' si impossible */
+  function exHtml(d) {
+    var ex, ex2 = null; try { ex = JSON.parse(d.dataset.ex); if (d.dataset.ex2) ex2 = JSON.parse(d.dataset.ex2); } catch (e) { return ''; }
     var k = d.dataset.k, ka = d.dataset.ka, ty = d.dataset.t, rows = cjForms(k, ty, false), rowsR = k === ka ? null : cjForms(ka, ty, true);
     var f2 = ex2 || ex;                                         // 2e phrase : autre sens si disponible
     var pool = exTenses(d, f2, rows), last = d._last, pick = pool.filter(function (t) { return t !== last; });
     if (!pick.length) pick = pool;
     var t = pick.length ? pick[Math.floor(Math.random() * pick.length)] : null; d._last = t;
     var h = exLine(ex, rows, rowsR, 'pres') + (t ? exLine(f2, rows, rowsR, t) : '');
-    if (pool.length > 1) h += '<button type="button" class="mini ex-more">↻ Autre temps</button>';
+    d._pool = pool.length;
+    return h;
+  }
+  function exFill(d) {
+    var b = d.querySelector('.exb'); if (!b) return;
+    var h = exHtml(d); if (!h) return;
+    if (d._pool > 1) h += '<button type="button" class="mini ex-more">↻ Autre temps</button>';
     b.innerHTML = h;
+  }
+  /* phrases d'exemple d'un verbe du vocabulaire (même moteur que les fiches de conjugaison), '' si le verbe n'a pas de fiche */
+  var EXD = null;
+  function exForVerb(jp) {
+    if (!EXD) { EXD = {}; document.querySelectorAll('details.exd').forEach(function (d) { if (!EXD[d.dataset.k]) EXD[d.dataset.k] = d; }); }
+    var d = EXD[jp]; return d ? exHtml(d) : '';
   }
   document.addEventListener('toggle', function (e) { var d = e.target; if (d.matches && d.matches('details.exd') && d.open) exFill(d); }, true);
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.ex-more'); if (b) { e.preventDefault(); exFill(b.closest('details.exd')); } });

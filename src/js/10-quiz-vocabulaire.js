@@ -195,9 +195,9 @@
       var T = S.ty[it.t] = S.ty[it.t] || { n: 0, ok: 0 }; T.n++; if (good) T.ok++;
       var C = S.cat[x.c] = S.cat[x.c] || { n: 0, ok: 0 }; C.n++; if (good) C.ok++;
       save();
-      var last = Q.i + 1 >= Q.items.length;
+      var last = Q.i + 1 >= Q.items.length, vex;
       $('v-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' +
-        '<div class="vq-ans"><div class="vq-jp">' + esc(x.jp) + '</div>' + (x.ka ? '<div>' + esc(x.ka) + '</div>' : '') + (x.ro ? '<div class="vq-ro">' + esc(x.ro) + '</div>' : '') + '<div><b>' + esc(x.fr) + '</b></div></div>' + jpMini(x) + (x.ex ? '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(x.ex[0]) + '</div><div class="vq-exfr">' + esc(x.ex[1]) + '</div></div>' : '') +
+        '<div class="vq-ans"><div class="vq-jp">' + esc(x.jp) + '</div>' + (x.ka ? '<div>' + esc(x.ka) + '</div>' : '') + (x.ro ? '<div class="vq-ro">' + esc(x.ro) + '</div>' : '') + '<div><b>' + esc(x.fr) + '</b></div></div>' + jpMini(x) + (!x.ex && x.c === 'Verbes' && (vex = exForVerb(x.jp)) ? '<div class="vq-ex vq-exv"><div class="vq-exh">Exemples</div>' + vex + '</div>' : '') + (x.ex ? '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(x.ex[0]) + '</div><div class="vq-exfr">' + esc(x.ex[1]) + '</div></div>' : '') +
         '<div class="fbb">' + (canSpeak && earOK(x) ? '<button type="button" class="mini" id="v-say" data-id="' + x.i + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="v-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       kdetAdd($('v-fb'));
       $('v-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });

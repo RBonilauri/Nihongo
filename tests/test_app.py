@@ -206,6 +206,24 @@ with sync_playwright() as p:
     check(pg.evaluate("document.querySelector('#v-sub').open") and n0 < n1 < nAll, 'sous-rubriques : aucune %d < Famille %d < toutes %d questions' % (n0, n1, nAll))
     pg.click('.quiz:not([hidden]) .x'); pg.wait_for_timeout(300)
 
+    print('Quiz vocabulaire : exemples de verbes')
+    pg.click('#tabbar [data-tab=quiz]'); pg.wait_for_timeout(300)
+    pg.evaluate("[...document.querySelectorAll('.quizlist .quizcard')].find(c=>/Quiz vocabulaire/.test(c.textContent)).click()"); pg.wait_for_timeout(400)
+    for _ in range(14):
+        if not pg.evaluate("(() => { const b = [...document.querySelectorAll('.quiz:not([hidden]) [data-c]')].find(b => b.dataset.c !== 'Verbes' && b.classList.contains('on')); if (b) b.click(); return !!b; })()"): break
+        pg.wait_for_timeout(80)
+    if not pg.evaluate("document.querySelector('.quiz:not([hidden]) [data-c=Verbes]').classList.contains('on')"): pg.click('.quiz:not([hidden]) [data-c=Verbes]'); pg.wait_for_timeout(120)
+    pg.click('#v-go'); pg.wait_for_timeout(300)
+    vx = []
+    for _ in range(6):
+        if not pg.evaluate("!!document.querySelector('.quiz:not([hidden]) .qopt')"): break
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(120)
+        vx.append(pg.evaluate("() => { const f = document.querySelector('.quiz:not([hidden]) .q-fb'); return f ? [(f.querySelector('.vq-jp') || {}).textContent, f.querySelectorAll('.vq-exv .ex-s').length, f.querySelectorAll('.vq-exv .ex-jp').length && [...f.querySelectorAll('.vq-exv .ex-fr')].every(e => e.textContent.length > 3)] : null; }"))
+        pg.evaluate("(document.querySelector('.quiz:not([hidden]) #v-next')||{click(){}}).click()"); pg.wait_for_timeout(100)
+    vx = [v for v in vx if v]
+    check(len(vx) >= 4 and sum(1 for v in vx if v[1] == 2 and v[2]) >= len(vx) - 1, 'quiz vocabulaire (verbes) : 2 phrases d’exemple JP + FR à temps différents sous la traduction %s' % vx)
+    pg.click('.quiz:not([hidden]) .x'); pg.wait_for_timeout(300)
+
     print('Compte à rebours')
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(200)
     check(pg.evaluate("!!document.querySelector('.ntrip [data-act=trip-set]')"), 'sans date : invitation à choisir la date')
