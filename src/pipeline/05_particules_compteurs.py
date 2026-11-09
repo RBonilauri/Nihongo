@@ -32,12 +32,12 @@ def counters_json(html):
                 elif g and hd[:1] == ['Compteur']:
                     for r in rows:
                         info[r[1]] = {'ro': r[0], 'u': r[2].replace('superlatiif', 'superlatif'), 'ex': [w.strip() for w in r[3].split('、') if w.strip() and '＝' not in w]}
-                elif g and hd and (hd[0] in ('1', 'N°1')):
+                elif g and hd and (hd[0] in ('1', 'N°1', '11', '21')):
                     for cell in rows[0]:
                         m = _re.match(r'^(\S+)\s+(\S+?)(⚠)?$', cell)
                         if not m: continue
                         k, y, irr = m.group(1), m.group(2), bool(m.group(3))
-                        mm = _re.match(r'^([一二三四五六七八九十何]+)(.+)$', k)
+                        mm = _re.match(r'^([0-9一二三四五六七八九十何]+)(.+)$', k)
                         reads.append({'k': k, 'y': y, 'c': mm.group(2), 'g': g, 'n': mm.group(1), 'irr': int(irr)})
     for k, (ro, u, ex) in _CEXTRA.items(): info.setdefault(k, {'ro': ro, 'u': u, 'ex': ex})
     gmap = {}

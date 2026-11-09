@@ -18,6 +18,21 @@ def reads(label, k, forms):
 def info(rows):
     return T(['Compteur', 'Kanji', 'S’utilise pour', 'Exemples'], rows, jp=(1,), ro=(0,))
 
+def dates_blocks():
+    """Jours du mois 1 à 31 (écrits « 1日 », comme sur un calendrier) : une lecture par jour ; ⚠ = lecture irrégulière."""
+    y = {1: 'ついたち!', 2: 'ふつか!', 3: 'みっか!', 4: 'よっか!', 5: 'いつか!', 6: 'むいか!', 7: 'なのか!', 8: 'ようか!', 9: 'ここのか!', 10: 'とおか!', 14: 'じゅうよっか!', 20: 'はつか!', 24: 'にじゅうよっか!'}
+    uni = ['', 'いち', 'に', 'さん', 'よん', 'ご', 'ろく', 'しち', 'はち', 'きゅう']
+    def yomi(n):
+        if n in y: return y[n]
+        if n < 20: return 'じゅう' + uni[n - 10] + 'にち'
+        if n < 30: return 'にじゅう' + uni[n - 20] + 'にち'
+        return 'さんじゅう' + ('' if n == 30 else uni[n - 30]) + 'にち'
+    out = [H('Les jours du mois (dates) — 1er au 31'), P('Sur un calendrier on écrit 1日, 2日… ⚠ = lecture irrégulière : le 1er (ついたち), du 2 au 10 (série japonaise), le 14 et le 24 (よっか), le 20 (はつか). Pour les autres jours : chiffre + にち, mais 7 → しち (しちにち) et 9 → く (くにち) : じゅうしちにち, にじゅうくにち.')]
+    for a, b in ((1, 10), (11, 20), (21, 31)):
+        row = ['%d日 %s' % (n, yomi(n).replace('!', '')) + ('⚠' if n in y else '') for n in range(a, b + 1)]
+        out.append(T([str(n) for n in range(a, b + 1)], [row], jp=(), ro=()))
+    return out
+
 def counters_subs():
     ken = reads('軒 (けん) — Maisons et boutiques', '軒', ['いっけん!', 'にけん', 'さんげん!', 'よんけん', 'ごけん', 'ろっけん!', 'ななけん', 'はっけん!', 'きゅうけん', 'じゅっけん!', 'なんげん!'])
     soku = reads('足 (そく) — Paires de chaussures', '足', ['いっそく!', 'にそく', 'さんぞく!', 'よんそく', 'ごそく', 'ろくそく', 'ななそく', 'はっそく!', 'きゅうそく', 'じゅっそく!', 'なんぞく!'])
@@ -40,11 +55,11 @@ def counters_subs():
     nen = reads('年 (ねん) — Années', '年', ['いちねん', 'にねん', 'さんねん', 'よねん!', 'ごねん', 'ろくねん', 'しちねん!', 'はちねん', 'くねん!', 'じゅうねん', 'なんねん'])
     byou = reads('秒 (びょう) — Secondes', '秒', ['いちびょう', 'にびょう', 'さんびょう', 'よんびょう', 'ごびょう', 'ろくびょう', 'ななびょう', 'はちびょう', 'きゅうびょう', 'じゅうびょう', 'なんびょう'])
     nichi = reads('日 (にち / か) — Jours (durée)', '日', ['いちにち!', 'ふつか!', 'みっか!', 'よっか!', 'いつか!', 'むいか!', 'なのか!', 'ようか!', 'ここのか!', 'とおか!', 'なんにち'])
+    dates = dates_blocks()
     temps = {'title': 'Durées et âge', 'blocks': [
         P('Compter les durées et l’âge : heures, minutes, secondes, jours, semaines, mois, années, ans. Attention aux pièges : 4 → よ (よじかん, よねん), 7 → しち ou なな, 9 → く (くじかん). Pour 20 ans : 二十歳 (はたち). Les secondes sont régulières (いち・に・さん… + びょう), mais les jours de 1 à 10 sont tous irréguliers : ふつか, みっか, よっか, いつか, むいか, なのか, ようか, ここのか, とおか (1 jour = いちにち).'),
         *sai, *jikan, *fun, *byou, *nichi, *shuu, *getsu, *nen,
-        H('Les jours du mois (dates) — cas particuliers'),
-        T(['Date', 'Lecture', 'À retenir'], [['一日', 'ついたち', 'Le 1er du mois (la durée « 1 jour » se dit いちにち)'], ['二日〜十日', 'ふつか・みっか・よっか・いつか・むいか・なのか・ようか・ここのか・とおか', 'Mêmes lectures que pour la durée'], ['十四日', 'じゅうよっか', 'Le 4 reste よっか'], ['十七日', 'じゅうしちにち', 'Pour les dates, 7 = しち'], ['十九日', 'じゅうくにち', 'Pour les dates, 9 = く'], ['二十日', 'はつか', 'Le 20 : lecture à part (≠ 二十歳 はたち)'], ['二十四日', 'にじゅうよっか', 'Le 4 reste よっか'], ['二十七日', 'にじゅうしちにち', '7 = しち'], ['二十九日', 'にじゅうくにち', '9 = く']], jp=(0,), ro=()),
+        *dates, 
         H('Récapitulatif'),
         info([['sai', '歳', 'Âge (ans)', ''], ['jikan', '時間', 'Durée en heures', ''], ['fun', '分', 'Minutes', ''], ['byō', '秒', 'Secondes', ''], ['nichi', '日', 'Jours (durée) et jours du mois', ''],
               ['shūkan', '週間', 'Durée en semaines', ''], ['kagetsu', 'か月', 'Durée en mois', ''], ['nen', '年', 'Années', '']]),
