@@ -45,7 +45,7 @@ for k in KS:
     comps = []
     for c in lv:
         c = disp(c)
-        if c != k and c in FULL and c in NAMED and c != R and c != form and VARS.get(c) != R and c not in comps: comps.append(c)
+        if c != k and c in FULL and c in NAMED and c != '一' and c != R and c != form and VARS.get(c) != R and c not in comps: comps.append(c)
     # éléments : 1 à 4 kanji complets distincts, radical exclu (il est affiché à part), sinon on n'affiche rien (trop fin / atomique)
     comps = comps if 1 <= len(comps) <= 4 else []
     if R or comps: res[k] = [form, ''.join(comps)] + ([R] if R and form != R else [])
