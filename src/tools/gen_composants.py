@@ -38,6 +38,7 @@ for k in KS:
     R = chr(0x2F00 + rad[k] - 1) if k in rad else ''
     R = disp(unicodedata.normalize('NFKC', R)) if R else ''
     if R == k: R = ''
+    if k in rad and (rad[k] <= 6 or R not in NAMED): R = ''   # radicaux-traits (一 丨 丶 丿 乙 亅) et radicaux sans nom : aucun intérêt
     lv = leaves(k); form = R
     for c in lv:                       # forme du radical telle qu'elle apparaît dans le kanji (ex. 水 → 氵)
         if c == R: form = R; break
