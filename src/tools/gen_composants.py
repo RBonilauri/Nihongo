@@ -28,6 +28,7 @@ for ch, v in db.execute("select c.literal, r.value from character c join radical
 DISP = {'辵': '辶', '⻌': '辶', '艸': '艹', '⺾': '艹'}
 TRAITS = set('丿丶丨乚乀丷乛乁⺊龴龶㐄㐅㔾丱亅')
 VARS = {'亻': '人', '氵': '水', '扌': '手', '忄': '心', '犭': '犬', '刂': '刀', '礻': '示', '衤': '衣', '灬': '火', '罒': '网', '攵': '攴'}   # variantes de radical = même radical
+VF = {'人': '亻', '水': '氵', '手': '扌', '心': '忄', '犬': '犭', '刀': '刂', '示': '礻', '衣': '衤', '火': '灬', '网': '罒', '攴': '攵', '艸': '艹', '辵': '辶', '邑': '阝', '阜': '阝'}  # forme prise par le radical dans un kanji
 def disp(c): return DISP.get(c, c)
 FULL = set(r[0] for r in db.execute('select literal from character'))   # vrais kanji (KANJIDIC2), pas les variantes de radical ni les traits
 _js = open(os.path.join(HERE, 'js', '08b-kanji-details.js'), encoding='utf-8').read()
@@ -37,12 +38,16 @@ for k in KS:
     R = chr(0x2F00 + rad[k] - 1) if k in rad else ''
     R = disp(unicodedata.normalize('NFKC', R)) if R else ''
     if R == k: R = ''
+    lv = leaves(k); form = R
+    for c in lv:                       # forme du radical telle qu'elle apparaît dans le kanji (ex. 水 → 氵)
+        if c == R: form = R; break
+        if R and VF.get(R) == c: form = c
     comps = []
-    for c in leaves(k):
+    for c in lv:
         c = disp(c)
-        if c != k and c in FULL and c in NAMED and c != R and VARS.get(c) != R and c not in comps: comps.append(c)
+        if c != k and c in FULL and c in NAMED and c != R and c != form and VARS.get(c) != R and c not in comps: comps.append(c)
     # éléments : 1 à 4 kanji complets distincts, radical exclu (il est affiché à part), sinon on n'affiche rien (trop fin / atomique)
     comps = comps if 1 <= len(comps) <= 4 else []
-    if R or comps: res[k] = [R, ''.join(comps)]
+    if R or comps: res[k] = [form, ''.join(comps)] + ([R] if R and form != R else [])
 json.dump(res, open(os.path.join(HERE, 'data', 'kanji_composants.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'), sort_keys=True)
 print(len(KS), 'kanji ;', len(res), 'avec données ;', sum(1 for v in res.values() if v[1]), 'avec composants ;', sum(1 for v in res.values() if v[0]), 'avec radical')

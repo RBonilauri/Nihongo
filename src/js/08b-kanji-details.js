@@ -23,7 +23,7 @@
     var cp = y.cp; if (!cp || (!cp[0] && !cp[1])) return '';
     var M = kdetMap();
     function one(c, r) { var m = M[c] && M[c].s ? M[c].s.split(/[,;，、]/)[0].trim() : (KRN[c] || ''); return '<span class="fbcc' + (r ? ' fbcrad' : '') + '"' + (r ? ' title="Radical"' : '') + '><b>' + esc(c) + '</b>' + (m ? '<i>' + esc(m) + '</i>' : '') + '</span>'; }
-    return '<details class="fbc"><summary>Composants</summary>' + (cp[0] ? '<div class="fbcr"><span class="fbcl">Radical</span>' + one(cp[0], 1) + '</div>' : '') + (cp[1] ? '<div class="fbcr"><span class="fbcl">Kanji</span>' + cp[1].split('').map(function (c) { return one(c); }).join('<span class="fbcp">+</span>') + '</div>' : '') + '</details>';
+    return '<details class="fbc"><summary>Composants</summary>' + (cp[0] ? '<div class="fbcr"><span class="fbcl">Radical</span>' + one(cp[0], 1) + (cp[2] ? '<span class="fbcv">forme réduite de ' + esc(cp[2]) + '</span>' : '') + '</div>' : '') + (cp[1] ? '<div class="fbcr"><span class="fbcl">Kanji</span>' + cp[1].split('').map(function (c) { return one(c); }).join('<span class="fbcp">+</span>') + '</div>' : '') + '</details>';
   }
   /* HTML de la rubrique déroulante pour les kanji de `text` (hors `skip`), '' s'il n'y en a aucun */
   function kdetHtml(text, skip) {
