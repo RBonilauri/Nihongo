@@ -25,6 +25,17 @@
     function one(c, r) { var m = M[c] && M[c].s ? M[c].s.split(/[,;，、]/)[0].trim() : (KRN[c] || ''); return '<span class="fbcc' + (r ? ' fbcrad' : '') + '"' + (r ? ' title="Radical"' : '') + '><b>' + esc(c) + '</b>' + (m ? '<i>' + esc(m) + '</i>' : '') + '</span>'; }
     return '<details class="fbc"><summary>Composants</summary>' + (cp[0] ? '<div class="fbcr"><span class="fbcl">Radical</span>' + one(cp[0], 1) + (cp[2] ? '<span class="fbcv">forme réduite de ' + esc(cp[2]) + '</span>' : '') + '</div>' : '') + (cp[1] ? '<div class="fbcr"><span class="fbcl">Kanji</span>' + cp[1].split('').map(function (c) { return one(c); }).join('<span class="fbcp">+</span>') + '</div>' : '') + '</details>';
   }
+  /* Listes de kanji (N5…N1) : menu « Composants » sous le sens de chaque kanji */
+  function kdetLists() {
+    var M = kdetMap();
+    document.querySelectorAll('table').forEach(function (t) {
+      var th = t.querySelectorAll('thead th'); if (th.length < 5 || th[4].textContent.trim() !== 'Mots clés') return;
+      t.querySelectorAll('tbody tr').forEach(function (tr) {
+        var c = tr.cells, y = c.length > 3 && M[c[0].textContent.trim()], h = y && kdetComp(y);
+        if (h) c[3].insertAdjacentHTML('beforeend', h);
+      });
+    });
+  }
   /* HTML de la rubrique déroulante pour les kanji de `text` (hors `skip`), '' s'il n'y en a aucun */
   function kdetHtml(text, skip) {
     var M = kdetMap(), seen = {}, oth = String(text || '').split('').filter(function (c) { if (c === skip || seen[c] || !M[c]) return false; return (seen[c] = 1); }).slice(0, 12);

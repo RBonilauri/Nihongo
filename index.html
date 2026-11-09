@@ -1171,6 +1171,13 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
 .vq-exv > summary { cursor: pointer; font-weight: 600; opacity: .85; padding: .1rem 0; }
 .vq-exv[open] > summary { margin-bottom: .4rem; }
 .fbcv { color: var(--muted); font-size: .78rem; }
+/* menu « Composants » dans les listes de kanji (cellule étroite) */
+td .fbc { display: block; width: 100%; margin-top: .3rem; }
+td .fbc > summary { display: block; white-space: nowrap; font-size: .8rem; }
+td .fbcr { display: block; padding: .15rem 0; }
+td .fbcl { display: block; min-width: 0; margin-bottom: .1rem; }
+td .fbcc { display: inline-flex; flex-wrap: nowrap; white-space: nowrap; margin: 0 .3rem .25rem 0; }
+td .fbcp { margin-right: .3rem; }
 </style>
 </head>
 <body>
@@ -6272,6 +6279,17 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     function one(c, r) { var m = M[c] && M[c].s ? M[c].s.split(/[,;，、]/)[0].trim() : (KRN[c] || ''); return '<span class="fbcc' + (r ? ' fbcrad' : '') + '"' + (r ? ' title="Radical"' : '') + '><b>' + esc(c) + '</b>' + (m ? '<i>' + esc(m) + '</i>' : '') + '</span>'; }
     return '<details class="fbc"><summary>Composants</summary>' + (cp[0] ? '<div class="fbcr"><span class="fbcl">Radical</span>' + one(cp[0], 1) + (cp[2] ? '<span class="fbcv">forme réduite de ' + esc(cp[2]) + '</span>' : '') + '</div>' : '') + (cp[1] ? '<div class="fbcr"><span class="fbcl">Kanji</span>' + cp[1].split('').map(function (c) { return one(c); }).join('<span class="fbcp">+</span>') + '</div>' : '') + '</details>';
   }
+  /* Listes de kanji (N5…N1) : menu « Composants » sous le sens de chaque kanji */
+  function kdetLists() {
+    var M = kdetMap();
+    document.querySelectorAll('table').forEach(function (t) {
+      var th = t.querySelectorAll('thead th'); if (th.length < 5 || th[4].textContent.trim() !== 'Mots clés') return;
+      t.querySelectorAll('tbody tr').forEach(function (tr) {
+        var c = tr.cells, y = c.length > 3 && M[c[0].textContent.trim()], h = y && kdetComp(y);
+        if (h) c[3].insertAdjacentHTML('beforeend', h);
+      });
+    });
+  }
   /* HTML de la rubrique déroulante pour les kanji de `text` (hors `skip`), '' s'il n'y en a aucun */
   function kdetHtml(text, skip) {
     var M = kdetMap(), seen = {}, oth = String(text || '').split('').filter(function (c) { if (c === skip || seen[c] || !M[c]) return false; return (seen[c] = 1); }).slice(0, 12);
@@ -8078,7 +8096,7 @@ td[data-label="Mots clés"] .kw small { flex: 1 1 auto; min-width: 0; font-size:
     return top + '<details class="q-more"><summary>Voir les ' + (rows.length - 5) + ' autres</summary><' + tag + ' class="' + cls + '">' + rows.slice(5).join('') + '</' + tag + '></details>';
   }
 
-  var ready = function () { try { build(); features(); selAllInit(); jpMapInit(); navInit(); } finally { document.documentElement.classList.remove('boot'); } };
+  var ready = function () { try { build(); features(); selAllInit(); jpMapInit(); navInit(); kdetLists(); } finally { document.documentElement.classList.remove('boot'); } };
   if ('requestIdleCallback' in window) requestIdleCallback(ready, { timeout: 300 }); else setTimeout(ready, 50);
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) { navigator.serviceWorker.register('sw.js').catch(function () {}); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.type === 'update') toast('Nouvelle version disponible.', 'Recharger', function () { location.reload(); }); }); }
 })();

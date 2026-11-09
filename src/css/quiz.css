@@ -167,3 +167,10 @@
 .vq-exv > summary { cursor: pointer; font-weight: 600; opacity: .85; padding: .1rem 0; }
 .vq-exv[open] > summary { margin-bottom: .4rem; }
 .fbcv { color: var(--muted); font-size: .78rem; }
+/* menu « Composants » dans les listes de kanji (cellule étroite) */
+td .fbc { display: block; width: 100%; margin-top: .3rem; }
+td .fbc > summary { display: block; white-space: nowrap; font-size: .8rem; }
+td .fbcr { display: block; padding: .15rem 0; }
+td .fbcl { display: block; min-width: 0; margin-bottom: .1rem; }
+td .fbcc { display: inline-flex; flex-wrap: nowrap; white-space: nowrap; margin: 0 .3rem .25rem 0; }
+td .fbcp { margin-right: .3rem; }
