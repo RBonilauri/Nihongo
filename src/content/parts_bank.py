@@ -165,6 +165,10 @@ PB += [
  ('昨日＿＿寒くありません。', 'ほど', 'ずつ,ごろ,しか', 'Il ne fait pas aussi froid qu’hier.', 'ほど + négation : « pas aussi… que ».', 'Degré (ほど)', 'ex'),
  ('金曜日＿＿レポートを出してください。', 'までに', 'まで,ずつ,ごろ', 'Remettez le rapport d’ici vendredi.', 'までに : date limite (fait une fois avant). まで = durée continue.', 'Date limite (までに)', 'ex'),
  ('私＿＿、まだまだです。', 'なんか', 'ずつ,ごろ,ほど', 'Moi, je ne suis pas encore bon du tout.', 'なんか : « des gens comme moi » (modestie ou dédain, familier).', 'Dédain (なんか)', 'ex'),
+ ('彼＿＿もう少し早く来てほしいです。', 'に', 'を,で,の', 'Je voudrais qu’il vienne un peu plus tôt.', 'てほしい : la personne qui doit agir se marque avec に. Pour mon propre désir, on emploie 〜たい.', 'Personne qui agit (てほしい)', 'nd'),
+ ('母＿＿もっと休んでほしいです。', 'に', 'を,で,の', 'Je voudrais que ma mère se repose davantage.', 'てほしい : に marque celui dont on souhaite l’action.', 'Personne qui agit (てほしい)', 'nd'),
+ ('嘘＿＿つかないでほしいです。', 'を', 'に,の,と', 'Je voudrais que tu ne mentes pas.', 'ないでほしい : souhait que l’autre ne fasse pas ; 嘘をつく garde を.', 'Objet direct', 'wo'),
+ ('私のこと＿＿忘れないでほしいです。', 'を', 'に,の,と', 'Je voudrais que tu ne m’oublies pas.', 'ないでほしい : souhait négatif adressé à autrui ; 忘れる garde を devant son objet.', 'Objet direct', 'wo'),
 ]
 
 if __name__ == '__main__':
