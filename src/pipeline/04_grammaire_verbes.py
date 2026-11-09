@@ -96,3 +96,27 @@ def add_all_verbs(verbs, html):
     print('verbes ajoutés au quiz conj', n)
 _GV = grammar_json(main)
 add_all_verbs(_GV, main)
+
+# Désir (〜たい) à quatre temps et souhait sur autrui (〜てほしい), dérivés des formes déjà présentes
+_LH = 'Souhait sur autrui '
+_TAI_HOSHII = [
+    ('Désidératif négatif', 'Désidératif', lambda s: s[:-1] + 'くない'),
+    ('Désidératif passé', 'Désidératif', lambda s: s[:-1] + 'かった'),
+    ('Désidératif passé négatif', 'Désidératif', lambda s: s[:-1] + 'くなかった'),
+    (_LH + '(てほしい)', 'Forme en て', lambda s: s + 'ほしい'),
+    (_LH + 'négatif (ないでほしい)', 'て négatif', lambda s: s + 'ほしい'),
+    (_LH + 'négatif (てほしくない)', 'Forme en て', lambda s: s + 'ほしくない'),
+    (_LH + 'passé (てほしかった)', 'Forme en て', lambda s: s + 'ほしかった'),
+    (_LH + 'passé négatif (ないでほしかった)', 'て négatif', lambda s: s + 'ほしかった'),
+]
+def add_tai_hoshii(verbs):
+    n = 0
+    for vv in verbs.values():
+        f, r = vv['f'], vv['r']
+        d, nd = f.get('Désidératif'), f.get('て négatif')
+        if not d or not d.endswith('たい') or not f.get('Forme en て') or not nd or not nd.endswith('ないで'): continue
+        for lab, src, fn in _TAI_HOSHII:
+            f[lab] = fn(f[src]); r[lab] = fn(r[src]) if r.get(src) else ''
+        n += 1
+    print('verbes avec formes たい (4 temps) et てほしい (5 formes)', n)
+add_tai_hoshii(_GV)

@@ -414,6 +414,10 @@ with sync_playwright() as p:
     gn = pg.evaluate("""() => ['N4','N3'].map(j => { const s = [...document.querySelectorAll('main > details.sec')].find(d => d.querySelector(':scope > summary .jp').textContent.trim() === j); return s ? [s.querySelectorAll(':scope > .sec-body > details.sub').length, s.querySelectorAll('tbody tr').length] : null; })""")
     check(gn[0] and gn[1] and gn[0][0] >= 8 and gn[1][0] >= 8 and gn[0][1] >= 60 and gn[1][1] >= 70, 'pages Grammaire N4 et N3 présentes %s' % gn)
     check(pg.evaluate("[...document.querySelectorAll('.quizcard')].length") >= 6, 'quiz inchangés')
+    tf = pg.evaluate("""() => { const D = JSON.parse(document.getElementById('grammar-data').textContent).verbs, L = ['Désidératif négatif', 'Désidératif passé', 'Désidératif passé négatif', 'Souhait sur autrui (てほしい)', 'Souhait sur autrui négatif (ないでほしい)', 'Souhait sur autrui négatif (てほしくない)', 'Souhait sur autrui passé (てほしかった)', 'Souhait sur autrui passé négatif (ないでほしかった)'];
+        const w = D.filter(v => v.f['Désidératif']), t = D.find(v => v.v === '食べる'), k = D.find(v => v.v === '書く');
+        return [w.length, w.filter(v => L.every(l => v.f[l])).length, t.f[L[1]] + '|' + t.f[L[2]], t.f[L[3]] + '|' + t.f[L[4]] + '|' + t.f[L[5]] + '|' + t.f[L[6]] + '|' + t.f[L[7]], k.f[L[3]] + '|' + k.f[L[4]]]; }""")
+    check(tf[0] >= 350 and tf[0] == tf[1] and tf[2] == '食べたかった|食べたくなかった' and tf[3] == '食べてほしい|食べないでほしい|食べてほしくない|食べてほしかった|食べないでほしかった' and tf[4] == '書いてほしい|書かないでほしい', 'quiz conjugaison : たい à 4 temps et てほしい à 5 formes pour chaque verbe %s' % tf)
 
     print('Exemples de verbes')
     ex = pg.evaluate("""() => { let n = 0, bad = 0; document.querySelectorAll('details.exd').forEach(d => { d.open = true; d.dispatchEvent(new Event('toggle')); n++; if (d.querySelectorAll('.ex-s').length < 2) bad++; });

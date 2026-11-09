@@ -24,7 +24,9 @@
     { id: 'pol', label: 'Polie (ます)', f: ['Polie, présent', 'Polie, négatif', 'Polie, passé', 'Polie, passé négatif'] },
     { id: 'sim', label: 'Simple & て', f: ['Négatif simple', 'Passé simple', 'Passé négatif simple', 'Forme en て', 'て négatif'] },
     { id: 'der', label: 'Potentiel, passif, causatif', f: ['Potentiel', 'Passif', 'Causatif', 'Causatif-passif'] },
-    { id: 'vol', label: 'Désir, volonté, ordre', f: ['Désidératif', 'Volitif', 'Impératif', 'Interdiction'] },
+    { id: 'tai', label: 'Désir 〜たい (4 temps)', f: ['Désidératif', 'Désidératif négatif', 'Désidératif passé', 'Désidératif passé négatif'] },
+    { id: 'hos', label: 'Souhait sur autrui 〜てほしい', f: ['Souhait sur autrui (てほしい)', 'Souhait sur autrui négatif (ないでほしい)', 'Souhait sur autrui négatif (てほしくない)', 'Souhait sur autrui passé (てほしかった)', 'Souhait sur autrui passé négatif (ないでほしかった)'] },
+    { id: 'vol', label: 'Volonté, ordre, interdiction', f: ['Volitif', 'Impératif', 'Interdiction'] },
     { id: 'con', label: 'Conditionnel', f: ['Conditionnel ば', 'Conditionnel たら'] }
   ];
   var GN = [10, 25, 50, 100];
@@ -42,6 +44,7 @@
     var cfg = ST[kc] || { types: TT.map(function (t) { return t.id; }), fams: GFAM.map(function (f) { return f.id; }), pg: GPG.map(function (g) { return g.id; }), n: 25, wrong: false };
     cfg.ka = false;
     if (!cfg.pg) cfg.pg = GPG.map(function (g) { return g.id; });
+    if (!cfg.fv) { cfg.fv = 2; if (cfg.fams.indexOf('vol') >= 0 && cfg.fams.indexOf('tai') < 0) cfg.fams.push('tai'); if (cfg.fams.indexOf('hos') < 0) cfg.fams.push('hos'); }   // sauvegardes antérieures : Désidératif quittait « vol », nouvelle famille てほしい
     if (!ST[kq]) ST[kq] = {}; if (!ST[ks]) ST[ks] = { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} };
     var Q = null;
     MIXREG[isC ? 'conj' : 'part'] = {
@@ -139,7 +142,7 @@
       GFAM.forEach(function (f) { if (f.id === x.fam) famLabels = f.f; });
       var cand = shuffle(famLabels.slice()).concat(shuffle(Object.keys(famOf)));
       cand.forEach(function (l) { if (out2.length < 4 && !s2[l] && v.f[l] !== v.f[x.l]) { s2[l] = 1; out2.push({ v: l, ok: false }); } });
-      var neu = function (l) { return l.replace('たら', 'tara').replace('て', 'te').replace('ば', 'ba'); };
+      var neu = function (l) { return l.replace('ないでほしかった', 'naide hoshikatta').replace('ないでほしい', 'naide hoshii').replace('てほしくない', 'te hoshikunai').replace('てほしかった', 'te hoshikatta').replace('てほしい', 'te hoshii').replace('たら', 'tara').replace('て', 'te').replace('ば', 'ba'); };
       out2.forEach(function (o) { o.v = neu(o.v); });
       return shuffle(out2);
     }
