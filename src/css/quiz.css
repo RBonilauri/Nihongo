@@ -174,3 +174,19 @@ td .fbcr { display: block; padding: .15rem 0; }
 td .fbcl { display: block; min-width: 0; margin-bottom: .1rem; }
 td .fbcc { display: inline-flex; flex-wrap: nowrap; white-space: nowrap; margin: 0 .3rem .25rem 0; }
 td .fbcp { margin-right: .3rem; }
+/* rubrique Radicaux : cartes (ordre de Kangxi) et pastille « variante de » */
+.rlist { display: flex; flex-direction: column; gap: .5rem; }
+.rhead { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: .9rem 0 .1rem; }
+.rcard { display: flex; gap: .8rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: .6rem .7rem; }
+.rg { width: 6.2rem; flex: none; text-align: center; }
+.rg b { display: block; font: 400 2.3rem 'Noto Serif JP', serif; color: var(--red); line-height: 1.15; }
+.rtag { display: inline-block; margin-top: .25rem; font-size: .6rem; border: 1px solid var(--gold); color: var(--gold); border-radius: 99px; padding: .05rem .4rem; white-space: nowrap; }
+.fbcr .rtag { margin-top: 0; }
+.ri { flex: 1; min-width: 0; font-size: .8rem; line-height: 1.55; }
+.rt { font-weight: 700; font-size: .9rem; }
+.rm { color: var(--muted); font-size: .76rem; }
+.rm b { color: var(--ink); }
+.rk { display: flex; flex-wrap: wrap; gap: .2rem .6rem; margin-top: .25rem; }
+.rkj { font-size: .74rem; color: var(--muted); }
+.rkj b { font: 400 1.15rem 'Noto Serif JP', serif; color: var(--ink); margin-right: .2rem; }
+td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }

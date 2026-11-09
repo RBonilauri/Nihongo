@@ -18,12 +18,20 @@
     var l = (y.kw || []).slice(0, 4); if (!l.length) return '';
     return '<div class="fbwl"><b>Mots</b>' + l.map(function (w) { return '<div class="fbwr"><span class="fbwj">' + esc(w[0]) + '</span><span class="fbwy">' + esc(w[1]) + '</span><span class="fbwm">' + esc(w[2]) + '</span></div>'; }).join('') + '</div>';
   }
+  /* infos d'un radical (nom français, nom japonais) lues dans les cartes de la rubrique Radicaux (clé « glyphe|parent ») */
+  var RADM = null;
+  function radInfo(g, p) {
+    if (!RADM) { RADM = {}; document.querySelectorAll('.rcard').forEach(function (c) { RADM[c.dataset.g + '|' + c.dataset.p] = { m: c.dataset.m, n: c.dataset.n }; }); }
+    return RADM[g + '|' + p] || null;
+  }
   /* « Composants » : menu déroulant radical + éléments (source CJKVI-IDS / KANJIDIC2), '' s'il n'y a rien */
   function kdetComp(y) {
     var cp = y.cp; if (!cp || (!cp[0] && !cp[1])) return '';
     var M = kdetMap();
     function one(c, r) { var m = M[c] && M[c].s ? M[c].s.split(/[,;，、]/)[0].trim() : (KRN[c] || ''); return '<span class="fbcc' + (r ? ' fbcrad' : '') + '"' + (r ? ' title="Radical"' : '') + '><b>' + esc(c) + '</b>' + (m ? '<i>' + esc(m) + '</i>' : '') + '</span>'; }
-    return '<details class="fbc"><summary>Composants</summary>' + (cp[0] ? '<div class="fbcr"><span class="fbcl">Radical</span>' + one(cp[0], 1) + (cp[2] ? '<span class="fbcv">forme réduite de ' + esc(cp[2]) + '</span>' : '') + '</div>' : '') + (cp[1] ? '<div class="fbcr"><span class="fbcl">Kanji</span>' + cp[1].split('').map(function (c) { return one(c); }).join('<span class="fbcp">+</span>') + '</div>' : '') + '</details>';
+    var rd = radInfo(cp[0], cp[2] || '');
+    function rchip() { return '<span class="fbcc fbcrad" title="Radical"><b>' + esc(cp[0]) + '</b>' + (rd && rd.m ? '<i>' + esc(rd.m) + '</i>' : '') + '</span>' + (rd && rd.n ? '<span class="fbcv">' + esc(rd.n) + '</span>' : '') + (cp[2] ? '<span class="rtag">variante de ' + esc(cp[2]) + '</span>' : ''); }
+    return '<details class="fbc"><summary>Composants</summary>' + (cp[0] ? '<div class="fbcr"><span class="fbcl">Radical</span>' + rchip() + '</div>' : '') + (cp[1] ? '<div class="fbcr"><span class="fbcl">Kanji</span>' + cp[1].split('').map(function (c) { return one(c); }).join('<span class="fbcp">+</span>') + '</div>' : '') + '</details>';
   }
   /* Listes de kanji (N5…N1) : menu « Composants » sous le sens de chaque kanji */
   function kdetLists() {

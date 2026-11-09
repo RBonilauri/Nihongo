@@ -16,7 +16,7 @@ def isid(c):
     return ('一' <= c <= '鿿') or ('⺀' <= c <= '⻳') or ('⼀' <= c <= '⿕') or ('㐀' <= c <= '䶿')
 def leaves(c, top=True, depth=0):
     s = IDS.get(c)
-    if not s or s == c or (not top and c in KSET) or depth > 4: return [c]
+    if not s or s == c or (not top and (c in KSET or c in STOPS)) or depth > 4: return [c]
     out = []
     for ch in s:
         if ch in OPS: continue
@@ -28,7 +28,8 @@ for ch, v in db.execute("select c.literal, r.value from character c join radical
 DISP = {'辵': '辶', '⻌': '辶', '艸': '艹', '⺾': '艹'}
 TRAITS = set('丿丶丨乚乀丷乛乁⺊龴龶㐄㐅㔾丱亅')
 VARS = {'亻': '人', '氵': '水', '扌': '手', '忄': '心', '犭': '犬', '刂': '刀', '礻': '示', '衤': '衣', '灬': '火', '罒': '网', '攵': '攴'}   # variantes de radical = même radical
-VF = {'人': '亻', '水': '氵', '手': '扌', '心': '忄', '犬': '犭', '刀': '刂', '示': '礻', '衣': '衤', '火': '灬', '网': '罒', '攴': '攵', '艸': '艹', '辵': '辶', '邑': '阝', '阜': '阝'}  # forme prise par le radical dans un kanji
+VF = {'人': '亻', '水': '氵', '手': '扌', '心': '忄', '犬': '犭', '刀': '刂', '示': '礻', '衣': '衤', '火': '灬', '网': '罒', '攴': '攵', '艸': '艹', '辵': '辶', '邑': '阝', '阜': '阝', '玉': '王', '牛': '牜', '肉': '月'}  # forme prise par le radical dans un kanji
+STOPS = set(VF.values()) | set(VARS) | set('艹⺾')   # formes de radical : on ne les décompose pas
 def disp(c): return DISP.get(c, c)
 FULL = set(r[0] for r in db.execute('select literal from character'))   # vrais kanji (KANJIDIC2), pas les variantes de radical ni les traits
 _js = open(os.path.join(HERE, 'js', '08b-kanji-details.js'), encoding='utf-8').read()
@@ -36,13 +37,13 @@ NAMED = KSET | set(re.findall(r"'(.)': '", re.search(r'var KRN = \{(.*?)\};', _j
 res = {}
 for k in KS:
     R = chr(0x2F00 + rad[k] - 1) if k in rad else ''
-    R = disp(unicodedata.normalize('NFKC', R)) if R else ''
+    R = unicodedata.normalize('NFKC', R) if R else ''
     if R == k: R = ''
-    if k in rad and (rad[k] <= 6 or R not in NAMED): R = ''   # radicaux-traits (一 丨 丶 丿 乙 亅) et radicaux sans nom : aucun intérêt
+    if k in rad and (rad[k] <= 6 or disp(R) not in NAMED): R = ''   # radicaux-traits (一 丨 丶 丿 乙 亅) et radicaux sans nom : aucun intérêt
     lv = leaves(k); form = R
     for c in lv:                       # forme du radical telle qu'elle apparaît dans le kanji (ex. 水 → 氵)
         if c == R: form = R; break
-        if R and VF.get(R) == c: form = c
+        if R and VF.get(R) == disp(c): form = disp(c)
     comps = []
     for c in lv:
         c = disp(c)
