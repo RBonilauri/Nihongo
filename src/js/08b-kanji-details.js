@@ -11,6 +11,8 @@
   function kdetParts(cell) { return String(cell || '').split(/[・･]/).map(function (p) { return p.replace(/[()（）]/g, '').trim(); }).filter(Boolean); }
   function kdetSay(y) { return kdetParts(y.on).concat(kdetParts(y.kun)); }
   function kdetSpk(y) { return '<button type="button" class="qsay2 kspk" aria-label="Écouter les lectures on et kun" title="Écouter" data-say=\'' + esc(JSON.stringify(kdetSay(y))) + '\'>🔊</button>'; }
+  /* noms français des radicaux / éléments qui ne sont pas eux-mêmes des kanji de l'appli (noms usuels des radicaux) */
+  var KRN = { '氵': 'eau', '亻': 'personne', '扌': 'main', '艹': 'herbe', '辶': 'chemin, marcher', '阝': 'colline / village', '宀': 'toit', '隹': 'oiseau (à courte queue)', '厶': 'privé', '冖': 'couvercle', '勹': 'envelopper', '尸': 'corps, cadavre', '夂': 'marcher lentement', '忄': 'cœur', '攵': 'frapper', '攴': 'frapper', '禾': 'céréale', '刂': 'couteau', '頁': 'tête, page', '冂': 'enceinte', '广': 'abri, bâtiment', '灬': 'feu', '彳': 'marcher', '犭': 'animal, chien', '罒': 'filet', '网': 'filet', '彡': 'poils, ornement', '几': 'table', '疒': 'maladie', '冫': 'glace', '卩': 'sceau', '厂': 'falaise', '囗': 'enclos', '礻': 'autel, esprit', '衤': 'vêtement', '彐': 'museau de porc', '儿': 'jambes', '凵': 'récipient ouvert', '艮': 'limite', '亠': 'couvercle', '匚': 'boîte', '戈': 'lance', '殳': 'arme', '戶': 'porte', '曰': 'dire', '歹': 'mort', '疋': 'pied', '虍': 'tigre', '幺': 'petit fil', '襾': 'couvrir', '豸': 'félin', '巛': 'rivière', '廴': 'allonger le pas', '廾': 'deux mains', '毋': 'ne pas', '豕': 'cochon', '靑': 'bleu', '麥': 'blé', '黑': 'noir', '匕': 'cuillère', '耒': 'charrue', '舛': 'opposés', '釆': 'discerner', '髟': 'cheveux', '韋': 'cuir', '黃': 'jaune', '黍': 'millet', '齒': 'dent', '鹵': 'sel', '气': 'vapeur', '爿': 'planche', '而': 'barbe', '尢': 'boiteux', '屮': 'pousse', '耂': 'vieillard', '聿': 'pinceau', '卜': 'divination', '丨': 'trait vertical', '丿': 'trait oblique', '丶': 'point', '亅': 'crochet', '乚': 'crochet' };
   /* « Mots » : liste rangée (mot · lecture · sens) */
   function kdetWords(y) {
     var l = (y.kw || []).slice(0, 4); if (!l.length) return '';
@@ -20,7 +22,7 @@
   function kdetComp(y) {
     var cp = y.cp; if (!cp || (!cp[0] && !cp[1])) return '';
     var M = kdetMap();
-    function one(c, r) { var m = M[c] && M[c].s ? M[c].s.split(/[,;，、]/)[0].trim() : ''; return '<span class="fbcc' + (r ? ' fbcrad' : '') + '"' + (r ? ' title="Radical"' : '') + '><b>' + esc(c) + '</b>' + (m ? '<i>' + esc(m) + '</i>' : '') + '</span>'; }
+    function one(c, r) { var m = M[c] && M[c].s ? M[c].s.split(/[,;，、]/)[0].trim() : (KRN[c] || ''); return '<span class="fbcc' + (r ? ' fbcrad' : '') + '"' + (r ? ' title="Radical"' : '') + '><b>' + esc(c) + '</b>' + (m ? '<i>' + esc(m) + '</i>' : '') + '</span>'; }
     return '<details class="fbc"><summary>Composants</summary>' + (cp[0] && cp[1].indexOf(cp[0]) < 0 ? '<div class="fbcr"><span class="fbcl">Radical</span>' + one(cp[0]) + '</div>' : '') + (cp[1] ? '<div class="fbcr"><span class="fbcl">' + 'Éléments' + '</span>' + cp[1].split('').map(function (c) { return one(c, c === cp[0]); }).join('<span class="fbcp">+</span>') + '</div>' : '') + '</details>';
   }
   /* HTML de la rubrique déroulante pour les kanji de `text` (hors `skip`), '' s'il n'y en a aucun */

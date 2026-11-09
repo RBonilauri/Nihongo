@@ -164,3 +164,5 @@
 .fbcc i { font-style: normal; font-size: .78rem; color: var(--muted); }
 .fbcp { color: var(--muted); }
 .fbcrad { border-color: var(--gold); }
+.vq-exv > summary { cursor: pointer; font-weight: 600; opacity: .85; padding: .1rem 0; }
+.vq-exv[open] > summary { margin-bottom: .4rem; }
