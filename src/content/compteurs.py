@@ -38,11 +38,15 @@ def counters_subs():
     shuu = reads('週間 (しゅうかん) — Semaines', '週間', ['いっしゅうかん!', 'にしゅうかん', 'さんしゅうかん', 'よんしゅうかん', 'ごしゅうかん', 'ろくしゅうかん', 'ななしゅうかん', 'はっしゅうかん!', 'きゅうしゅうかん', 'じゅっしゅうかん!', 'なんしゅうかん'])
     getsu = reads('か月 (かげつ) — Mois (durée)', 'か月', ['いっかげつ!', 'にかげつ', 'さんかげつ', 'よんかげつ', 'ごかげつ', 'ろっかげつ!', 'ななかげつ', 'はっかげつ!', 'きゅうかげつ', 'じゅっかげつ!', 'なんかげつ'])
     nen = reads('年 (ねん) — Années', '年', ['いちねん', 'にねん', 'さんねん', 'よねん!', 'ごねん', 'ろくねん', 'しちねん!', 'はちねん', 'くねん!', 'じゅうねん', 'なんねん'])
+    byou = reads('秒 (びょう) — Secondes', '秒', ['いちびょう', 'にびょう', 'さんびょう', 'よんびょう', 'ごびょう', 'ろくびょう', 'ななびょう', 'はちびょう', 'きゅうびょう', 'じゅうびょう', 'なんびょう'])
+    nichi = reads('日 (にち / か) — Jours (durée)', '日', ['いちにち!', 'ふつか!', 'みっか!', 'よっか!', 'いつか!', 'むいか!', 'なのか!', 'ようか!', 'ここのか!', 'とおか!', 'なんにち'])
     temps = {'title': 'Durées et âge', 'blocks': [
-        P('Compter les durées et l’âge : heures, minutes, semaines, mois, années, ans. Attention aux pièges : 4 → よ (よじかん, よねん), 7 → しち ou なな, 9 → く (くじかん). Pour 20 ans : 二十歳 (はたち).'),
-        *sai, *jikan, *fun, *shuu, *getsu, *nen,
+        P('Compter les durées et l’âge : heures, minutes, secondes, jours, semaines, mois, années, ans. Attention aux pièges : 4 → よ (よじかん, よねん), 7 → しち ou なな, 9 → く (くじかん). Pour 20 ans : 二十歳 (はたち). Les secondes sont régulières (いち・に・さん… + びょう), mais les jours de 1 à 10 sont tous irréguliers : ふつか, みっか, よっか, いつか, むいか, なのか, ようか, ここのか, とおか (1 jour = いちにち).'),
+        *sai, *jikan, *fun, *byou, *nichi, *shuu, *getsu, *nen,
+        H('Les jours du mois (dates) — cas particuliers'),
+        T(['Date', 'Lecture', 'À retenir'], [['一日', 'ついたち', 'Le 1er du mois (la durée « 1 jour » se dit いちにち)'], ['二日〜十日', 'ふつか・みっか・よっか・いつか・むいか・なのか・ようか・ここのか・とおか', 'Mêmes lectures que pour la durée'], ['十四日', 'じゅうよっか', 'Le 4 reste よっか'], ['十七日', 'じゅうしちにち', 'Pour les dates, 7 = しち'], ['十九日', 'じゅうくにち', 'Pour les dates, 9 = く'], ['二十日', 'はつか', 'Le 20 : lecture à part (≠ 二十歳 はたち)'], ['二十四日', 'にじゅうよっか', 'Le 4 reste よっか'], ['二十七日', 'にじゅうしちにち', '7 = しち'], ['二十九日', 'にじゅうくにち', '9 = く']], jp=(0,), ro=()),
         H('Récapitulatif'),
-        info([['sai', '歳', 'Âge (ans)', ''], ['jikan', '時間', 'Durée en heures', ''], ['fun', '分', 'Minutes', ''],
+        info([['sai', '歳', 'Âge (ans)', ''], ['jikan', '時間', 'Durée en heures', ''], ['fun', '分', 'Minutes', ''], ['byō', '秒', 'Secondes', ''], ['nichi', '日', 'Jours (durée) et jours du mois', ''],
               ['shūkan', '週間', 'Durée en semaines', ''], ['kagetsu', 'か月', 'Durée en mois', ''], ['nen', '年', 'Années', '']]),
     ]}
     return {'助数詞': [objets, temps]}
