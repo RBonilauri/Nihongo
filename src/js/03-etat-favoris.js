@@ -133,4 +133,13 @@
 
 
   /* anti-indices : retire les parenthèses contenant du japonais, qui donneraient la réponse */
+  /* forme d'une réponse (parenthèse, nombre de parties « a / b », longueur) : les mauvaises réponses doivent lui ressembler, sinon la bonne se repère à sa seule forme */
+  function shapePen(s, ans) {
+    s = String(s || ''); ans = String(ans || '');
+    var par = function (z) { return /[（(]/.test(z); }, n = function (z) { return z.split(/\s*[\/・、,]\s*/).length; };
+    return (par(s) !== par(ans) ? 30 : 0) + Math.abs(n(s) - n(ans)) * 6 + Math.abs(s.length - ans.length) * 0.8;
+  }
+  function shapeOrder(ans, cands, txt, bonus) {
+    return cands.map(function (c) { return { c: c, p: shapePen(txt(c), ans) + (bonus ? bonus(c) : 0) + Math.random() * 8 }; }).sort(function (a, b) { return a.p - b.p; }).map(function (z) { return z.c; });
+  }
   function noJpHint(s) { return String(s).replace(/\s*[（(][^）)]*[぀-ヿ㐀-鿿][^）)]*[）)]/g, '').replace(/\s+/g, ' ').trim(); }

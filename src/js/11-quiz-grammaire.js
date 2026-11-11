@@ -122,8 +122,11 @@
       var x = byI[it.i];
       if (it.t === 'pick') { var bad = x.p.d[Math.floor(Math.random() * x.p.d.length)]; return shuffle([{ v: fillS(x.p, x.p.a), ok: true, k: fillK(x.p, x.p.a) }, { v: fillS(x.p, bad), ok: false, k: fillK(x.p, bad) }]); }
       if (it.t === 'role') {
-        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: noJpHint(x.p.r), ok: true }], sR = {}; sR[noJpHint(x.p.r)] = 1;
-        shuffle(famR.slice()).concat(shuffle([].concat.apply([], GROLES))).forEach(function (r) { var n = noJpHint(r); if (outR.length < 4 && !sR[n] && !incompat(r, x.p.r)) { sR[n] = 1; outR.push({ v: n, ok: false }); } });
+        // libellé sans parenthèse ni mot repris de la traduction (« mais », « seulement », « pourtant »…) : la bonne réponse ne doit pas se lire dans la phrase
+        var RSA = { 'Pourtant (surprise, regret)': 'Contraste inattendu', 'En tant que (として)': 'Statut, qualité', 'Même (さえ)': 'Cas extrême', 'Même (すら)': 'Cas extrême', 'Même (だって)': 'Cas extrême' };
+        var rs = function (r) { return RSA[r] || String(r).replace(/\s*[（(][^）)]*[）)]/g, '').replace(/\s+/g, ' ').trim(); };
+        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: rs(x.p.r), ok: true }], sR = {}; sR[rs(x.p.r)] = 1;
+        shapeOrder(rs(x.p.r), [].concat.apply([], GROLES), rs, function (r) { return famR.indexOf(r) >= 0 ? -12 : 0; }).forEach(function (r) { var n = rs(r); if (outR.length < 4 && !sR[n] && !incompat(r, x.p.r)) { sR[n] = 1; outR.push({ v: n, ok: false }); } });
         return shuffle(outR);
       }
       if (it.t === 'p') return shuffle([{ v: x.p.a, ok: true }].concat(x.p.d.map(function (d) { return { v: d, ok: false }; })));
@@ -142,7 +145,19 @@
       GFAM.forEach(function (f) { if (f.id === x.fam) famLabels = f.f; });
       var cand = shuffle(famLabels.slice()).concat(shuffle(Object.keys(famOf)));
       cand.forEach(function (l) { if (out2.length < 4 && !s2[l] && v.f[l] !== v.f[x.l]) { s2[l] = 1; out2.push({ v: l, ok: false }); } });
-      var neu = function (l) { return l.replace('ないでほしかった', 'naide hoshikatta').replace('ないでほしい', 'naide hoshii').replace('てほしくない', 'te hoshikunai').replace('てほしかった', 'te hoshikatta').replace('てほしい', 'te hoshii').replace('たら', 'tara').replace('て', 'te').replace('ば', 'ba'); };
+      // libellés de réponse sans kana ni romaji : la terminaison de la question ne doit pas se lire dans la réponse
+      var FLF = {
+        'Forme en て': 'Liaison, demande',
+        'て négatif': 'Liaison négative',
+        'Conditionnel ば': 'Conditionnel : condition générale',
+        'Conditionnel たら': 'Conditionnel : « si / quand »',
+        'Souhait sur autrui (てほしい)': 'Souhait sur autrui : « je veux que tu… »',
+        'Souhait sur autrui négatif (ないでほしい)': 'Souhait sur autrui : « je veux que tu ne… pas »',
+        'Souhait sur autrui négatif (てほしくない)': 'Souhait sur autrui : « je ne veux pas que tu… »',
+        'Souhait sur autrui passé (てほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu… »',
+        'Souhait sur autrui passé négatif (ないでほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu ne… pas »'
+      };
+      var neu = function (l) { return FLF[l] || l; };
       out2.forEach(function (o) { o.v = neu(o.v); });
       return shuffle(out2);
     }

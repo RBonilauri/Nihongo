@@ -122,14 +122,14 @@
       function add(v, ok, k) { if (!v || seen[v]) return false; seen[v] = 1; out.push({ v: v, ok: ok, k: k }); return true; }
       if (q.t === 'k2s') {
         add(x.s, true); var tx = senseToks(x.s);
-        sameFirst(x, pool.filter(function (c) { return disjoint(tx, senseToks(c.s)); })).some(function (c) { add(c.s, false); return out.length >= 4; });
+        shapeOrder(x.s, pool.filter(function (c) { return disjoint(tx, senseToks(c.s)); }), function (c) { return c.s; }, function (c) { return c.g === x.g ? -6 : 0; }).some(function (c) { add(c.s, false); return out.length >= 4; });
       } else if (q.t === 's2k') {
         add(x.k, true); var ty = senseToks(x.s);
         sameFirst(x, pool.filter(function (c) { return disjoint(ty, senseToks(c.s)); })).some(function (c) { add(c.k, false); return out.length >= 4; });
       } else if (q.t === 'k2on' || q.t === 'k2kun') {
         var f = q.t === 'k2on' ? 'on' : 'kun', px = parts(x[f]);
         add(x[f], true);
-        sameFirst(x, pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); })).some(function (c) { add(c[f], false); return out.length >= 4; });
+        shapeOrder(x[f], pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); }), function (c) { return c[f]; }, function (c) { return c.g === x.g ? -6 : 0; }).some(function (c) { add(c[f], false); return out.length >= 4; });
       } else {
         var r = q.w[1], tail = (q.w[0].match(/[ぁ-ゟ゠-ヿ]+$/) || [''])[0], words = [], wseen = {}, wt = q.t;
         var fk = function (w) { return wt === 'w2r' ? w[1] : wt === 'w2s' ? w[2] : w[0]; };
@@ -140,7 +140,7 @@
           if (fk(w) === okv || w[0] === q.w[0] || wseen[w[0]] || wseen[fk(w)]) return;
           if (wt === 'w2s' && !disjoint(tk, ft(w[2]))) return;
           wseen[w[0]] = 1;
-          words.push({ w: w, ov: wt === 'r2w' && w[0].split('').some(function (ch, i) { return i < w[0].length - 1 && r.indexOf(w[0].slice(i, i + 2)) >= 0; }) ? 1 : 0, tl: tail && (wt === 'w2r' ? w[1] : w[0]).slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }) ? 1 : 0, d: Math.abs(w[1].length - r.length) });
+          words.push({ w: w, ov: wt === 'r2w' && w[0].split('').some(function (ch, i) { return i < w[0].length - 1 && r.indexOf(w[0].slice(i, i + 2)) >= 0; }) ? 1 : 0, tl: tail && (wt === 'w2r' ? w[1] : w[0]).slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }) ? 1 : 0, d: Math.abs(w[1].length - r.length), sp: shapePen(fk(w), okv) });
         }); }); };
         addWords(levelPool(curLv()));
         var tn = function () { return words.filter(function (z) { return z.tl; }).length; };
@@ -148,7 +148,7 @@
         var kana = wt === 'w2r' || wt === 'r2w';
         shuffle(words).sort(function (a, b) {
           if (kana) return (b.ov - a.ov) || (b.tl - a.tl) || (a.d > 1) - (b.d > 1) || (b.share - a.share);
-          return (a.d > 2) - (b.d > 2) || (b.share - a.share);
+          return (a.sp > 25) - (b.sp > 25) || (a.d > 2) - (b.d > 2) || (b.share - a.share);
         }).some(function (c) { add(fk(c.w), false, c.w[1]); return out.length >= 4; });
       }
       return shuffle(out);

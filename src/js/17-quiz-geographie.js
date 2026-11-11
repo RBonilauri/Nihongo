@@ -118,7 +118,7 @@
     function pickWords(x, n, key) {
       var others = GW.filter(function (o) { return o.i !== x.w.i && o[key] !== x.w[key]; }), same = shuffle(others.filter(function (o) { return o.g === x.w.g; })), rest = shuffle(others.filter(function (o) { return o.g !== x.w.g; }));
       var out = [], seen = {}; seen[x.w[key]] = 1;
-      same.slice(0, 3).concat(rest).concat(same.slice(3)).forEach(function (o) { if (out.length < n && !seen[o[key]]) { seen[o[key]] = 1; out.push(o); } });
+      shapeOrder(x.w[key], same.slice(0, 3).concat(rest).concat(same.slice(3)), function (o) { return o[key]; }, function (o) { return o.g === x.w.g ? -3 : 0; }).forEach(function (o) { if (out.length < n && !seen[o[key]]) { seen[o[key]] = 1; out.push(o); } });
       return out;
     }
     function pickPrefs(x, n, key) {
@@ -130,8 +130,8 @@
     function options(it) {
       var x = byI[it.i], t = it.t, out;
       if (x.k === 'w') { var key = t === 'f2w' ? 'jp' : 'fr'; return shuffle([{ v: x.w[key], k: key === 'jp' ? (x.w.kk || '') : '', ok: true }].concat(pickWords(x, 3, key).map(function (o) { return { v: o[key], k: key === 'jp' ? (o.kk || '') : '', ok: false }; }))); }
-      if (t === 'rmap') out = [{ v: rl(x.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
-      else if (t === 'reg') out = [{ v: rl(x.o.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.o.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
+      if (t === 'rmap') out = [{ v: rl(x.r), ok: true }].concat(shapeOrder(rl(x.r), M.ids.filter(function (r) { return r !== x.r; }), rl).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
+      else if (t === 'reg') out = [{ v: rl(x.o.r), ok: true }].concat(shapeOrder(rl(x.o.r), M.ids.filter(function (r) { return r !== x.o.r; }), rl).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
       else if (t === 'cap') out = [{ v: x.o.cap, k: x.o.capk, ok: true }].concat(pickPrefs(x, 3, 'cap').map(function (o) { return { v: o.cap, k: o.capk, ok: false }; }));
       else if (t === 'rd') out = [{ v: x.o.k, ok: true }].concat(pickPrefs(x, 3, 'k').map(function (o) { return { v: o.k, ok: false }; }));
       else out = [{ v: x.o.n, k: x.o.k, ok: true }].concat(pickPrefs(x, 3, 'n').map(function (o) { return { v: o.n, k: o.k, ok: false }; }));

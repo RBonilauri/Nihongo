@@ -105,8 +105,8 @@
         shuffle(CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ'; })).forEach(function (c) { add(c.k, false, c.b); });
       } else {
         add(x.c.u, true);
-        shuffle(CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ' && c.g === x.c.g; })).forEach(function (c) { add(c.u, false); });
-        shuffle(CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ'; })).forEach(function (c) { add(c.u, false); });
+        var su = function (c) { return c.u; };
+        shapeOrder(x.c.u, CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ'; }), su, function (c) { return c.g === x.c.g ? -10 : 0; }).forEach(function (c) { add(c.u, false); });
       }
       return shuffle(out);
     }

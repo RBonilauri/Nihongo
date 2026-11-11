@@ -5667,6 +5667,15 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
 
 
   /* anti-indices : retire les parenthèses contenant du japonais, qui donneraient la réponse */
+  /* forme d'une réponse (parenthèse, nombre de parties « a / b », longueur) : les mauvaises réponses doivent lui ressembler, sinon la bonne se repère à sa seule forme */
+  function shapePen(s, ans) {
+    s = String(s || ''); ans = String(ans || '');
+    var par = function (z) { return /[（(]/.test(z); }, n = function (z) { return z.split(/\s*[\/・、,]\s*/).length; };
+    return (par(s) !== par(ans) ? 30 : 0) + Math.abs(n(s) - n(ans)) * 6 + Math.abs(s.length - ans.length) * 0.8;
+  }
+  function shapeOrder(ans, cands, txt, bonus) {
+    return cands.map(function (c) { return { c: c, p: shapePen(txt(c), ans) + (bonus ? bonus(c) : 0) + Math.random() * 8 }; }).sort(function (a, b) { return a.p - b.p; }).map(function (z) { return z.c; });
+  }
   function noJpHint(s) { return String(s).replace(/\s*[（(][^）)]*[぀-ヿ㐀-鿿][^）)]*[）)]/g, '').replace(/\s+/g, ' ').trim(); }
   /* ── conjugaisons à la demande ── */
   var CJ_GO = { 'う': ['わ', 'い', 'え', 'お'], 'く': ['か', 'き', 'け', 'こ'], 'ぐ': ['が', 'ぎ', 'げ', 'ご'], 'す': ['さ', 'し', 'せ', 'そ'], 'つ': ['た', 'ち', 'て', 'と'], 'ぬ': ['な', 'に', 'ね', 'の'], 'ぶ': ['ば', 'び', 'べ', 'ぼ'], 'む': ['ま', 'み', 'め', 'も'], 'る': ['ら', 'り', 'れ', 'ろ'] };
@@ -6537,14 +6546,14 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
       function add(v, ok, k) { if (!v || seen[v]) return false; seen[v] = 1; out.push({ v: v, ok: ok, k: k }); return true; }
       if (q.t === 'k2s') {
         add(x.s, true); var tx = senseToks(x.s);
-        sameFirst(x, pool.filter(function (c) { return disjoint(tx, senseToks(c.s)); })).some(function (c) { add(c.s, false); return out.length >= 4; });
+        shapeOrder(x.s, pool.filter(function (c) { return disjoint(tx, senseToks(c.s)); }), function (c) { return c.s; }, function (c) { return c.g === x.g ? -6 : 0; }).some(function (c) { add(c.s, false); return out.length >= 4; });
       } else if (q.t === 's2k') {
         add(x.k, true); var ty = senseToks(x.s);
         sameFirst(x, pool.filter(function (c) { return disjoint(ty, senseToks(c.s)); })).some(function (c) { add(c.k, false); return out.length >= 4; });
       } else if (q.t === 'k2on' || q.t === 'k2kun') {
         var f = q.t === 'k2on' ? 'on' : 'kun', px = parts(x[f]);
         add(x[f], true);
-        sameFirst(x, pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); })).some(function (c) { add(c[f], false); return out.length >= 4; });
+        shapeOrder(x[f], pool.filter(function (c) { return c[f] && disjoint(px, parts(c[f])); }), function (c) { return c[f]; }, function (c) { return c.g === x.g ? -6 : 0; }).some(function (c) { add(c[f], false); return out.length >= 4; });
       } else {
         var r = q.w[1], tail = (q.w[0].match(/[ぁ-ゟ゠-ヿ]+$/) || [''])[0], words = [], wseen = {}, wt = q.t;
         var fk = function (w) { return wt === 'w2r' ? w[1] : wt === 'w2s' ? w[2] : w[0]; };
@@ -6555,7 +6564,7 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
           if (fk(w) === okv || w[0] === q.w[0] || wseen[w[0]] || wseen[fk(w)]) return;
           if (wt === 'w2s' && !disjoint(tk, ft(w[2]))) return;
           wseen[w[0]] = 1;
-          words.push({ w: w, ov: wt === 'r2w' && w[0].split('').some(function (ch, i) { return i < w[0].length - 1 && r.indexOf(w[0].slice(i, i + 2)) >= 0; }) ? 1 : 0, tl: tail && (wt === 'w2r' ? w[1] : w[0]).slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }) ? 1 : 0, d: Math.abs(w[1].length - r.length) });
+          words.push({ w: w, ov: wt === 'r2w' && w[0].split('').some(function (ch, i) { return i < w[0].length - 1 && r.indexOf(w[0].slice(i, i + 2)) >= 0; }) ? 1 : 0, tl: tail && (wt === 'w2r' ? w[1] : w[0]).slice(-tail.length) === tail ? 1 : 0, share: q.w[0].split('').some(function (ch) { return w[0].indexOf(ch) >= 0; }) ? 1 : 0, d: Math.abs(w[1].length - r.length), sp: shapePen(fk(w), okv) });
         }); }); };
         addWords(levelPool(curLv()));
         var tn = function () { return words.filter(function (z) { return z.tl; }).length; };
@@ -6563,7 +6572,7 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
         var kana = wt === 'w2r' || wt === 'r2w';
         shuffle(words).sort(function (a, b) {
           if (kana) return (b.ov - a.ov) || (b.tl - a.tl) || (a.d > 1) - (b.d > 1) || (b.share - a.share);
-          return (a.d > 2) - (b.d > 2) || (b.share - a.share);
+          return (a.sp > 25) - (b.sp > 25) || (a.d > 2) - (b.d > 2) || (b.share - a.share);
         }).some(function (c) { add(fk(c.w), false, c.w[1]); return out.length >= 4; });
       }
       return shuffle(out);
@@ -6794,7 +6803,7 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
     function options(it) {
       var x = byI[it.i], key = it.t === 'f2j' ? 'jp' : 'fr', out = [x], seen = {}, kv = function (c) { return key === 'fr' ? noJpHint(c.fr) : c.jp; }; seen[kv(x)] = 1;
       var rest = cands(x).filter(function (c) { return !seen[kv(c)]; });
-      var score = function (c) { return (c.g === x.g ? 0 : c.c === x.c ? 100 : 200) + Math.abs(c[key].length - x[key].length) + Math.random() * 12; };
+      var score = function (c) { return (c.g === x.g ? 0 : c.c === x.c ? 100 : 200) + Math.abs(c[key].length - x[key].length) + shapePen(kv(c), kv(x)) + Math.random() * 12; };
       rest.sort(function (a, b) { return score(a) - score(b); });
       rest.some(function (c) { if (seen[kv(c)]) return false; seen[kv(c)] = 1; out.push(c); return out.length >= 4; });
       return shuffle(out.map(function (c) { return { v: kv(c), ok: c === x, k: c.kk || c.jp }; }));
@@ -7036,8 +7045,11 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
       var x = byI[it.i];
       if (it.t === 'pick') { var bad = x.p.d[Math.floor(Math.random() * x.p.d.length)]; return shuffle([{ v: fillS(x.p, x.p.a), ok: true, k: fillK(x.p, x.p.a) }, { v: fillS(x.p, bad), ok: false, k: fillK(x.p, bad) }]); }
       if (it.t === 'role') {
-        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: noJpHint(x.p.r), ok: true }], sR = {}; sR[noJpHint(x.p.r)] = 1;
-        shuffle(famR.slice()).concat(shuffle([].concat.apply([], GROLES))).forEach(function (r) { var n = noJpHint(r); if (outR.length < 4 && !sR[n] && !incompat(r, x.p.r)) { sR[n] = 1; outR.push({ v: n, ok: false }); } });
+        // libellé sans parenthèse ni mot repris de la traduction (« mais », « seulement », « pourtant »…) : la bonne réponse ne doit pas se lire dans la phrase
+        var RSA = { 'Pourtant (surprise, regret)': 'Contraste inattendu', 'En tant que (として)': 'Statut, qualité', 'Même (さえ)': 'Cas extrême', 'Même (すら)': 'Cas extrême', 'Même (だって)': 'Cas extrême' };
+        var rs = function (r) { return RSA[r] || String(r).replace(/\s*[（(][^）)]*[）)]/g, '').replace(/\s+/g, ' ').trim(); };
+        var famR = GROLES.filter(function (f) { return f.indexOf(x.p.r) >= 0; })[0] || [], outR = [{ v: rs(x.p.r), ok: true }], sR = {}; sR[rs(x.p.r)] = 1;
+        shapeOrder(rs(x.p.r), [].concat.apply([], GROLES), rs, function (r) { return famR.indexOf(r) >= 0 ? -12 : 0; }).forEach(function (r) { var n = rs(r); if (outR.length < 4 && !sR[n] && !incompat(r, x.p.r)) { sR[n] = 1; outR.push({ v: n, ok: false }); } });
         return shuffle(outR);
       }
       if (it.t === 'p') return shuffle([{ v: x.p.a, ok: true }].concat(x.p.d.map(function (d) { return { v: d, ok: false }; })));
@@ -7056,7 +7068,19 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
       GFAM.forEach(function (f) { if (f.id === x.fam) famLabels = f.f; });
       var cand = shuffle(famLabels.slice()).concat(shuffle(Object.keys(famOf)));
       cand.forEach(function (l) { if (out2.length < 4 && !s2[l] && v.f[l] !== v.f[x.l]) { s2[l] = 1; out2.push({ v: l, ok: false }); } });
-      var neu = function (l) { return l.replace('ないでほしかった', 'naide hoshikatta').replace('ないでほしい', 'naide hoshii').replace('てほしくない', 'te hoshikunai').replace('てほしかった', 'te hoshikatta').replace('てほしい', 'te hoshii').replace('たら', 'tara').replace('て', 'te').replace('ば', 'ba'); };
+      // libellés de réponse sans kana ni romaji : la terminaison de la question ne doit pas se lire dans la réponse
+      var FLF = {
+        'Forme en て': 'Liaison, demande',
+        'て négatif': 'Liaison négative',
+        'Conditionnel ば': 'Conditionnel : condition générale',
+        'Conditionnel たら': 'Conditionnel : « si / quand »',
+        'Souhait sur autrui (てほしい)': 'Souhait sur autrui : « je veux que tu… »',
+        'Souhait sur autrui négatif (ないでほしい)': 'Souhait sur autrui : « je veux que tu ne… pas »',
+        'Souhait sur autrui négatif (てほしくない)': 'Souhait sur autrui : « je ne veux pas que tu… »',
+        'Souhait sur autrui passé (てほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu… »',
+        'Souhait sur autrui passé négatif (ないでほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu ne… pas »'
+      };
+      var neu = function (l) { return FLF[l] || l; };
       out2.forEach(function (o) { o.v = neu(o.v); });
       return shuffle(out2);
     }
@@ -7279,8 +7303,8 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
         shuffle(CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ'; })).forEach(function (c) { add(c.k, false, c.b); });
       } else {
         add(x.c.u, true);
-        shuffle(CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ' && c.g === x.c.g; })).forEach(function (c) { add(c.u, false); });
-        shuffle(CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ'; })).forEach(function (c) { add(c.u, false); });
+        var su = function (c) { return c.u; };
+        shapeOrder(x.c.u, CD.counters.filter(function (c) { return c.k !== x.c.k && c.k !== 'つ'; }), su, function (c) { return c.g === x.c.g ? -10 : 0; }).forEach(function (c) { add(c.u, false); });
       }
       return shuffle(out);
     }
@@ -7774,7 +7798,7 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
     function pickWords(x, n, key) {
       var others = GW.filter(function (o) { return o.i !== x.w.i && o[key] !== x.w[key]; }), same = shuffle(others.filter(function (o) { return o.g === x.w.g; })), rest = shuffle(others.filter(function (o) { return o.g !== x.w.g; }));
       var out = [], seen = {}; seen[x.w[key]] = 1;
-      same.slice(0, 3).concat(rest).concat(same.slice(3)).forEach(function (o) { if (out.length < n && !seen[o[key]]) { seen[o[key]] = 1; out.push(o); } });
+      shapeOrder(x.w[key], same.slice(0, 3).concat(rest).concat(same.slice(3)), function (o) { return o[key]; }, function (o) { return o.g === x.w.g ? -3 : 0; }).forEach(function (o) { if (out.length < n && !seen[o[key]]) { seen[o[key]] = 1; out.push(o); } });
       return out;
     }
     function pickPrefs(x, n, key) {
@@ -7786,8 +7810,8 @@ td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
     function options(it) {
       var x = byI[it.i], t = it.t, out;
       if (x.k === 'w') { var key = t === 'f2w' ? 'jp' : 'fr'; return shuffle([{ v: x.w[key], k: key === 'jp' ? (x.w.kk || '') : '', ok: true }].concat(pickWords(x, 3, key).map(function (o) { return { v: o[key], k: key === 'jp' ? (o.kk || '') : '', ok: false }; }))); }
-      if (t === 'rmap') out = [{ v: rl(x.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
-      else if (t === 'reg') out = [{ v: rl(x.o.r), ok: true }].concat(shuffle(M.ids.filter(function (r) { return r !== x.o.r; })).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
+      if (t === 'rmap') out = [{ v: rl(x.r), ok: true }].concat(shapeOrder(rl(x.r), M.ids.filter(function (r) { return r !== x.r; }), rl).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
+      else if (t === 'reg') out = [{ v: rl(x.o.r), ok: true }].concat(shapeOrder(rl(x.o.r), M.ids.filter(function (r) { return r !== x.o.r; }), rl).slice(0, 3).map(function (r) { return { v: rl(r), ok: false }; }));
       else if (t === 'cap') out = [{ v: x.o.cap, k: x.o.capk, ok: true }].concat(pickPrefs(x, 3, 'cap').map(function (o) { return { v: o.cap, k: o.capk, ok: false }; }));
       else if (t === 'rd') out = [{ v: x.o.k, ok: true }].concat(pickPrefs(x, 3, 'k').map(function (o) { return { v: o.k, ok: false }; }));
       else out = [{ v: x.o.n, k: x.o.k, ok: true }].concat(pickPrefs(x, 3, 'n').map(function (o) { return { v: o.n, k: o.k, ok: false }; }));

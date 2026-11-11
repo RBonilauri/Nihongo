@@ -109,7 +109,7 @@
     function options(it) {
       var x = byI[it.i], key = it.t === 'f2j' ? 'jp' : 'fr', out = [x], seen = {}, kv = function (c) { return key === 'fr' ? noJpHint(c.fr) : c.jp; }; seen[kv(x)] = 1;
       var rest = cands(x).filter(function (c) { return !seen[kv(c)]; });
-      var score = function (c) { return (c.g === x.g ? 0 : c.c === x.c ? 100 : 200) + Math.abs(c[key].length - x[key].length) + Math.random() * 12; };
+      var score = function (c) { return (c.g === x.g ? 0 : c.c === x.c ? 100 : 200) + Math.abs(c[key].length - x[key].length) + shapePen(kv(c), kv(x)) + Math.random() * 12; };
       rest.sort(function (a, b) { return score(a) - score(b); });
       rest.some(function (c) { if (seen[kv(c)]) return false; seen[kv(c)] = 1; out.push(c); return out.length >= 4; });
       return shuffle(out.map(function (c) { return { v: kv(c), ok: c === x, k: c.kk || c.jp }; }));
