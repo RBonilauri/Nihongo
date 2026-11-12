@@ -19,18 +19,20 @@ def info(rows):
     return T(['Compteur', 'Kanji', 'S’utilise pour', 'Exemples'], rows, jp=(1,), ro=(0,))
 
 def dates_blocks():
-    """Jours du mois 1 à 31 (écrits « 1日 », comme sur un calendrier) : une lecture par jour ; ⚠ = lecture irrégulière."""
-    y = {1: 'ついたち!', 2: 'ふつか!', 3: 'みっか!', 4: 'よっか!', 5: 'いつか!', 6: 'むいか!', 7: 'なのか!', 8: 'ようか!', 9: 'ここのか!', 10: 'とおか!', 14: 'じゅうよっか!', 20: 'はつか!', 24: 'にじゅうよっか!'}
-    uni = ['', 'いち', 'に', 'さん', 'よん', 'ご', 'ろく', 'しち', 'はち', 'きゅう']
+    """Jours du mois : 1er (ついたち) et 11 à 31, écrits « 11日 » comme sur un calendrier. Les jours 2 à 10 se lisent comme les durées (tableau « Jours (durée) »), donc pas de répétition ; ⚠ = lecture irrégulière."""
+    y = {1: 'ついたち!', 14: 'じゅうよっか!', 20: 'はつか!', 24: 'にじゅうよっか!', 17: 'じゅうしちにち', 19: 'じゅうくにち', 27: 'にじゅうしちにち', 29: 'にじゅうくにち'}
+    uni = ['', 'いち', 'に', 'さん', 'よん', 'ご', 'ろく', 'なな', 'はち', 'きゅう']
     def yomi(n):
         if n in y: return y[n]
         if n < 20: return 'じゅう' + uni[n - 10] + 'にち'
         if n < 30: return 'にじゅう' + uni[n - 20] + 'にち'
         return 'さんじゅう' + ('' if n == 30 else uni[n - 30]) + 'にち'
-    out = [H('Les jours du mois (dates) — 1er au 31'), P('Sur un calendrier on écrit 1日, 2日… ⚠ = lecture irrégulière : le 1er (ついたち), du 2 au 10 (série japonaise), le 14 et le 24 (よっか), le 20 (はつか). Pour les autres jours : chiffre + にち, mais 7 → しち (しちにち) et 9 → く (くにち) : じゅうしちにち, にじゅうくにち.')]
-    for a, b in ((1, 10), (11, 20), (21, 31)):
-        row = ['%d日 %s' % (n, yomi(n).replace('!', '')) + ('⚠' if n in y else '') for n in range(a, b + 1)]
-        out.append(T([str(n) for n in range(a, b + 1)], [row], jp=(), ro=()))
+    out = [H('Les jours du mois (dates) — 1er et 11 au 31'),
+           P('Sur un calendrier on écrit 1日, 11日… Du 2 au 10, la lecture est celle du tableau « Jours (durée) » ci-dessus (2日 = ふつか … 10日 = とおか). Le 1er est ついたち (≠ いちにち, « un jour »). ⚠ = lecture irrégulière : le 14 et le 24 (よっか), le 20 (はつか). Pièges : le 17 et le 27 se lisent しち (じゅうしちにち), le 19 et le 29 se lisent く (じゅうくにち). Les autres jours : chiffre + にち.')]
+    days = [1] + list(range(11, 32))
+    for chunk in (days[:11], days[11:]):
+        row = ['%d日 %s' % (n, yomi(n).replace('!', '')) + ('⚠' if yomi(n).endswith('!') else '') for n in chunk]
+        out.append(T([str(n) for n in chunk], [row], jp=(), ro=()))
     return out
 
 def counters_subs():
@@ -57,7 +59,7 @@ def counters_subs():
     nichi = reads('日 (にち / か) — Jours (durée)', '日', ['いちにち!', 'ふつか!', 'みっか!', 'よっか!', 'いつか!', 'むいか!', 'なのか!', 'ようか!', 'ここのか!', 'とおか!', 'なんにち'])
     dates = dates_blocks()
     temps = {'title': 'Durées et âge', 'blocks': [
-        P('Compter les durées et l’âge : heures, minutes, secondes, jours, semaines, mois, années, ans. Attention aux pièges : 4 → よ (よじかん, よねん), 7 → しち ou なな, 9 → く (くじかん). Pour 20 ans : 二十歳 (はたち). Les secondes sont régulières (いち・に・さん… + びょう), mais les jours de 1 à 10 sont tous irréguliers : ふつか, みっか, よっか, いつか, むいか, なのか, ようか, ここのか, とおか (1 jour = いちにち).'),
+        P('Compter les durées et l’âge : heures, minutes, secondes, jours, semaines, mois, années, ans. Attention aux pièges : 4 → よ (よじかん, よねん), 7 → しち ou なな, 9 → く (くじかん). Pour 20 ans : 二十歳 (はたち). Les secondes sont régulières (いち・に・さん… + びょう), mais les jours de 2 à 10 sont tous irréguliers : ふつか, みっか, よっか, いつか, むいか, なのか, ようか, ここのか, とおか (1 jour = いちにち ; le 1er du mois = ついたち).'),
         *sai, *jikan, *fun, *byou, *nichi, *shuu, *getsu, *nen,
         *dates, 
         H('Récapitulatif'),

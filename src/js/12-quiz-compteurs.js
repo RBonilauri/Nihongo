@@ -191,10 +191,10 @@
         h += '<div class="vq-ro">' + (x.kind === 'c' ? '' : '<b>' + esc(c.k) + '</b> (' + esc(c.ro) + ') : ') + esc(c.u) + '</div>';
         var exl = (CD.exs || {})[x.i];
         if (exl && exl.length) { var e = exl[(st.n - 1) % exl.length]; h += '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(e[0]) + '</div><div class="vq-exfr">' + esc(e[1]) + '</div></div>'; }
-        var rs = CD.reads.filter(function (r) { return r.c === c.k; });
+        var rs = CD.reads.filter(function (r) { return r.c === c.k; }).sort(function (p, q) { return (p.n === '何') - (q.n === '何'); });
         if (rs.length) {
           var nn = rs.map(function (r) { return r.n; }), nw = nn.indexOf('何') >= 0, num = nn.filter(function (v) { return v !== '何'; });
-          h += '<details class="cq-det"><summary>Lectures de ' + esc(c.k) + ' · ' + esc(num[0]) + ' → ' + esc(num[num.length - 1]) + (nw ? ', 何' : '') + '</summary><div class="cq-grid">' + rs.map(function (r) {
+          h += '<details class="cq-det"><summary>Lectures de ' + esc(c.k) + ' · ' + esc(/^\d/.test(num[num.length - 1]) ? '1' : num[0]) + ' → ' + esc(num[num.length - 1]) + (nw ? ', 何' : '') + '</summary><div class="cq-grid">' + rs.map(function (r) {
             return '<div class="cq-c' + (x.kind === 'r' && r.k === x.r.k ? ' cur' : '') + (r.irr ? ' irr' : '') + '"><b>' + esc(r.k) + '</b><span>' + esc(r.y) + '</span>' + (r.irr ? '<i title="lecture irrégulière">⚠</i>' : '') + '</div>';
           }).join('') + '</div></details>';
         }

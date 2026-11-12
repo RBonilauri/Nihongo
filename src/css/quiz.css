@@ -144,8 +144,8 @@
 .cq-det { margin-top: .6rem; border-top: 1px dashed var(--border); padding-top: .4rem; }
 .cq-det > summary { cursor: pointer; font-weight: 600; font-size: .9rem; padding: .3rem 0; }
 .cq-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .4rem; margin-top: .4rem; }
-.cq-c { display: flex; align-items: baseline; gap: .5rem; padding: .35rem .6rem; border-radius: 8px; background: rgba(127,127,127,.1); font-size: .9rem; }
-.cq-c b { font-size: 1.05rem; font-weight: 600; }
+.cq-c { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; padding: .35rem .6rem; border-radius: 8px; background: rgba(127,127,127,.1); font-size: .9rem; }
+.cq-c b { font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
 .cq-c span { color: var(--muted); }
 .cq-c i { font-style: normal; color: #c97a1a; margin-left: auto; }
 .cq-c.cur { outline: 2px solid var(--gold, #c9a84c); background: rgba(201,168,76,.18); }
