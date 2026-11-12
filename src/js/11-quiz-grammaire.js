@@ -118,6 +118,19 @@
       if (v.v === '書く' && l === 'Négatif simple') out.push('書くない');
       return out;
     }
+    // libellés de forme sans kana ni romaji : la terminaison ne doit pas se lire dans la question (produire) ni dans les réponses (reconnaître)
+      var FLF = {
+      'Forme en て': 'Liaison, demande',
+      'て négatif': 'Liaison négative',
+      'Conditionnel ば': 'Conditionnel : condition générale',
+      'Conditionnel たら': 'Conditionnel : « si / quand »',
+      'Souhait sur autrui (てほしい)': 'Souhait sur autrui : « je veux que tu… »',
+      'Souhait sur autrui négatif (ないでほしい)': 'Souhait sur autrui : « je veux que tu ne… pas »',
+      'Souhait sur autrui négatif (てほしくない)': 'Souhait sur autrui : « je ne veux pas que tu… »',
+      'Souhait sur autrui passé (てほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu… »',
+      'Souhait sur autrui passé négatif (ないでほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu ne… pas »'
+      };
+    function fl(l) { return FLF[l] || l; }
     function options(it) {
       var x = byI[it.i];
       if (it.t === 'pick') { var bad = x.p.d[Math.floor(Math.random() * x.p.d.length)]; return shuffle([{ v: fillS(x.p, x.p.a), ok: true, k: fillK(x.p, x.p.a) }, { v: fillS(x.p, bad), ok: false, k: fillK(x.p, bad) }]); }
@@ -145,19 +158,7 @@
       GFAM.forEach(function (f) { if (f.id === x.fam) famLabels = f.f; });
       var cand = shuffle(famLabels.slice()).concat(shuffle(Object.keys(famOf)));
       cand.forEach(function (l) { if (out2.length < 4 && !s2[l] && v.f[l] !== v.f[x.l]) { s2[l] = 1; out2.push({ v: l, ok: false }); } });
-      // libellés de réponse sans kana ni romaji : la terminaison de la question ne doit pas se lire dans la réponse
-      var FLF = {
-        'Forme en て': 'Liaison, demande',
-        'て négatif': 'Liaison négative',
-        'Conditionnel ば': 'Conditionnel : condition générale',
-        'Conditionnel たら': 'Conditionnel : « si / quand »',
-        'Souhait sur autrui (てほしい)': 'Souhait sur autrui : « je veux que tu… »',
-        'Souhait sur autrui négatif (ないでほしい)': 'Souhait sur autrui : « je veux que tu ne… pas »',
-        'Souhait sur autrui négatif (てほしくない)': 'Souhait sur autrui : « je ne veux pas que tu… »',
-        'Souhait sur autrui passé (てほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu… »',
-        'Souhait sur autrui passé négatif (ないでほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu ne… pas »'
-      };
-      var neu = function (l) { return FLF[l] || l; };
+      var neu = fl;
       out2.forEach(function (o) { o.v = neu(o.v); });
       return shuffle(out2);
     }
@@ -216,7 +217,7 @@
       var it = Q.items[Q.i], x = byI[it.i], opts = options(it); Q.cur = { it: it, opts: opts, done: false };
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
       var ask, big, hint = '', optK = function () { return opts.some(function (o) { return HK.test(o.v); }) ? hintBtn(opts.map(function (o) { return o.k; }).join('\n')) : ''; };
-      if (it.t === 'c2f') { ask = 'Mets ce verbe à la forme :'; big = '<div class="q-big vq gq-verb">' + vlabel(x.v) + '</div><div class="gq-form">' + esc(x.l) + '</div>'; hint = optK(); }
+      if (it.t === 'c2f') { ask = 'Mets ce verbe à la forme :'; big = '<div class="q-big vq gq-verb">' + vlabel(x.v) + '</div><div class="gq-form">' + esc(fl(x.l)) + '</div>'; hint = optK(); }
       else if (it.t === 'f2c') { ask = 'Quelle est cette forme ?'; big = '<div class="q-big vq">' + esc(kf(x.v, x.v.f[x.l])) + '</div><div class="gq-sub">du verbe ' + esc(cfg.ka ? x.v.ka : x.v.v) + ' · ' + esc(x.v.fr) + '</div>'; var kk = kfa(x.v, x.v.f[x.l]); hint = hintBtn(kk !== x.v.f[x.l] ? kk : ''); }
       else if (it.t === 'pick') { ask = 'Quelle phrase est correcte ?'; big = '<div class="gq-sub gq-fr">' + esc(x.p.fr) + '</div>'; hint = optK(); }
       else if (it.t === 'role') { ask = 'Quel est le rôle de la particule en gras ?'; big = '<div class="q-big vq gq-sent">' + (function () { var pp = (cfg.ka && x.p.k ? x.p.k : x.p.s).replace(/（.*）/, '').split('＿＿'); return esc(pp[0]) + '<b class="gq-hl">' + esc(x.p.a) + '</b>' + esc(pp[1] || ''); })() + '</div><div class="gq-sub">' + esc(x.p.fr) + '</div>'; hint = hintBtn(x.p.k && HK.test(x.p.s) ? fillK(x.p, x.p.a) : ''); }
