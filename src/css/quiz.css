@@ -140,6 +140,8 @@
 .fbw .fbex { flex-basis: 100%; margin-top: .45rem; padding: .5rem .7rem; border-left: 3px solid var(--gold, #c9a84c); background: rgba(127,127,127,.1); border-radius: 0 8px 8px 0; display: flex; flex-direction: column; gap: .15rem; }
 .fbex-j { font-size: 1.05rem; font-weight: 500; }
 .fbex-f { font-size: .9rem; color: var(--muted); }
+.fbex-k, .vq-exk, .vq-kk { font-size: .78rem; color: var(--muted); opacity: .85; line-height: 1.35; }
+.vq-exk { margin-bottom: 2px; }
 
 .cq-det { margin-top: .6rem; border-top: 1px dashed var(--border); padding-top: .4rem; }
 .cq-det > summary { cursor: pointer; font-weight: 600; font-size: .9rem; padding: .3rem 0; }

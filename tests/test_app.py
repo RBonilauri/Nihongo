@@ -126,6 +126,14 @@ with sync_playwright() as p:
     check(len(cqk) >= 3 and all(k['ex'] and k['cd'] and k['nc'] >= 4 for k in cqk), 'réponses compteurs : phrase d’exemple + menu déroulant des lectures (%d réponses)' % len(cqk))
     cx = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('counter-data').textContent); let n = 0, ok = 0; const ids = d.reads.map(r => 'r:' + r.k); d.counters.forEach(c => { if (c.k !== 'つ') ids.push('c:' + c.k); c.ex.forEach(w => ids.push('w:' + w[0])); }); ids.forEach(i => { n++; const e = d.exs[i]; if (e && e.length >= 2 && e[0][0] !== e[1][0]) ok++; }); return [n, ok]; }""")
     check(cx[0] == cx[1] and cx[0] > 300, 'chaque élément du quiz compteurs a 2 phrases d’exemple différentes %s' % cx)
+    # phrase en kana sous chaque exemple : présente, sans kanji ni chiffre, et jours du mois corrects
+    ck = pg.evaluate("""() => { const K = /[一-鿿々]/, d = JSON.parse(document.getElementById('counter-data').textContent), kd = JSON.parse(document.getElementById('kanji-data').textContent); let bad = 0, n = 0;
+      Object.keys(d.exs).forEach(k => d.exs[k].forEach(e => { n++; if (!e[2] || K.test(e[2]) || /[0-9]/.test(e[2])) bad++; }));
+      let kb = 0, kn = 0; kd.forEach(x => x.kw.forEach(w => { if (w[4]) { kn++; if (w[4][2] && (K.test(w[4][2]) || /[0-9]/.test(w[4][2]))) kb++; } }));
+      const f = (k, i) => (d.exs[k] || [[]])[i][2] || '';
+      return [n, bad, kn, kb, f('r:1日', 0), f('r:19日', 0), f('r:20日', 0), f('r:24日', 0)]; }""")
+    check(ck[0] > 700 and ck[1] == 0 and ck[2] > 10000 and ck[3] == 0, 'phrases en kana : compteurs complets, aucun kanji ni chiffre restant %s' % ck[:4])
+    check('ついたち' in ck[4] and 'じゅうくにち' in ck[5] and 'はつか' in ck[6] and 'にじゅうよっか' in ck[7], 'phrases en kana : jours du mois (1, 19, 20, 24) lus correctement %s' % ck[4:])
     check(len(kk) >= 8 and all(k['det'] and k['sp'] >= 1 for n, k in kk) and all(not k['det'] for n, k in KDS if not k['has'] and not k['fbk']), 'réponse contenant un kanji : rubrique « Détails » dans tous les quiz (%d réponses, quiz : %s)' % (len(kk), [(n, k) for n, k in KDS if (k['has'] and not (k['det'] and k['sp'] >= 1)) or (not k['has'] and k['det'] and not k['fbk'])][:4]))
     print('Statistiques des quiz')
     dayn = lambda: pg.evaluate("(JSON.parse(localStorage.getItem('jp-state')).day||{}).n||0")
@@ -383,7 +391,7 @@ with sync_playwright() as p:
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(60)
         if info and 'lit ce mot' in info['ask']:
-            dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent, (document.querySelector('.q-fb > .fbkr .lvp') || {}).textContent || '', (d.querySelector('.fbd-k .lvp') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-j') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-f') || {}).textContent || '']; }""")
+            dt = pg.evaluate("""() => { const d = document.querySelector('.quiz:not([hidden]) details.fbd'); if (!d) return null; return [d.querySelectorAll('.fbd-k').length, d.querySelectorAll('.fbd-k .fbi b').length, d.querySelectorAll('.fbd-k .qsay2').length, d.querySelector('.fbd-k .fbk').textContent, (document.querySelector('.q-fb > .fbkr .lvp') || {}).textContent || '', (d.querySelector('.fbd-k .lvp') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-j') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-f') || {}).textContent || '', (document.querySelector('.q-fb .fbw .fbex-k') || {}).textContent || '']; }""")
             dets.append((info['n'], dt))
             cmp_.append(pg.evaluate("() => { const f = document.querySelector('.quiz:not([hidden]) .q-fb'); return [f.querySelectorAll('.fbwr').length, f.querySelectorAll('.fbwl > b').length, f.querySelectorAll('details.fbc').length, f.querySelectorAll('details.fbc .fbcc b').length, f.querySelectorAll('.fbi .fbwr, .fbi details').length]; }"))
             if info['n'] >= 2 and not spk:
@@ -403,6 +411,7 @@ with sync_playwright() as p:
     check(rad[2] == [] and rad[1] >= 230 and rad[3] == 0 and rad[4] >= 20 and rad[5] == rad[4], 'rubrique Radicaux : %d cartes (214 radicaux + variantes), tous les radicaux du menu Composants présents (%d), tous nommés, variantes signalées %s' % (rad[1], rad[0], rad[2]))
     check(cpd[0] >= 2000 and cpd[1] == 0 and cpd[2] == ['月', '亡王'], 'données de composants : radical + 1 à 4 kanji complets, 望 = radical 月 + 亡 + 王 %s' % cpd)
     check(len(mk) >= 3 and all(len(d[6]) >= 4 and len(d[7]) >= 4 for d in mk), 'réponse d’un mot : phrase d’exemple japonaise + traduction française sous le sens %s' % [d[6:] for d in mk[:2]])
+    check(len(mk) >= 3 and sum(1 for d in mk if len(d[8]) >= 4) >= 0.8 * len(mk) and not any(re.search(r'[一-鿿]', d[8]) for d in mk), 'réponse d’un mot : la phrase d’exemple est répétée en kana (petit) sous le japonais %s' % [d[8] for d in mk[:2]])
     ex = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); let n = 0, ok = 0, lg = 0; d.forEach(x => x.kw.forEach(k => { n++; const e = k[4]; if (e && e[0] && e[1] && (e[0].includes(k[0]) || e[0].includes(k[0].slice(0, -1)) || e[0].includes(k[0].slice(0, -2)))) ok++; if (e && e[0].length > 28) lg++; })); return [n, ok, lg]; }""")
     check(ex[0] == ex[1] and ex[2] == 0, 'chaque mot de chaque liste de kanji a une phrase d’exemple courte contenant le mot %s' % ex)
     check(len(amp) >= 5 and all(re.fullmatch(r'N[1-5]', a['lv']) for a in amp) and all(re.fullmatch(r'N[1-5]', d[4]) and re.fullmatch(r'N[1-5]', d[5]) for d in mk), 'pastille de niveau : sur chaque question (quiz multi-niveaux) et à côté de chaque kanji de la réponse %s' % [a['lv'] for a in amp[:5]])

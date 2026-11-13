@@ -190,7 +190,7 @@
       if (c) {
         h += '<div class="vq-ro">' + (x.kind === 'c' ? '' : '<b>' + esc(c.k) + '</b> (' + esc(c.ro) + ') : ') + esc(c.u) + '</div>';
         var exl = (CD.exs || {})[x.i];
-        if (exl && exl.length) { var e = exl[(st.n - 1) % exl.length]; h += '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(e[0]) + '</div><div class="vq-exfr">' + esc(e[1]) + '</div></div>'; }
+        if (exl && exl.length) { var e = exl[(st.n - 1) % exl.length]; h += '<div class="vq-ex"><div class="vq-exh">Exemple</div><div class="vq-exjp">' + esc(e[0]) + '</div>' + (e[2] ? '<div class="vq-exk">' + esc(e[2]) + '</div>' : '') + '<div class="vq-exfr">' + esc(e[1]) + '</div></div>'; }
         var rs = CD.reads.filter(function (r) { return r.c === c.k; }).sort(function (p, q) { return (p.n === '何') - (q.n === '何'); });
         if (rs.length) {
           var nn = rs.map(function (r) { return r.n; }), nw = nn.indexOf('何') >= 0, num = nn.filter(function (v) { return v !== '何'; });
