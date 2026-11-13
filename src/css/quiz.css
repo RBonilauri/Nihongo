@@ -192,3 +192,17 @@ td .fbcp { margin-right: .3rem; }
 .rkj { font-size: .74rem; color: var(--muted); }
 .rkj b { font: 400 1.15rem 'Noto Serif JP', serif; color: var(--ink); margin-right: .2rem; }
 td .fbcv, td .fbcr .rtag { display: inline-block; margin: 0 .35rem .2rem 0; }
+
+/* Listes de kanji : menu « Affichage » et vues par groupe */
+.kmode { display: flex; flex-direction: column; gap: .35rem; margin: .5rem 0 1rem; }
+.kmlab { display: flex; align-items: center; gap: .6rem; font-size: .85rem; color: var(--muted); }
+.kmsel { flex: 1; min-width: 0; font: inherit; font-size: .92rem; color: var(--text, inherit); background: var(--card, rgba(127,127,127,.12)); border: 1px solid var(--border, rgba(127,127,127,.35)); border-radius: 10px; padding: .55rem .6rem; }
+.kmhint { font-size: .78rem; color: var(--muted); line-height: 1.4; }
+.kview[hidden] { display: none; }
+.kmc { margin-left: .9rem; font-size: .72rem; opacity: .7; white-space: nowrap; text-transform: none; letter-spacing: 0; }
+.kmulti { color: var(--gold, #c9a84c); }
+.kmulti .kmc { opacity: 1; border: 1px solid currentColor; border-radius: 999px; padding: 0 .5rem; }
+.kmrg { font-family: 'Noto Serif JP', serif; font-size: 1.25rem; }
+mark.kmk { background: rgba(201,168,76,.28); color: inherit; border-radius: 4px; padding: 0 .15rem; }
+tr.kalt > td:first-child { opacity: .85; }
+.kaltt { display: block; font-size: .6rem; color: var(--muted); letter-spacing: .02em; }
