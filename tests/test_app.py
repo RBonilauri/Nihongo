@@ -495,6 +495,8 @@ with sync_playwright() as p:
         verbes: JSON.parse(document.getElementById('grammar-data').textContent).verbs.length })""")
     check(counts['kanji'] > 600 and counts['vocab'] > 2000 and counts['verbes'] > 300, 'données présentes : %s' % counts)
 
+    _src = open(os.path.join(ROOT, 'src/js/11-quiz-grammaire.js'), encoding='utf-8').read()
+    check("du verbe ' + vlabel(x.v)" in _src, 'f2c : ligne du verbe = lecture · sens · groupe (comme c2f)')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))
