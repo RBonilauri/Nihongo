@@ -3,14 +3,14 @@
   var CJ_TE = { 'う': ['って', 'った'], 'つ': ['って', 'った'], 'る': ['って', 'った'], 'く': ['いて', 'いた'], 'ぐ': ['いで', 'いだ'], 'す': ['して', 'した'], 'ぬ': ['んで', 'んだ'], 'ぶ': ['んで', 'んだ'], 'む': ['んで', 'んだ'] };
   var CJ_NO = { 'ある': 1, 'できる': 1, '分かる': 1, 'わかる': 1, '見える': 1, 'みえる': 1, '聞こえる': 1, 'きこえる': 1, '要る': 1, 'いる(要)': 1 };
   function cjForms(s, ty, kana) {
-    var L = s.slice(-1), st = s.slice(0, -1), pre = s.slice(0, -2), a, i, e, o, te, ta, pot, pas, cau, vol, imp, ba;
-    if (ty === 'suru') { a = pre + 'し'; i = pre + 'し'; te = pre + 'して'; ta = pre + 'した'; pot = pre + 'できる'; pas = pre + 'される'; cau = pre + 'させる'; vol = pre + 'しよう'; imp = pre + 'しろ'; ba = pre + 'すれば'; }
-    else if (ty === 'irr') { var c = kana ? ['こ', 'き', 'くれ'] : ['来', '来', '来れ']; a = c[0]; i = c[1]; te = i + 'て'; ta = i + 'た'; pot = a + 'られる'; pas = a + 'られる'; cau = a + 'させる'; vol = a + 'よう'; imp = a + 'い'; ba = c[2] + 'ば'; }
-    else if (ty === 'ru') { a = i = st; te = st + 'て'; ta = st + 'た'; pot = st + 'られる'; pas = st + 'られる'; cau = st + 'させる'; vol = st + 'よう'; imp = st + 'ろ'; ba = st + 'れば'; }
+    var L = s.slice(-1), st = s.slice(0, -1), pre = s.slice(0, -2), a, i, e, o, te, ta, pot, pas, cau, caup, vol, imp, ba;
+    if (ty === 'suru') { a = pre + 'し'; i = pre + 'し'; te = pre + 'して'; ta = pre + 'した'; pot = pre + 'できる'; pas = pre + 'される'; cau = pre + 'させる'; vol = pre + 'しよう'; imp = pre + 'しろ'; ba = pre + 'すれば'; caup = pre + 'させられる'; }
+    else if (ty === 'irr') { var c = kana ? ['こ', 'き', 'くれ'] : ['来', '来', '来れ']; a = c[0]; i = c[1]; te = i + 'て'; ta = i + 'た'; pot = a + 'られる'; pas = a + 'られる'; cau = a + 'させる'; vol = a + 'よう'; imp = a + 'い'; ba = c[2] + 'ば'; caup = a + 'させられる'; }
+    else if (ty === 'ru') { a = i = st; te = st + 'て'; ta = st + 'た'; pot = st + 'られる'; pas = st + 'られる'; cau = st + 'させる'; vol = st + 'よう'; imp = st + 'ろ'; ba = st + 'れば'; caup = st + 'させられる'; }
     else {
       var g = CJ_GO[L]; a = st + g[0]; i = st + g[1]; e = st + g[2]; o = st + g[3];
       var t = CJ_TE[L]; if (/(行く|いく)$/.test(s)) t = ['って', 'った'];
-      te = st + t[0]; ta = st + t[1]; pot = e + 'る'; pas = a + 'れる'; cau = a + 'せる'; vol = o + 'う'; imp = e; ba = e + 'ば';
+      te = st + t[0]; ta = st + t[1]; pot = e + 'る'; pas = a + 'れる'; cau = a + 'せる'; vol = o + 'う'; imp = e; ba = e + 'ば'; caup = a + 'せられる';
       if (s === 'ある' || s === 'あ' + 'る') { a = ''; }
     }
     var neg = function (v) { return v.slice(0, -1) + 'ない'; };
@@ -23,9 +23,11 @@
     R.push(['Neutre, passé', ta, dna]);
     R.push(['Forme て', te, aru ? 'なくて' : a + 'ないで']);
     R.push(['Envie (〜たい)', (aru || s === 'できる') ? '—' : i + 'たい', (aru || s === 'できる') ? '—' : i + 'たくない']);
+    R.push(['Envie, passé', (aru || s === 'できる') ? '—' : i + 'たかった', (aru || s === 'できる') ? '—' : i + 'たくなかった']);
     R.push(['Potentiel', no ? '—' : pot, no ? '—' : neg(pot)]);
     R.push(['Passif', no ? '—' : pas, no ? '—' : neg(pas)]);
     R.push(['Causatif', no ? '—' : cau, no ? '—' : neg(cau)]);
+    R.push(['Causatif-passif', no ? '—' : caup, no ? '—' : neg(caup)]);
     R.push(['Volitif (on y va)', no ? '—' : vol, '—']);
     R.push(['Volitif poli', aru ? '—' : i + 'ましょう', '—']);
     R.push(['Impératif', no ? '—' : imp, no ? '—' : s + 'な']);
@@ -33,12 +35,15 @@
     R.push(['Conditionnel たら', ta + 'ら', dna + 'ら']);
     R.push(['En cours (〜ている)', aru ? '—' : te + 'いる', aru ? '—' : te + 'いない']);
     R.push(['Demande (〜ください)', aru ? '—' : te + 'ください', aru ? '—' : a + 'ないでください']);
+    R.push(['Souhait sur autrui (〜てほしい)', aru ? '—' : te + 'ほしい', aru ? '—' : a + 'ないでほしい']);
+    R.push(['Souhait sur autrui, passé', aru ? '—' : te + 'ほしかった', aru ? '—' : a + 'ないでほしかった']);
+    R.push(['Souhait sur autrui, autre négatif', '—', aru ? '—' : te + 'ほしくない']);
     return R;
   }
   function cjFill(d) {
     var b = d.querySelector('.cjb'); if (!b || b.firstChild) return;
     var k = d.dataset.k, ka = d.dataset.ka, ty = d.dataset.t, fr = d.dataset.fr || '', A = cjForms(k, ty, false), B = k === ka ? null : cjForms(ka, ty, true);
-    var KM = { 'Poli': ['Polie, présent', 'Polie, négatif'], 'Poli, passé': ['Polie, passé', 'Polie, passé négatif'], 'Neutre (dico)': ['DICO', 'Négatif simple'], 'Neutre, passé': ['Passé simple', 'Passé négatif simple'], 'Forme て': ['Forme en て', 'て négatif'], 'Envie (〜たい)': ['Désidératif', 'Désidératif négatif'], 'Potentiel': ['Potentiel', 'Potentiel négatif'], 'Passif': ['Passif'], 'Causatif': ['Causatif'], 'Volitif (on y va)': ['Volitif'], 'Volitif poli': ['Volitif'], 'Impératif': ['Impératif', 'Interdiction'], 'Conditionnel ば': ['Conditionnel ば', 'Si négatif'], 'Conditionnel たら': ['Conditionnel たら', 'Quand négatif'], 'En cours (〜ている)': ['En cours', 'En cours négatif'], 'Demande (〜ください)': ['Demande', 'Demande négatif'] };
+    var KM = { 'Poli': ['Polie, présent', 'Polie, négatif'], 'Poli, passé': ['Polie, passé', 'Polie, passé négatif'], 'Neutre (dico)': ['DICO', 'Négatif simple'], 'Neutre, passé': ['Passé simple', 'Passé négatif simple'], 'Forme て': ['Forme en て', 'て négatif'], 'Envie (〜たい)': ['Désidératif', 'Désidératif négatif'], 'Potentiel': ['Potentiel', 'Potentiel négatif'], 'Passif': ['Passif'], 'Causatif': ['Causatif'], 'Causatif-passif': ['Causatif-passif'], 'Envie, passé': ['Désidératif passé', 'Désidératif passé négatif'], 'Souhait sur autrui (〜てほしい)': ['Souhait sur autrui (てほしい)', 'Souhait sur autrui négatif (ないでほしい)'], 'Souhait sur autrui, passé': ['Souhait sur autrui passé (てほしかった)', 'Souhait sur autrui passé négatif (ないでほしかった)'], 'Souhait sur autrui, autre négatif': [null, 'Souhait sur autrui négatif (てほしくない)'], 'Volitif (on y va)': ['Volitif'], 'Volitif poli': ['Volitif'], 'Impératif': ['Impératif', 'Interdiction'], 'Conditionnel ば': ['Conditionnel ば', 'Si négatif'], 'Conditionnel たら': ['Conditionnel たら', 'Quand négatif'], 'En cours (〜ている)': ['En cours', 'En cours négatif'], 'Demande (〜ください)': ['Demande', 'Demande négatif'] };
     var h = '<div class="cj"><div class="cj-row cj-h"><span>Forme</span><span>Affirmatif</span><span>Négatif</span></div>';
     A.forEach(function (r, n) {
       var cell = function (j) { var v = r[j]; if (v === '—') return '<span>—</span>'; var kk = B && B[n][j] !== v ? '<span class="cj-r">' + B[n][j] + '</span>' : ''; var km = KM[r[0]], t1 = km && km[j - 1] ? FRV.tr(fr, km[j - 1])[0] : ''; return '<span><span class="cj-j">' + v + '</span>' + kk + (t1 ? '<span class="cj-fr">' + esc(t1) + '</span>' : '') + '</span>'; };

@@ -190,6 +190,14 @@ with sync_playwright() as p:
     pg.evaluate("document.querySelector('details.cjd[data-k=食べる]').open = true"); pg.wait_for_timeout(300)
     n_fr = pg.evaluate("document.querySelectorAll('details.cjd[data-k=食べる] .cj-fr').length")
     check(n_fr >= 15, 'fiche « Conjuguer » : %d traductions pour 食べる' % n_fr)
+    tj = pg.evaluate("[...document.querySelectorAll('details.cjd[data-k=食べる] .cj-j')].map(e=>e.textContent)")
+    need = ['食べさせられる', '食べさせられない', '食べたかった', '食べたくなかった', '食べてほしい', '食べないでほしい', '食べてほしくない', '食べてほしかった', '食べないでほしかった']
+    check(all(n in tj for n in need), 'tableau « Conjuguer » : toutes les formes du quiz présentes (%s manquantes)' % [n for n in need if n not in tj])
+    # couverture : chaque forme du quiz conjugaison a sa fiche dans Apprendre
+    src_f = open(os.path.join(ROOT, 'src/js/05b-fiches-conjugaison.js'), encoding='utf-8').read()
+    ids = re.findall(r"^    cj\('(\w+)'", src_f, re.M)
+    for need_id in ['cpass', 'takatta', 'takunakatta', 'hoshii', 'naihoshii', 'hoshikunai', 'hoshikatta', 'naihoshikatta']:
+        check(need_id in ids and ("'" + need_id + "'") in src_f.split('var CJ_SUBS')[1], 'fiche %s présente et rattachée à une rubrique' % need_id)
     ex = pg.evaluate("[...document.querySelectorAll('details.cjd[data-k=食べる] .cj-fr')].slice(0,3).map(e=>e.textContent)")
     check(any('mange' in e for e in ex), 'exemple : %s' % ex)
 
@@ -327,13 +335,13 @@ with sync_playwright() as p:
     check(pg.evaluate("(() => { const d = document.querySelector('main > details.sec.cur .ndeck'), q = document.querySelector('main > details.sec.cur .nquiz'); return !!d && !!q && d.nextElementSibling === q; })()"), 'bouton « Fiches de tous les temps » juste au-dessus du quiz')
     pg.evaluate("document.querySelector('main > details.sec.cur .ndeck').click()"); pg.wait_for_timeout(300)
     nprog = pg.evaluate("(() => { const d = document.querySelector('.deck'); return [!d.hidden, +d.querySelector('.prog').textContent.split('/')[1], d.querySelector('.ttl').textContent, d.querySelector('#card .flab') ? d.querySelector('#card .flab').textContent : '']; })()")
-    check(nprog[0] and nprog[1] == 24 and 'tous les temps' in nprog[2] and nprog[3] != '', 'paquet de fiches regroupées ouvert (%s)' % nprog)
+    check(nprog[0] and nprog[1] == 32 and 'tous les temps' in nprog[2] and nprog[3] != '', 'paquet de fiches regroupées ouvert (%s)' % nprog)
     pg.evaluate("document.querySelector('.deck #card').click()"); pg.wait_for_timeout(100)
     check(pg.evaluate("document.querySelectorAll('.deck #card .back > div').length") == 8 and pg.evaluate("[...document.querySelectorAll('.deck #card .back b')].map(b => b.textContent.slice(0, 5)).join()").startswith('Sens,Conte,Group,Group,Irrég,Exemp'), 'la fiche se retourne : 8 rubriques uniformes (sens, contexte, groupes, exemple, lecture, traduction)')
     pg.evaluate("document.querySelector('.deck .x').click()"); pg.wait_for_timeout(300)
     check(pg.evaluate("document.querySelector('.deck').hidden"), 'paquet fermé')
     sub5 = pg.evaluate("""() => { const s = document.querySelector('main > details.sec.cur'), d = [...s.querySelectorAll(':scope > .sec-body > details.sub')].find(x => x.querySelector('summary').firstChild.textContent.trim().startsWith('て —')), b = d && d.querySelector('.deckbtn'); if (!b) return [0, '']; b.click(); const k = document.querySelector('.deck'); const r = [+k.querySelector('.prog').textContent.split('/')[1], k.querySelector('.ttl').textContent]; k.querySelector('.x').click(); return r; }""")
-    check(sub5[0] == 2 and 'Forme' in sub5[1], 'sous-rubrique « て » : paquet de fiches uniformes (%s)' % sub5)
+    check(sub5[0] == 7 and 'Forme' in sub5[1], 'sous-rubrique « て » : paquet de fiches uniformes (%s)' % sub5)
     pg.click('#tabbar [data-tab=home]'); pg.wait_for_timeout(300)
 
     print('Réponses non évidentes')

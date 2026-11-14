@@ -1609,6 +1609,7 @@ tr.kalt > td:first-child { opacity: .85; }
 <div class="te-card"><span class="tc-form">〜てから</span><span class="tc-label">Après avoir fait</span><div class="tc-desc">Séquence stricte : 1ère action entièrement terminée avant la 2ème.</div><span class="tc-ex">食べてから、寝る — dormir après avoir mangé</span><span class="tc-trans">Séquence temporelle stricte</span></div>
 <div class="te-card"><span class="tc-form">〜てほしい</span><span class="tc-label">Vouloir que quelqu'un fasse</span><div class="tc-desc">Souhait adressé à autrui : la personne qui doit agir se marque avec <strong>に</strong>. Pour <em>mon</em> propre désir d'agir, on emploie <strong>〜たい</strong> (voir l'onglet たい). Poli : ていただけませんか.</div><span class="tc-ex">来てほしい — je veux que tu viennes<br/>彼に手伝ってほしい — je voudrais qu'il m'aide<br/>行きたい — je veux y aller (moi) ≠ 行ってほしい — je voudrais que tu y ailles (toi)</span><span class="tc-trans">Souhait adressé à autrui</span></div>
 <div class="te-card"><span class="tc-form">〜ないでほしい / 〜てほしくない</span><span class="tc-label">Vouloir que quelqu'un ne fasse pas</span><div class="tc-desc">Négatif de てほしい. <strong>ないでほしい</strong> = je voudrais que tu ne… pas (la forme la plus naturelle). <strong>てほしくない</strong> = je ne veux pas que tu… (plus catégorique). Exprime un souhait, alors que <strong>ないでください</strong> est une demande directe.</div><span class="tc-ex">嘘をつかないでほしい — je voudrais que tu ne mentes pas<br/>私のことを忘れないでほしい — ne m'oublie pas<br/>行ってほしくない — je ne veux pas que tu partes</span><span class="tc-trans">Souhait négatif adressé à autrui</span></div>
+<div class="te-card"><span class="tc-form">〜てほしかった / 〜ないでほしかった</span><span class="tc-label">Regret : j'aurais voulu que… (ne pas)</span><div class="tc-desc">Passé de てほしい : on regrette que l'autre n'ait pas agi (<strong>てほしかった</strong>) ou qu'il ait agi (<strong>ないでほしかった</strong>). ほしい se conjugue comme un adjectif en -i : ほしかった.</div><span class="tc-ex">もっと早く言ってほしかった — j'aurais voulu que tu me le dises plus tôt<br/>勝手に使わないでほしかった — j'aurais voulu que tu ne l'utilises pas sans demander</span><span class="tc-trans">Souhait passé adressé à autrui</span></div>
 <div class="te-card"><span class="tc-form">〜ている + ない = ていない</span><span class="tc-label">Ne pas être en train de / pas encore</span><div class="tc-desc">Négation du progressif ou d'un état résultant.</div><span class="tc-ex">まだ食べていない — je n'ai pas encore mangé</span><span class="tc-trans">Non-accompli / en attente</span></div>
 <div class="te-card"><span class="tc-form">〜ないで / 〜なくて</span><span class="tc-label">Forme en て négative</span><div class="tc-desc"><strong>ないで</strong> = sans faire (action accompagnée). <strong>なくて</strong> = parce que quelque chose n'a pas eu lieu (cause).</div><span class="tc-ex">朝ご飯を食べないで行った — parti sans petit-déjeuner<br/>彼が来なくて心配した — il n'est pas venu, je me suis inquiété</span><span class="tc-trans">Sans faire / cause négative</span></div>
 <div class="te-card"><span class="tc-form">〜てある</span><span class="tc-label">État résultant voulu</span><div class="tc-desc">Quelqu'un a fait l'action exprès et le résultat demeure. Verbe transitif + が. Comparer 開いている (c'est ouvert) et 開けてある (on l'a ouvert exprès).</div><span class="tc-ex">窓が開けてある — la fenêtre a été ouverte (exprès)<br/>メニューに写真が書いてある — il y a des photos sur le menu</span><span class="tc-trans">Résultat intentionnel</span></div>
@@ -5698,14 +5699,14 @@ tr.kalt > td:first-child { opacity: .85; }
   var CJ_TE = { 'う': ['って', 'った'], 'つ': ['って', 'った'], 'る': ['って', 'った'], 'く': ['いて', 'いた'], 'ぐ': ['いで', 'いだ'], 'す': ['して', 'した'], 'ぬ': ['んで', 'んだ'], 'ぶ': ['んで', 'んだ'], 'む': ['んで', 'んだ'] };
   var CJ_NO = { 'ある': 1, 'できる': 1, '分かる': 1, 'わかる': 1, '見える': 1, 'みえる': 1, '聞こえる': 1, 'きこえる': 1, '要る': 1, 'いる(要)': 1 };
   function cjForms(s, ty, kana) {
-    var L = s.slice(-1), st = s.slice(0, -1), pre = s.slice(0, -2), a, i, e, o, te, ta, pot, pas, cau, vol, imp, ba;
-    if (ty === 'suru') { a = pre + 'し'; i = pre + 'し'; te = pre + 'して'; ta = pre + 'した'; pot = pre + 'できる'; pas = pre + 'される'; cau = pre + 'させる'; vol = pre + 'しよう'; imp = pre + 'しろ'; ba = pre + 'すれば'; }
-    else if (ty === 'irr') { var c = kana ? ['こ', 'き', 'くれ'] : ['来', '来', '来れ']; a = c[0]; i = c[1]; te = i + 'て'; ta = i + 'た'; pot = a + 'られる'; pas = a + 'られる'; cau = a + 'させる'; vol = a + 'よう'; imp = a + 'い'; ba = c[2] + 'ば'; }
-    else if (ty === 'ru') { a = i = st; te = st + 'て'; ta = st + 'た'; pot = st + 'られる'; pas = st + 'られる'; cau = st + 'させる'; vol = st + 'よう'; imp = st + 'ろ'; ba = st + 'れば'; }
+    var L = s.slice(-1), st = s.slice(0, -1), pre = s.slice(0, -2), a, i, e, o, te, ta, pot, pas, cau, caup, vol, imp, ba;
+    if (ty === 'suru') { a = pre + 'し'; i = pre + 'し'; te = pre + 'して'; ta = pre + 'した'; pot = pre + 'できる'; pas = pre + 'される'; cau = pre + 'させる'; vol = pre + 'しよう'; imp = pre + 'しろ'; ba = pre + 'すれば'; caup = pre + 'させられる'; }
+    else if (ty === 'irr') { var c = kana ? ['こ', 'き', 'くれ'] : ['来', '来', '来れ']; a = c[0]; i = c[1]; te = i + 'て'; ta = i + 'た'; pot = a + 'られる'; pas = a + 'られる'; cau = a + 'させる'; vol = a + 'よう'; imp = a + 'い'; ba = c[2] + 'ば'; caup = a + 'させられる'; }
+    else if (ty === 'ru') { a = i = st; te = st + 'て'; ta = st + 'た'; pot = st + 'られる'; pas = st + 'られる'; cau = st + 'させる'; vol = st + 'よう'; imp = st + 'ろ'; ba = st + 'れば'; caup = st + 'させられる'; }
     else {
       var g = CJ_GO[L]; a = st + g[0]; i = st + g[1]; e = st + g[2]; o = st + g[3];
       var t = CJ_TE[L]; if (/(行く|いく)$/.test(s)) t = ['って', 'った'];
-      te = st + t[0]; ta = st + t[1]; pot = e + 'る'; pas = a + 'れる'; cau = a + 'せる'; vol = o + 'う'; imp = e; ba = e + 'ば';
+      te = st + t[0]; ta = st + t[1]; pot = e + 'る'; pas = a + 'れる'; cau = a + 'せる'; vol = o + 'う'; imp = e; ba = e + 'ば'; caup = a + 'せられる';
       if (s === 'ある' || s === 'あ' + 'る') { a = ''; }
     }
     var neg = function (v) { return v.slice(0, -1) + 'ない'; };
@@ -5718,9 +5719,11 @@ tr.kalt > td:first-child { opacity: .85; }
     R.push(['Neutre, passé', ta, dna]);
     R.push(['Forme て', te, aru ? 'なくて' : a + 'ないで']);
     R.push(['Envie (〜たい)', (aru || s === 'できる') ? '—' : i + 'たい', (aru || s === 'できる') ? '—' : i + 'たくない']);
+    R.push(['Envie, passé', (aru || s === 'できる') ? '—' : i + 'たかった', (aru || s === 'できる') ? '—' : i + 'たくなかった']);
     R.push(['Potentiel', no ? '—' : pot, no ? '—' : neg(pot)]);
     R.push(['Passif', no ? '—' : pas, no ? '—' : neg(pas)]);
     R.push(['Causatif', no ? '—' : cau, no ? '—' : neg(cau)]);
+    R.push(['Causatif-passif', no ? '—' : caup, no ? '—' : neg(caup)]);
     R.push(['Volitif (on y va)', no ? '—' : vol, '—']);
     R.push(['Volitif poli', aru ? '—' : i + 'ましょう', '—']);
     R.push(['Impératif', no ? '—' : imp, no ? '—' : s + 'な']);
@@ -5728,12 +5731,15 @@ tr.kalt > td:first-child { opacity: .85; }
     R.push(['Conditionnel たら', ta + 'ら', dna + 'ら']);
     R.push(['En cours (〜ている)', aru ? '—' : te + 'いる', aru ? '—' : te + 'いない']);
     R.push(['Demande (〜ください)', aru ? '—' : te + 'ください', aru ? '—' : a + 'ないでください']);
+    R.push(['Souhait sur autrui (〜てほしい)', aru ? '—' : te + 'ほしい', aru ? '—' : a + 'ないでほしい']);
+    R.push(['Souhait sur autrui, passé', aru ? '—' : te + 'ほしかった', aru ? '—' : a + 'ないでほしかった']);
+    R.push(['Souhait sur autrui, autre négatif', '—', aru ? '—' : te + 'ほしくない']);
     return R;
   }
   function cjFill(d) {
     var b = d.querySelector('.cjb'); if (!b || b.firstChild) return;
     var k = d.dataset.k, ka = d.dataset.ka, ty = d.dataset.t, fr = d.dataset.fr || '', A = cjForms(k, ty, false), B = k === ka ? null : cjForms(ka, ty, true);
-    var KM = { 'Poli': ['Polie, présent', 'Polie, négatif'], 'Poli, passé': ['Polie, passé', 'Polie, passé négatif'], 'Neutre (dico)': ['DICO', 'Négatif simple'], 'Neutre, passé': ['Passé simple', 'Passé négatif simple'], 'Forme て': ['Forme en て', 'て négatif'], 'Envie (〜たい)': ['Désidératif', 'Désidératif négatif'], 'Potentiel': ['Potentiel', 'Potentiel négatif'], 'Passif': ['Passif'], 'Causatif': ['Causatif'], 'Volitif (on y va)': ['Volitif'], 'Volitif poli': ['Volitif'], 'Impératif': ['Impératif', 'Interdiction'], 'Conditionnel ば': ['Conditionnel ば', 'Si négatif'], 'Conditionnel たら': ['Conditionnel たら', 'Quand négatif'], 'En cours (〜ている)': ['En cours', 'En cours négatif'], 'Demande (〜ください)': ['Demande', 'Demande négatif'] };
+    var KM = { 'Poli': ['Polie, présent', 'Polie, négatif'], 'Poli, passé': ['Polie, passé', 'Polie, passé négatif'], 'Neutre (dico)': ['DICO', 'Négatif simple'], 'Neutre, passé': ['Passé simple', 'Passé négatif simple'], 'Forme て': ['Forme en て', 'て négatif'], 'Envie (〜たい)': ['Désidératif', 'Désidératif négatif'], 'Potentiel': ['Potentiel', 'Potentiel négatif'], 'Passif': ['Passif'], 'Causatif': ['Causatif'], 'Causatif-passif': ['Causatif-passif'], 'Envie, passé': ['Désidératif passé', 'Désidératif passé négatif'], 'Souhait sur autrui (〜てほしい)': ['Souhait sur autrui (てほしい)', 'Souhait sur autrui négatif (ないでほしい)'], 'Souhait sur autrui, passé': ['Souhait sur autrui passé (てほしかった)', 'Souhait sur autrui passé négatif (ないでほしかった)'], 'Souhait sur autrui, autre négatif': [null, 'Souhait sur autrui négatif (てほしくない)'], 'Volitif (on y va)': ['Volitif'], 'Volitif poli': ['Volitif'], 'Impératif': ['Impératif', 'Interdiction'], 'Conditionnel ば': ['Conditionnel ば', 'Si négatif'], 'Conditionnel たら': ['Conditionnel たら', 'Quand négatif'], 'En cours (〜ている)': ['En cours', 'En cours négatif'], 'Demande (〜ください)': ['Demande', 'Demande négatif'] };
     var h = '<div class="cj"><div class="cj-row cj-h"><span>Forme</span><span>Affirmatif</span><span>Négatif</span></div>';
     A.forEach(function (r, n) {
       var cell = function (j) { var v = r[j]; if (v === '—') return '<span>—</span>'; var kk = B && B[n][j] !== v ? '<span class="cj-r">' + B[n][j] + '</span>' : ''; var km = KM[r[0]], t1 = km && km[j - 1] ? FRV.tr(fr, km[j - 1])[0] : ''; return '<span><span class="cj-j">' + v + '</span>' + kk + (t1 ? '<span class="cj-fr">' + esc(t1) + '</span>' : '') + '</span>'; };
@@ -6241,11 +6247,60 @@ tr.kalt > td:first-child { opacity: .85; }
       '-u → -i + なさい : 書く → 書きなさい ; 行く → 行きなさい',
       '食べる → 食べなさい',
       'する → しなさい ; 来る → 来なさい（きなさい）',
-      '早く寝なさい。', 'はやく ねなさい。', 'Va te coucher vite.')
+      '早く寝なさい。', 'はやく ねなさい。', 'Va te coucher vite.'),
+
+    cj('cpass', 'Causatif passif', '使役受身形', 'être forcé de · contrainte subie', 'être forcé de faire… ; se faire faire…',
+      'Causatif (使役) puis passif (受身) : le sujet fait l’action contre son gré, celui qui l’y oblige est marqué par に. Presque toujours un désagrément.',
+      '-u → -a + せられる (courant : -a + される) : 書く → 書かせられる / 書かされる ; 飲む → 飲まされる ; 話す → 話させられる (seulement la forme longue)',
+      'る → させられる : 食べる → 食べさせられる',
+      'する → させられる ; 来る → 来させられる（こさせられる）',
+      '母に嫌いな野菜を食べさせられた。', 'はは に きらいな やさいを たべさせられた。', 'Ma mère m’a forcé à manger des légumes que je déteste.'),
+    cj('takatta', 'Désir passé', 'たかった', 'désir · passé', 'je voulais… (faire) ; j’aurais voulu…',
+      'たい se conjugue comme un adjectif en -i : たい → たかった (poli : たかったです).',
+      '-u → -i + たかった : 書く → 書きたかった ; 飲む → 飲みたかった',
+      '食べる → 食べたかった',
+      'する → したかった ; 来る → 来たかった（きたかった）',
+      '子どもの頃、犬を飼いたかった。', 'こどもの ころ、いぬを かいたかった。', 'Enfant, je voulais avoir un chien.'),
+    cj('takunakatta', 'Désir passé négatif', 'たくなかった', 'désir · passé négatif', 'je ne voulais pas… (faire)',
+      'Passé négatif de たい : たい → たくなかった (poli : たくなかったです / たくありませんでした).',
+      '-u → -i + たくなかった : 書く → 書きたくなかった ; 行く → 行きたくなかった',
+      '食べる → 食べたくなかった',
+      'する → したくなかった ; 来る → 来たくなかった（きたくなかった）',
+      '昨日は外に出たくなかった。', 'きのうは そとに でたくなかった。', 'Hier, je ne voulais pas sortir.'),
+    cj('hoshii', 'Souhait sur autrui', 'てほしい', 'souhait · affirmatif', 'je voudrais que tu… (faire)',
+      'Souhait adressé à quelqu’un : celui qui doit agir est marqué par に. Pour mon propre désir d’agir, on emploie たい.',
+      'forme en て + ほしい : 書く → 書いてほしい ; 飲む → 飲んでほしい',
+      '食べる → 食べてほしい',
+      'する → してほしい ; 来る → 来てほしい（きてほしい）',
+      '友達に手伝ってほしい。', 'ともだちに てつだってほしい。', 'Je voudrais que mon ami m’aide.'),
+    cj('naihoshii', 'Souhait négatif (ないで)', 'ないでほしい', 'souhait · négatif', 'je voudrais que tu ne… pas',
+      'La forme négative la plus naturelle du souhait sur autrui : forme en ないで + ほしい.',
+      '-u → -a + ないでほしい : 書く → 書かないでほしい ; 行く → 行かないでほしい',
+      '食べる → 食べないでほしい',
+      'する → しないでほしい ; 来る → 来ないでほしい（こないでほしい）',
+      '嘘をつかないでほしい。', 'うそを つかないでほしい。', 'Je voudrais que tu ne mentes pas.'),
+    cj('hoshikunai', 'Souhait négatif (くない)', 'てほしくない', 'souhait · négatif catégorique', 'je ne veux pas que tu… (faire)',
+      'ほしい se conjugue comme un adjectif en -i : ほしい → ほしくない. Plus catégorique que ないでほしい.',
+      'forme en て + ほしくない : 書く → 書いてほしくない ; 行く → 行ってほしくない',
+      '食べる → 食べてほしくない',
+      'する → してほしくない ; 来る → 来てほしくない（きてほしくない）',
+      '一人で行ってほしくない。', 'ひとりで いってほしくない。', 'Je ne veux pas que tu y ailles seul.'),
+    cj('hoshikatta', 'Souhait passé', 'てほしかった', 'souhait · passé (regret)', 'j’aurais voulu que tu… (faire)',
+      'Regret : on aurait voulu que l’autre agisse, et il ne l’a pas fait. ほしい → ほしかった.',
+      'forme en て + ほしかった : 書く → 書いてほしかった ; 待つ → 待ってほしかった',
+      '食べる → 食べてほしかった',
+      'する → してほしかった ; 来る → 来てほしかった（きてほしかった）',
+      'もっと早く言ってほしかった。', 'もっと はやく いってほしかった。', 'J’aurais voulu que tu me le dises plus tôt.'),
+    cj('naihoshikatta', 'Souhait passé négatif', 'ないでほしかった', 'souhait · passé négatif (regret)', 'j’aurais voulu que tu ne… pas',
+      'Regret : on aurait voulu que l’autre ne fasse pas ce qu’il a fait. ないでほしい → ないでほしかった.',
+      '-u → -a + ないでほしかった : 書く → 書かないでほしかった ; 行く → 行かないでほしかった',
+      '食べる → 食べないでほしかった',
+      'する → しないでほしかった ; 来る → 来ないでほしかった（こないでほしかった）',
+      '私の物を勝手に使わないでほしかった。', 'わたしの ものを かってに つかわないでほしかった。', 'J’aurais voulu que tu n’utilises pas mes affaires sans demander.')
   ];
   /* sous-rubriques de la conjugaison → fiches correspondantes */
-  var CJ_SUBS = { 'ます': ['masu', 'masen', 'mashita', 'masendeshita', 'mashou'], 'ない': ['nai', 'nakatta', 'naide'], 'た': ['ta', 'nakatta'], 'て': ['te', 'naide'], 'たい': ['tai', 'takunai'], 'ば': ['ba'],
-    '可能形': ['pot'], '受身形': ['pas'], '使役形': ['caus'], '意向形': ['mashou', 'vol'], '条件': ['tara', 'to', 'nara', 'ba'], '命令形': ['imp', 'impneg', 'nasai'] };
+  var CJ_SUBS = { 'ます': ['masu', 'masen', 'mashita', 'masendeshita', 'mashou'], 'ない': ['nai', 'nakatta', 'naide'], 'た': ['ta', 'nakatta'], 'て': ['te', 'naide', 'hoshii', 'naihoshii', 'hoshikunai', 'hoshikatta', 'naihoshikatta'], 'たい': ['tai', 'takunai', 'takatta', 'takunakatta'], 'ば': ['ba'],
+    '可能形': ['pot'], '受身形': ['pas'], '使役形': ['caus', 'cpass'], '意向形': ['mashou', 'vol'], '条件': ['tara', 'to', 'nara', 'ba'], '命令形': ['imp', 'impneg', 'nasai'] };
   function cjFor(ids) { return CJ_CARDS.filter(function (c) { return ids.indexOf(c.cj) >= 0; }).sort(function (a, b) { return ids.indexOf(a.cj) - ids.indexOf(b.cj); }); }
   var CJ_ALL = CJ_CARDS;   /* tous les temps : paquet complet, dans l'ordre pédagogique (le rappel des groupes vient en premier) */
   /* ── écoute (synthèse vocale japonaise) ── */
