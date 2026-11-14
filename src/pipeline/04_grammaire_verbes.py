@@ -96,6 +96,8 @@ def add_all_verbs(verbs, html):
     print('verbes ajoutés au quiz conj', n)
 _GV = grammar_json(main)
 add_all_verbs(_GV, main)
+if '来る' in _GV:   # le lecteur automatique donne きさせる : le causatif de 来る se lit こさせる
+    _GV['来る']['r'].update({'Causatif': 'こさせる', 'Causatif-passif': 'こさせられる'})
 
 # Désir (〜たい) à quatre temps et souhait sur autrui (〜てほしい), dérivés des formes déjà présentes
 _LH = 'Souhait sur autrui '
@@ -120,3 +122,36 @@ def add_tai_hoshii(verbs):
         n += 1
     print('verbes avec formes たい (4 temps) et てほしい (5 formes)', n)
 add_tai_hoshii(_GV)
+
+# Adjectifs en い / en な et です : mêmes mécanismes que les verbes (une entrée par adjectif, 10 formes), tirés du vocabulaire
+import json as _jsA
+_ADJ_NA = {'好き', '嫌い', '大好き', '上手', '下手', '得意', '苦手', '有名', '静か', '賑やか', '便利', '不便', '親切', '丁寧', '大切', '大変', '元気', '暇', '真剣', '不思議', 'きれい', '可哀想'}
+_ADJ_SKIP = {'うらやましい', '主'}
+_ADJ_FR = {'好き': 'Apprécié (aimer)', '嫌い': 'Détesté (détester)', '大好き': 'Adoré (adorer)', '眠い': 'Somnolent (avoir sommeil)'}
+_ADJ_IRR = ('格好いい', 'かっこいい')       # いい → よ- pour toutes les formes conjuguées
+def gen_adj(s, ty):
+    if ty == 'i':
+        st = s[:-2] + 'よ' if s in _ADJ_IRR else s[:-1]
+        return {'Adjectif négatif': st + 'くない', 'Adjectif passé': st + 'かった', 'Adjectif passé négatif': st + 'くなかった', 'Adjectif en て': st + 'くて',
+                'Adverbe': st + 'く', 'Adjectif poli': s + 'です', 'Adjectif poli négatif': st + 'くないです', 'Adjectif poli passé': st + 'かったです',
+                'Adjectif poli passé négatif': st + 'くなかったです', 'Adjectif condition': st + 'かったら'}
+    return {'Adjectif négatif': s + 'じゃない', 'Adjectif passé': s + 'だった', 'Adjectif passé négatif': s + 'じゃなかった', 'Adjectif en て': s + 'で',
+            'Adverbe': s + 'に', 'Adjectif poli': s + 'です', 'Adjectif poli négatif': s + 'じゃありません', 'Adjectif poli passé': s + 'でした',
+            'Adjectif poli passé négatif': s + 'じゃありませんでした', 'Adjectif condition': s + 'だったら'}
+def add_adjectives(verbs):
+    n = 0
+    for e in _jsA.loads(_VJ):
+        if e['c'] != 'Adjectifs' or e['g'] not in ('Adjectifs:い形容詞', 'Adjectifs:な形容詞', 'Adjectifs:Listes'): continue
+        jp = e['jp'].strip()
+        if jp in verbs or jp in _ADJ_SKIP or not jp or ' ' in jp or '/' in jp: continue
+        ty = 'na' if (e['g'] == 'Adjectifs:な形容詞' or jp in _ADJ_NA) else 'i'
+        if ty == 'i' and not jp.endswith('い'): continue
+        ka = (e.get('ka') or e.get('kk') or jp).strip()
+        if _re.search(r'[一-鿿]', ka) or ' ' in ka: ka = jp
+        f = gen_adj(jp, ty); r = gen_adj(ka, ty) if ka != jp else {}
+        fr = _re.sub(r'\s*⚠.*$', '', _re.sub(r'\s+', ' ', e['fr']).strip()); fr = _ADJ_FR.get(jp) or fr[:1].upper() + fr[1:]
+        verbs[jp] = {'v': jp, 'ka': ka, 'fr': fr, 'g': 'adjectif en ' + ('な' if ty == 'na' else 'い'), 'adj': 1, 'f': f,
+                     'r': {l: (r[l] if r and _re.search(r'[一-鿿]', f[l]) else '') for l in f}}
+        n += 1
+    print('adjectifs ajoutés au quiz conj', n)
+add_adjectives(_GV)

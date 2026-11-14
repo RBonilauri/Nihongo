@@ -26,15 +26,45 @@
     { id: 'der', label: 'Potentiel, passif, causatif', f: ['Potentiel', 'Passif', 'Causatif', 'Causatif-passif'] },
     { id: 'tai', label: 'Désir 〜たい (4 temps)', f: ['Désidératif', 'Désidératif négatif', 'Désidératif passé', 'Désidératif passé négatif'] },
     { id: 'hos', label: 'Souhait sur autrui 〜てほしい', f: ['Souhait sur autrui (てほしい)', 'Souhait sur autrui négatif (ないでほしい)', 'Souhait sur autrui négatif (てほしくない)', 'Souhait sur autrui passé (てほしかった)', 'Souhait sur autrui passé négatif (ないでほしかった)'] },
-    { id: 'vol', label: 'Volonté, ordre, interdiction', f: ['Volitif', 'Impératif', 'Interdiction'] },
-    { id: 'con', label: 'Conditionnel', f: ['Conditionnel ば', 'Conditionnel たら'] }
+    { id: 'vol', label: 'Volonté, ordre, interdiction, invitation', f: ['Volitif', 'Impératif', 'Interdiction', 'Invitation', 'Proposition', 'Ordre poli'] },
+    { id: 'con', label: 'Conditionnel (ば, たら, と, なら)', f: ['Conditionnel ば', 'Conditionnel たら', 'Si négatif', 'Quand négatif', 'Conditionnel と', 'Conditionnel なら'] },
+    { id: 'prg', label: 'En cours 〜ている (4 temps)', f: ['En cours', 'En cours négatif', 'En cours passé', 'En cours passé négatif'] },
+    { id: 'dem', label: 'Demande & obligation', f: ['Demande', 'Demande négatif', 'Obligation', 'Absence d’obligation', 'Obligation orale'] },
+    { id: 'dpo', label: 'Potentiel : négatif, passé, poli', f: ['Potentiel négatif', 'Potentiel passé', 'Potentiel poli', 'Potentiel poli négatif'] },
+    { id: 'dpa', label: 'Passif : négatif, passé, poli', f: ['Passif négatif', 'Passif passé', 'Passif poli', 'Passif poli négatif'] },
+    { id: 'dca', label: 'Causatif : négatif, passé, poli', f: ['Causatif négatif', 'Causatif passé', 'Causatif poli', 'Causatif poli négatif'] },
+    { id: 'dcp', label: 'Causatif passif : négatif, passé, poli', f: ['Causatif-passif négatif', 'Causatif-passif passé', 'Causatif-passif poli', 'Causatif-passif poli négatif'] },
+    { id: 'tar', label: 'Énumération 〜たり & regret 〜ばよかった', f: ['Énumération', 'Énumération négatif', 'Regret', 'Regret négatif'] },
+    { id: 'adj', label: 'Adjectifs en い / な (10 formes)', f: ['Adjectif négatif', 'Adjectif passé', 'Adjectif passé négatif', 'Adjectif en て', 'Adverbe', 'Adjectif poli', 'Adjectif poli négatif', 'Adjectif poli passé', 'Adjectif poli passé négatif', 'Adjectif condition'] }
   ];
   var GN = [10, 25, 50, 100];
+  /* formes dérivées calculées au chargement à partir des formes de base (le JSON n'embarque que les formes de base) */
+  function gdDerive(GD) {
+    GD.verbs.forEach(function (v) {
+      if (v.adj || v._d) return; v._d = 1;
+      var f = v.f, r = v.r || (v.r = {}), HON = /(いらっしゃる|なさる|くださる|おっしゃる|ござる)$/.test(v.v);
+      function put(lab, src, fn) { if (f[src] && !f[lab]) { f[lab] = fn(f[src]); r[lab] = r[src] ? fn(r[src]) : ''; } }
+      var cut = function (n, add) { return function (x) { return x.slice(0, -n) + add; }; }, plus = function (add) { return function (x) { return x + add; }; };
+      ['Potentiel', 'Passif', 'Causatif', 'Causatif-passif'].forEach(function (b) {
+        put(b + ' négatif', b, cut(1, 'ない')); put(b + ' passé', b, cut(1, 'た')); put(b + ' poli', b, cut(1, 'ます')); put(b + ' poli négatif', b, cut(1, 'ません'));
+      });
+      put('En cours', 'Forme en て', plus('いる')); put('En cours négatif', 'Forme en て', plus('いない')); put('En cours passé', 'Forme en て', plus('いた')); put('En cours passé négatif', 'Forme en て', plus('いなかった'));
+      put('Demande', 'Forme en て', plus('ください')); put('Demande négatif', 'て négatif', plus('ください'));
+      put('Obligation', 'Négatif simple', cut(1, 'ければならない')); put('Absence d’obligation', 'Négatif simple', cut(1, 'くてもいい')); put('Obligation orale', 'Négatif simple', cut(2, 'なきゃ'));
+      put('Si négatif', 'Négatif simple', cut(1, 'ければ')); put('Quand négatif', 'Passé négatif simple', plus('ら'));
+      if (v.v) { f['Conditionnel と'] = v.v + 'と'; r['Conditionnel と'] = v.ka !== v.v ? v.ka + 'と' : ''; f['Conditionnel なら'] = v.v + 'なら'; r['Conditionnel なら'] = v.ka !== v.v ? v.ka + 'なら' : ''; }
+      put('Invitation', 'Polie, présent', cut(2, 'ましょう')); put('Proposition', 'Polie, présent', cut(2, 'ましょうか'));
+      if (!HON) put('Ordre poli', 'Polie, présent', cut(2, 'なさい'));
+      put('Énumération', 'Passé simple', plus('り')); put('Énumération négatif', 'Passé négatif simple', plus('り'));
+      put('Regret', 'Conditionnel ば', plus('よかった')); put('Regret négatif', 'Si négatif', plus('よかった'));
+    });
+  }
   function initGrammar(mainEl, mode) {
     var kq = 'gq_' + mode, kc = 'gqc_' + mode, ks = 'gqs_' + mode, isC = mode === 'c';
     var TT = GT.filter(function (t) { return t.cat === mode; }), TITLE = isC ? 'Quiz conjugaison' : 'Quiz particules';
     var GD = null; try { GD = JSON.parse(document.getElementById('grammar-data').textContent); } catch (e) {}
     if (!GD || !GD.verbs) return;
+    gdDerive(GD);
     var canSpeak = !!window.speechSynthesis;
     var famOf = {}; GFAM.forEach(function (f) { f.f.forEach(function (l) { famOf[l] = f.id; }); });
     var ALL = []; // éléments de base
@@ -45,6 +75,7 @@
     cfg.ka = false;
     if (!cfg.pg) cfg.pg = GPG.map(function (g) { return g.id; });
     if (!cfg.fv) { cfg.fv = 2; if (cfg.fams.indexOf('vol') >= 0 && cfg.fams.indexOf('tai') < 0) cfg.fams.push('tai'); if (cfg.fams.indexOf('hos') < 0) cfg.fams.push('hos'); }   // sauvegardes antérieures : Désidératif quittait « vol », nouvelle famille てほしい
+    if (cfg.fv < 3) { cfg.fv = 3; ['prg', 'dem', 'dpo', 'dpa', 'dca', 'dcp', 'tar', 'adj'].forEach(function (id) { if (cfg.fams.indexOf(id) < 0) cfg.fams.push(id); }); }   // nouvelles familles : activées pour les sauvegardes antérieures
     if (!ST[kq]) ST[kq] = {}; if (!ST[ks]) ST[ks] = { sess: 0, q: 0, ok: 0, ty: {}, lab: {}, pt: {} };
     var Q = null;
     MIXREG[isC ? 'conj' : 'part'] = {
@@ -69,7 +100,7 @@
     function wrongCount() { return Object.keys(ST[kq]).filter(function (k) { return ST[kq][k].w && byI[k]; }).length; }
     function paintCard() {
       var seen = Object.keys(ST[kq]).length, w = wrongCount();
-      card.innerHTML = '<span class="qc-jp">' + (isC ? '活用' : '助詞') + '</span><span class="qc-t">' + TITLE + '<small>' + (isC ? GD.verbs.length + ' verbes · ' + ALL.length + ' formes' : GD.parts.length + ' phrases à trou') + ' · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
+      card.innerHTML = '<span class="qc-jp">' + (isC ? '活用' : '助詞') + '</span><span class="qc-t">' + TITLE + '<small>' + (isC ? GD.verbs.filter(function (v) { return !v.adj; }).length + ' verbes · ' + GD.verbs.filter(function (v) { return v.adj; }).length + ' adjectifs · ' + ALL.length + ' formes' : GD.parts.length + ' phrases à trou') + ' · ' + (seen ? seen + ' vus' + (w ? ', ' + w + ' à revoir' : '') : 'jamais lancé') + '</small></span><span class="qc-go">›</span>';
     }
     paintCard();
     card.addEventListener('click', function () { open(true); showSetup(); });
@@ -110,6 +141,12 @@
     function fillK(p, a) { return (p.k || p.s).replace(/（.*）/, '').replace('＿＿', a); }
     function kfa(v, s) { for (var l in v.r) if (v.f[l] === s && v.r[l]) return v.r[l]; return v.kp && s.indexOf(v.kp) === 0 ? v.kk + s.slice(v.kp.length) : s; }
     function pshow(o) { return cfg.ka && o.k ? o.k : o.v; }
+    function wrongAdj(v, l) {   // erreurs classiques : terminaison de l’autre type d’adjectif, ou い gardé
+      var st = v.v.slice(0, -1), c;
+      if (/い$/.test(v.g)) c = { 'Adjectif négatif': [st + 'じゃない', v.v + 'くない'], 'Adjectif passé': [st + 'だった', v.v + 'かった'], 'Adjectif passé négatif': [st + 'じゃなかった', v.v + 'くなかった'], 'Adjectif en て': [st + 'で', v.v + 'くて'], 'Adverbe': [st + 'に', v.v + 'く'] };
+      else c = { 'Adjectif négatif': [v.v + 'くない', v.v + 'ない'], 'Adjectif passé': [v.v + 'かった', v.v + 'いた'], 'Adjectif passé négatif': [v.v + 'くなかった', v.v + 'なかった'], 'Adjectif en て': [v.v + 'くて', v.v + 'って'], 'Adverbe': [v.v + 'く', v.v + 'で'] };
+      return c[l] || [];
+    }
     function wrongForms(v, l) {
       var s = v.v.slice(0, -1), out = [];
       if (/en る|^groupe 1 \(en る\)/.test(v.g)) { if (l === 'Négatif simple') out.push(s + 'ない'); if (l === 'Polie, présent') out.push(s + 'ます'); if (l === 'Forme en て') out.push(s + 'て'); if (l === 'Passé simple') out.push(s + 'た'); }
@@ -128,7 +165,26 @@
       'Souhait sur autrui négatif (ないでほしい)': 'Souhait sur autrui : « je veux que tu ne… pas »',
       'Souhait sur autrui négatif (てほしくない)': 'Souhait sur autrui : « je ne veux pas que tu… »',
       'Souhait sur autrui passé (てほしかった)': 'Souhait sur autrui passé : « j’aurais voulu que tu… »',
-      'Souhait sur autrui passé négatif (ないでほしかった)': 'Souhait sur autrui passé négatif'
+      'Souhait sur autrui passé négatif (ないでほしかった)': 'Souhait sur autrui passé négatif',
+      'Demande': 'Demande « s’il vous plaît »',
+      'Demande négatif': 'Demande négative « s’il vous plaît »',
+      'Obligation': 'Obligation : « il faut… »',
+      'Absence d’obligation': 'Pas obligé : « on peut ne pas… »',
+      'Obligation orale': 'Obligation familière, à l’oral',
+      'Si négatif': 'Condition générale négative',
+      'Quand négatif': 'Condition « si / quand » négative',
+      'Conditionnel と': 'Condition : conséquence automatique',
+      'Conditionnel なら': 'Condition : « dans ce cas… »',
+      'Invitation': 'Invitation polie : « faisons… »',
+      'Proposition': 'Proposition : « voulez-vous que je… ? »',
+      'Ordre poli': 'Ordre d’un parent ou d’un enseignant',
+      'Énumération': 'Énumération : « tantôt… »',
+      'Énumération négatif': 'Énumération négative : « tantôt ne pas… »',
+      'Regret': 'Regret : « j’aurais dû… »',
+      'Regret négatif': 'Regret : « je n’aurais pas dû… »',
+      'Adjectif en て': 'Liaison avec la suite',
+      'Adverbe': 'Adverbe : « …ment »',
+      'Adjectif condition': 'Condition « si / quand »'
       };
     function fl(l) { return FLF[l] || l; }
     function options(it) {
@@ -147,10 +203,10 @@
       if (it.t === 'c2f') {
         var ans = v.f[x.l], seen = {}, out = [{ v: ans, ok: true, k: kfa(v, ans) }]; seen[ans] = 1;
         function add(s, vv) { if (s && !seen[s] && out.length < 4) { seen[s] = 1; out.push({ v: s, ok: false, k: kfa(vv || v, s) }); } }
-        if (ans.indexOf(v.v) === 0) { add(v.v); add(v.v + 'か'); }   // la bonne réponse garde le verbe entier (ex. 行くな) : les mauvaises aussi
+        if (v.adj) wrongAdj(v, x.l).forEach(add); else if (ans.indexOf(v.v) === 0) { add(v.v); add(v.v + 'か'); }   // la bonne réponse garde le verbe entier (ex. 行くな) : les mauvaises aussi
         wrongForms(v, x.l).slice(0, 1).forEach(add);
         shuffle(Object.keys(v.f).filter(function (l) { return l !== x.l && famOf[l] === x.fam; })).forEach(function (l) { add(v.f[l]); });
-        shuffle(ALL.filter(function (o) { return o.c === 'c' && o.l === x.l && o.v !== v && o.v.v !== 'ある'; })).forEach(function (o) { if (out.length < 4) add(o.v.f[x.l], o.v); });
+        shuffle(ALL.filter(function (o) { return o.c === 'c' && o.l === x.l && o.v !== v && o.v.v !== 'ある' && o.v.g === v.g; })).forEach(function (o) { if (out.length < 4) add(o.v.f[x.l], o.v); });
         return shuffle(out);
       }
       var ans2 = x.l, s2 = {}, out2 = [{ v: ans2, ok: true }]; s2[ans2] = 1;
@@ -217,8 +273,8 @@
       var it = Q.items[Q.i], x = byI[it.i], opts = options(it); Q.cur = { it: it, opts: opts, done: false };
       prog.textContent = (Q.i + 1) + ' / ' + Q.items.length; barI.style.width = (Q.i / Q.items.length * 100) + '%';
       var ask, big, hint = '', optK = function () { return opts.some(function (o) { return HK.test(o.v); }) ? hintBtn(opts.map(function (o) { return o.k; }).join('\n')) : ''; };
-      if (it.t === 'c2f') { ask = 'Mets ce verbe à la forme :'; big = '<div class="q-big vq gq-verb">' + vlabel(x.v) + '</div><div class="gq-form">' + esc(fl(x.l)) + '</div>'; hint = optK(); }
-      else if (it.t === 'f2c') { ask = 'Quelle est cette forme ?'; big = '<div class="q-big vq">' + esc(kf(x.v, x.v.f[x.l])) + '</div><div class="gq-sub">du verbe ' + vlabel(x.v) + '</div>'; var kk = kfa(x.v, x.v.f[x.l]); hint = hintBtn(kk !== x.v.f[x.l] ? kk : ''); }
+      if (it.t === 'c2f') { ask = x.v.adj ? 'Mets cet adjectif à la forme :' : 'Mets ce verbe à la forme :'; big = '<div class="q-big vq gq-verb">' + vlabel(x.v) + '</div><div class="gq-form">' + esc(fl(x.l)) + '</div>'; hint = optK(); }
+      else if (it.t === 'f2c') { ask = 'Quelle est cette forme ?'; big = '<div class="q-big vq">' + esc(kf(x.v, x.v.f[x.l])) + '</div><div class="gq-sub">' + (x.v.adj ? 'de l’adjectif ' : 'du verbe ') + vlabel(x.v) + '</div>'; var kk = kfa(x.v, x.v.f[x.l]); hint = hintBtn(kk !== x.v.f[x.l] ? kk : ''); }
       else if (it.t === 'pick') { ask = 'Quelle phrase est correcte ?'; big = '<div class="gq-sub gq-fr">' + esc(x.p.fr) + '</div>'; hint = optK(); }
       else if (it.t === 'role') { ask = 'Quel est le rôle de la particule en gras ?'; big = '<div class="q-big vq gq-sent">' + (function () { var pp = (cfg.ka && x.p.k ? x.p.k : x.p.s).replace(/（.*）/, '').split('＿＿'); return esc(pp[0]) + '<b class="gq-hl">' + esc(x.p.a) + '</b>' + esc(pp[1] || ''); })() + '</div><div class="gq-sub">' + esc(x.p.fr) + '</div>'; hint = hintBtn(x.p.k && HK.test(x.p.s) ? fillK(x.p, x.p.a) : ''); }
       else { ask = 'Quelle particule manque ?'; big = '<div class="q-big vq gq-sent">' + esc(cfg.ka && x.p.k ? x.p.k : x.p.s) + '</div><div class="gq-sub">' + esc(x.p.fr) + '</div>'; hint = hintBtn(x.p.k && HK.test(x.p.s) ? x.p.k : ''); }

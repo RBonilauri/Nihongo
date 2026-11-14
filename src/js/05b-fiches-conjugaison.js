@@ -211,10 +211,35 @@
       '-u → -a + ないでほしかった : 書く → 書かないでほしかった ; 行く → 行かないでほしかった',
       '食べる → 食べないでほしかった',
       'する → しないでほしかった ; 来る → 来ないでほしかった（こないでほしかった）',
-      '私の物を勝手に使わないでほしかった。', 'わたしの ものを かってに つかわないでほしかった。', 'J’aurais voulu que tu n’utilises pas mes affaires sans demander.')
+      '私の物を勝手に使わないでほしかった。', 'わたしの ものを かってに つかわないでほしかった。', 'J’aurais voulu que tu n’utilises pas mes affaires sans demander.'),
+
+    cj('tari', 'Énumération (たり)', 'たり形', 'énumération · alternance', 'tantôt… tantôt… ; entre autres…',
+      'Cite quelques actions parmi d’autres ou une alternance. Le dernier verbe est toujours する : c’est lui qui porte le temps et la politesse.',
+      'forme en た + り : 書く → 書いたり ; 飲む → 飲んだり ; 行く → 行ったり',
+      '食べる → 食べたり',
+      'する → したり ; 来る → 来たり（きたり）',
+      '休みの日は、本を読んだり、映画を見たりします。', 'やすみの ひは、ほんを よんだり、えいがを みたりします。', 'Les jours de congé, je lis, je regarde des films, etc.'),
+    cj('mashouka', 'Proposition (ましょうか)', 'ましょうか', 'poli · proposition', 'voulez-vous que je… ? ; on… ?',
+      'Propose son aide ou demande l’avis de l’autre. Différent de ませんか, qui invite l’autre à faire quelque chose avec soi.',
+      '-u → -i + ましょうか : 書く → 書きましょうか ; 持つ → 持ちましょうか',
+      '食べる → 食べましょうか',
+      'する → しましょうか ; 来る → 来ましょうか（きましょうか）',
+      '荷物を持ちましょうか。', 'にもつを もちましょうか。', 'Voulez-vous que je porte vos bagages ?'),
+    cj('bayokatta', 'Regret (ばよかった)', 'ばよかった', 'regret · « j’aurais dû »', 'j’aurais dû… ; si seulement j’avais… (négatif : je n’aurais pas dû)',
+      'Regret sur une action passée : forme en ば + よかった. Pour « je n’aurais pas dû… », on utilise le négatif en ば : なければよかった.',
+      '-u → -e + ばよかった : 書く → 書けばよかった ; négatif : 書かなければよかった',
+      '食べる → 食べればよかった ; négatif : 食べなければよかった',
+      'する → すればよかった ; 来る → 来ればよかった（くればよかった）',
+      'もっと早く寝ればよかった。', 'もっと はやく ねればよかった。', 'J’aurais dû me coucher plus tôt.'),
+    cj('nakya', 'Obligation orale (なきゃ)', 'なきゃ', 'familier · obligation', 'il faut… (forme raccourcie à l’oral)',
+      'Raccourci familier de なければ（ならない）. Variante : なくちゃ (de なくては（いけない）). Souvent sans la fin de phrase.',
+      '-u → -a + なきゃ : 書く → 書かなきゃ ; 行く → 行かなきゃ',
+      '食べる → 食べなきゃ',
+      'する → しなきゃ ; 来る → 来なきゃ（こなきゃ）',
+      'もう行かなきゃ。', 'もう いかなきゃ。', 'Il faut que j’y aille.')
   ];
   /* sous-rubriques de la conjugaison → fiches correspondantes */
-  var CJ_SUBS = { 'ます': ['masu', 'masen', 'mashita', 'masendeshita', 'mashou'], 'ない': ['nai', 'nakatta', 'naide'], 'た': ['ta', 'nakatta'], 'て': ['te', 'naide', 'hoshii', 'naihoshii', 'hoshikunai', 'hoshikatta', 'naihoshikatta'], 'たい': ['tai', 'takunai', 'takatta', 'takunakatta'], 'ば': ['ba'],
+  var CJ_SUBS = { 'ます': ['masu', 'masen', 'mashita', 'masendeshita', 'mashou', 'mashouka'], 'ない': ['nai', 'nakatta', 'naide'], 'た': ['ta', 'nakatta'], 'て': ['te', 'naide', 'hoshii', 'naihoshii', 'hoshikunai', 'hoshikatta', 'naihoshikatta'], 'たい': ['tai', 'takunai', 'takatta', 'takunakatta'], 'ば': ['ba', 'bayokatta', 'nakya'], 'たり': ['tari'],
     '可能形': ['pot'], '受身形': ['pas'], '使役形': ['caus', 'cpass'], '意向形': ['mashou', 'vol'], '条件': ['tara', 'to', 'nara', 'ba'], '命令形': ['imp', 'impneg', 'nasai'] };
   function cjFor(ids) { return CJ_CARDS.filter(function (c) { return ids.indexOf(c.cj) >= 0; }).sort(function (a, b) { return ids.indexOf(a.cj) - ids.indexOf(b.cj); }); }
   var CJ_ALL = CJ_CARDS;   /* tous les temps : paquet complet, dans l'ordre pédagogique (le rappel des groupes vient en premier) */

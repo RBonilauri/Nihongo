@@ -35,6 +35,19 @@
     R.push(['Conditionnel たら', ta + 'ら', dna + 'ら']);
     R.push(['En cours (〜ている)', aru ? '—' : te + 'いる', aru ? '—' : te + 'いない']);
     R.push(['Demande (〜ください)', aru ? '—' : te + 'ください', aru ? '—' : a + 'ないでください']);
+    [['Potentiel', pot], ['Passif', pas], ['Causatif', cau], ['Causatif-passif', caup]].forEach(function (b) {
+      var x = b[1], c = function (n, t) { return no ? '—' : x.slice(0, -1) + t; };
+      R.push([b[0] + ', passé', c(0, 'た'), c(0, 'なかった')]); R.push([b[0] + ', poli', c(0, 'ます'), c(0, 'ません')]);
+    });
+    R.push(['En cours, passé', aru ? '—' : te + 'いた', aru ? '—' : te + 'いなかった']);
+    R.push(['Obligation, pas obligé', aru ? '—' : a + 'なければならない', aru ? '—' : a + 'なくてもいい']);
+    R.push(['Obligation orale', aru ? '—' : a + 'なきゃ', '—']);
+    R.push(['Conditionnel と', s + 'と', '—']);
+    R.push(['Conditionnel なら', s + 'なら', '—']);
+    R.push(['Proposition (〜ましょうか)', aru ? '—' : i + 'ましょうか', '—']);
+    R.push(['Ordre poli (〜なさい)', (aru || /(いらっしゃる|なさる|くださる|おっしゃる|ござる)$/.test(s)) ? '—' : i + 'なさい', '—']);
+    R.push(['Énumération (〜たり)', aru ? 'あったり' : ta + 'り', dna + 'り']);
+    R.push(['Regret (〜ばよかった)', ba + 'よかった', aru ? 'なければよかった' : a + 'なければよかった']);
     R.push(['Souhait sur autrui (〜てほしい)', aru ? '—' : te + 'ほしい', aru ? '—' : a + 'ないでほしい']);
     R.push(['Souhait sur autrui, passé', aru ? '—' : te + 'ほしかった', aru ? '—' : a + 'ないでほしかった']);
     R.push(['Souhait sur autrui, autre négatif', '—', aru ? '—' : te + 'ほしくない']);
@@ -43,7 +56,7 @@
   function cjFill(d) {
     var b = d.querySelector('.cjb'); if (!b || b.firstChild) return;
     var k = d.dataset.k, ka = d.dataset.ka, ty = d.dataset.t, fr = d.dataset.fr || '', A = cjForms(k, ty, false), B = k === ka ? null : cjForms(ka, ty, true);
-    var KM = { 'Poli': ['Polie, présent', 'Polie, négatif'], 'Poli, passé': ['Polie, passé', 'Polie, passé négatif'], 'Neutre (dico)': ['DICO', 'Négatif simple'], 'Neutre, passé': ['Passé simple', 'Passé négatif simple'], 'Forme て': ['Forme en て', 'て négatif'], 'Envie (〜たい)': ['Désidératif', 'Désidératif négatif'], 'Potentiel': ['Potentiel', 'Potentiel négatif'], 'Passif': ['Passif'], 'Causatif': ['Causatif'], 'Causatif-passif': ['Causatif-passif'], 'Envie, passé': ['Désidératif passé', 'Désidératif passé négatif'], 'Souhait sur autrui (〜てほしい)': ['Souhait sur autrui (てほしい)', 'Souhait sur autrui négatif (ないでほしい)'], 'Souhait sur autrui, passé': ['Souhait sur autrui passé (てほしかった)', 'Souhait sur autrui passé négatif (ないでほしかった)'], 'Souhait sur autrui, autre négatif': [null, 'Souhait sur autrui négatif (てほしくない)'], 'Volitif (on y va)': ['Volitif'], 'Volitif poli': ['Volitif'], 'Impératif': ['Impératif', 'Interdiction'], 'Conditionnel ば': ['Conditionnel ば', 'Si négatif'], 'Conditionnel たら': ['Conditionnel たら', 'Quand négatif'], 'En cours (〜ている)': ['En cours', 'En cours négatif'], 'Demande (〜ください)': ['Demande', 'Demande négatif'] };
+    var KM = { 'Poli': ['Polie, présent', 'Polie, négatif'], 'Poli, passé': ['Polie, passé', 'Polie, passé négatif'], 'Neutre (dico)': ['DICO', 'Négatif simple'], 'Neutre, passé': ['Passé simple', 'Passé négatif simple'], 'Forme て': ['Forme en て', 'て négatif'], 'Envie (〜たい)': ['Désidératif', 'Désidératif négatif'], 'Potentiel': ['Potentiel', 'Potentiel négatif'], 'Passif': ['Passif'], 'Causatif': ['Causatif'], 'Potentiel, passé': ['Potentiel passé'], 'Potentiel, poli': ['Potentiel poli', 'Potentiel poli négatif'], 'Passif, passé': ['Passif passé'], 'Passif, poli': ['Passif poli', 'Passif poli négatif'], 'Causatif, passé': ['Causatif passé'], 'Causatif, poli': ['Causatif poli', 'Causatif poli négatif'], 'Causatif-passif, passé': ['Causatif-passif passé'], 'Causatif-passif, poli': ['Causatif-passif poli', 'Causatif-passif poli négatif'], 'En cours, passé': ['En cours passé', 'En cours passé négatif'], 'Obligation, pas obligé': ['Obligation', 'Absence d’obligation'], 'Obligation orale': ['Obligation orale'], 'Conditionnel と': ['Conditionnel と'], 'Conditionnel なら': ['Conditionnel なら'], 'Proposition (〜ましょうか)': ['Proposition'], 'Ordre poli (〜なさい)': ['Ordre poli'], 'Énumération (〜たり)': ['Énumération', 'Énumération négatif'], 'Regret (〜ばよかった)': ['Regret', 'Regret négatif'],  'Causatif-passif': ['Causatif-passif'], 'Envie, passé': ['Désidératif passé', 'Désidératif passé négatif'], 'Souhait sur autrui (〜てほしい)': ['Souhait sur autrui (てほしい)', 'Souhait sur autrui négatif (ないでほしい)'], 'Souhait sur autrui, passé': ['Souhait sur autrui passé (てほしかった)', 'Souhait sur autrui passé négatif (ないでほしかった)'], 'Souhait sur autrui, autre négatif': [null, 'Souhait sur autrui négatif (てほしくない)'], 'Volitif (on y va)': ['Volitif'], 'Volitif poli': ['Volitif'], 'Impératif': ['Impératif', 'Interdiction'], 'Conditionnel ば': ['Conditionnel ば', 'Si négatif'], 'Conditionnel たら': ['Conditionnel たら', 'Quand négatif'], 'En cours (〜ている)': ['En cours', 'En cours négatif'], 'Demande (〜ください)': ['Demande', 'Demande négatif'] };
     var h = '<div class="cj"><div class="cj-row cj-h"><span>Forme</span><span>Affirmatif</span><span>Négatif</span></div>';
     A.forEach(function (r, n) {
       var cell = function (j) { var v = r[j]; if (v === '—') return '<span>—</span>'; var kk = B && B[n][j] !== v ? '<span class="cj-r">' + B[n][j] + '</span>' : ''; var km = KM[r[0]], t1 = km && km[j - 1] ? FRV.tr(fr, km[j - 1])[0] : ''; return '<span><span class="cj-j">' + v + '</span>' + kk + (t1 ? '<span class="cj-fr">' + esc(t1) + '</span>' : '') + '</span>'; };

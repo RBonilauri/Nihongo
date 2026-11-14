@@ -195,8 +195,10 @@ with sync_playwright() as p:
     check(all(n in tj for n in need), 'tableau « Conjuguer » : toutes les formes du quiz présentes (%s manquantes)' % [n for n in need if n not in tj])
     # couverture : chaque forme du quiz conjugaison a sa fiche dans Apprendre
     src_f = open(os.path.join(ROOT, 'src/js/05b-fiches-conjugaison.js'), encoding='utf-8').read()
+    _html = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+    check(all(t in _html for t in ['たり — Énumération', '〜ましょうか — proposer de faire', 'Regret et obligation à l\'oral', 'Négatif, passé et poli — modèle 書く']), 'leçons ajoutées : たり, ましょうか, ばよかった/なきゃ, formes dérivées')
     ids = re.findall(r"^    cj\('(\w+)'", src_f, re.M)
-    for need_id in ['cpass', 'takatta', 'takunakatta', 'hoshii', 'naihoshii', 'hoshikunai', 'hoshikatta', 'naihoshikatta']:
+    for need_id in ['cpass', 'takatta', 'takunakatta', 'hoshii', 'naihoshii', 'hoshikunai', 'hoshikatta', 'naihoshikatta', 'tari', 'mashouka', 'bayokatta', 'nakya']:
         check(need_id in ids and ("'" + need_id + "'") in src_f.split('var CJ_SUBS')[1], 'fiche %s présente et rattachée à une rubrique' % need_id)
     ex = pg.evaluate("[...document.querySelectorAll('details.cjd[data-k=食べる] .cj-fr')].slice(0,3).map(e=>e.textContent)")
     check(any('mange' in e for e in ex), 'exemple : %s' % ex)
@@ -335,7 +337,7 @@ with sync_playwright() as p:
     check(pg.evaluate("(() => { const d = document.querySelector('main > details.sec.cur .ndeck'), q = document.querySelector('main > details.sec.cur .nquiz'); return !!d && !!q && d.nextElementSibling === q; })()"), 'bouton « Fiches de tous les temps » juste au-dessus du quiz')
     pg.evaluate("document.querySelector('main > details.sec.cur .ndeck').click()"); pg.wait_for_timeout(300)
     nprog = pg.evaluate("(() => { const d = document.querySelector('.deck'); return [!d.hidden, +d.querySelector('.prog').textContent.split('/')[1], d.querySelector('.ttl').textContent, d.querySelector('#card .flab') ? d.querySelector('#card .flab').textContent : '']; })()")
-    check(nprog[0] and nprog[1] == 32 and 'tous les temps' in nprog[2] and nprog[3] != '', 'paquet de fiches regroupées ouvert (%s)' % nprog)
+    check(nprog[0] and nprog[1] == 36 and 'tous les temps' in nprog[2] and nprog[3] != '', 'paquet de fiches regroupées ouvert (%s)' % nprog)
     pg.evaluate("document.querySelector('.deck #card').click()"); pg.wait_for_timeout(100)
     check(pg.evaluate("document.querySelectorAll('.deck #card .back > div').length") == 8 and pg.evaluate("[...document.querySelectorAll('.deck #card .back b')].map(b => b.textContent.slice(0, 5)).join()").startswith('Sens,Conte,Group,Group,Irrég,Exemp'), 'la fiche se retourne : 8 rubriques uniformes (sens, contexte, groupes, exemple, lecture, traduction)')
     pg.evaluate("document.querySelector('.deck .x').click()"); pg.wait_for_timeout(300)
@@ -450,6 +452,32 @@ with sync_playwright() as p:
         const w = D.filter(v => v.f['Désidératif']), t = D.find(v => v.v === '食べる'), k = D.find(v => v.v === '書く');
         return [w.length, w.filter(v => L.every(l => v.f[l])).length, t.f[L[1]] + '|' + t.f[L[2]], t.f[L[3]] + '|' + t.f[L[4]] + '|' + t.f[L[5]] + '|' + t.f[L[6]] + '|' + t.f[L[7]], k.f[L[3]] + '|' + k.f[L[4]]]; }""")
     check(tf[0] >= 350 and tf[0] == tf[1] and tf[2] == '食べたかった|食べたくなかった' and tf[3] == '食べてほしい|食べないでほしい|食べてほしくない|食べてほしかった|食べないでほしかった' and tf[4] == '書いてほしい|書かないでほしい', 'quiz conjugaison : たい à 4 temps et てほしい à 5 formes pour chaque verbe %s' % tf)
+    # toutes les familles du quiz conjugaison (verbes dérivés, adjectifs…) : une question s'affiche, se corrige, sans erreur
+    print('Quiz conjugaison : toutes les familles')
+    pg.click('#tabbar [data-tab=quiz]'); pg.wait_for_timeout(200)
+    def _open_conj():
+        pg.evaluate("[...document.querySelectorAll('.quizlist .quizcard')].filter(e=>e.textContent.includes('conjugaison'))[0].click()"); pg.wait_for_timeout(250)
+    _open_conj()
+    fams = pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) [data-f]')].map(b=>b.dataset.f)")
+    check(len(fams) >= 15 and {'prg', 'dem', 'dpo', 'dpa', 'dca', 'dcp', 'tar', 'adj'} <= set(fams), 'quiz conjugaison : %d familles dont dérivées, énumération/regret et adjectifs' % len(fams))
+    card_t = pg.evaluate("[...document.querySelectorAll('.quizlist .quizcard')].filter(e=>e.textContent.includes('conjugaison'))[0].textContent")
+    check('adjectifs' in card_t, 'carte du quiz : verbes + adjectifs (%s)' % card_t[:70])
+    for fid in fams:
+        for _ in range(30):   # chaque clic ré-affiche les puces : on retire une famille à la fois
+            if not pg.evaluate("f => { const b = [...document.querySelectorAll('.quiz:not([hidden]) [data-f].on')].find(b => b.dataset.f !== f); if (b) b.click(); return !!b; }", fid): break
+        pg.evaluate("f => { const b = document.querySelector('.quiz:not([hidden]) [data-f=' + f + ']'); if (b && !b.classList.contains('on')) b.click(); }", fid); pg.wait_for_timeout(40)
+        ons = pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) [data-f].on')].map(b=>b.dataset.f)")
+        nq = pg.evaluate("+(document.querySelector('.quiz:not([hidden]) .qgo').textContent.match(/\\d+/)||[0])[0]")
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qgo').click()"); pg.wait_for_timeout(120)
+        ok_q = pg.evaluate("document.querySelectorAll('.quiz:not([hidden]) .qopt').length") == 4 and pg.evaluate("document.querySelector('.quiz:not([hidden]) .q-big').textContent.trim().length") > 0
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(80)
+        has_fb = pg.evaluate("!!document.querySelector('.quiz:not([hidden]) .q-fb')")
+        check(ons == [fid] and nq > 0 and ok_q and has_fb, 'famille %s : %s question(s), 4 réponses, correction affichée' % (fid, nq))
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(100)
+        _open_conj()
+    for _ in range(30):   # on réactive toutes les familles
+        if not pg.evaluate("() => { const b = [...document.querySelectorAll('.quiz:not([hidden]) [data-f]')].find(b => !b.classList.contains('on')); if (b) b.click(); return !!b; }"): break
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(100)
 
     print('Exemples de verbes')
     ex = pg.evaluate("""() => { let n = 0, bad = 0; document.querySelectorAll('details.exd').forEach(d => { d.open = true; d.dispatchEvent(new Event('toggle')); n++; if (d.querySelectorAll('.ex-s').length < 2) bad++; });
@@ -504,7 +532,7 @@ with sync_playwright() as p:
     check(counts['kanji'] > 600 and counts['vocab'] > 2000 and counts['verbes'] > 300, 'données présentes : %s' % counts)
 
     _src = open(os.path.join(ROOT, 'src/js/11-quiz-grammaire.js'), encoding='utf-8').read()
-    check("du verbe ' + vlabel(x.v)" in _src, 'f2c : ligne du verbe = lecture · sens · groupe (comme c2f)')
+    check("du verbe ') + vlabel(x.v)" in _src, 'f2c : ligne du verbe = lecture · sens · groupe (comme c2f)')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))
