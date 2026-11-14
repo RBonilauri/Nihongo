@@ -533,6 +533,22 @@ with sync_playwright() as p:
 
     _src = open(os.path.join(ROOT, 'src/js/11-quiz-grammaire.js'), encoding='utf-8').read()
     check("du verbe ') + vlabel(x.v)" in _src, 'f2c : ligne du verbe = lecture · sens · groupe (comme c2f)')
+    # particules : rôles tous déclarés dans GROLES, couverture des finales et équilibre par particule
+    import importlib.util, collections
+    _sp = importlib.util.spec_from_file_location('pb', os.path.join(ROOT, 'src/content/parts_bank.py'))
+    _pb = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(_pb)
+    _gr = _src[_src.index('var GROLES'):_src.index('function incompat')]
+    _roles = {r[5] for r in _pb.PB}
+    _miss = [r for r in _roles if r and ("'" + r + "'") not in _gr]
+    check(not _miss, 'tous les rôles de particules sont dans GROLES (manquants : %s)' % _miss[:3])
+    check(all(r[5] for r in _pb.PB), 'chaque phrase de particule a un rôle')
+    _cnt = collections.Counter(r[1] for r in _pb.PB)
+    _reb = ['や','ので','ながら','たら','ば','ぐらい','こそ','すら','さえ','だって','について','によって','として','に対して','において','ほど','なんか']
+    _few = [a for a in _reb if _cnt.get(a, 0) < 2]
+    check(not _few, 'particules rééquilibrées : ≥ 2 phrases chacune (manque : %s)' % _few[:5])
+    _fin = ['かい','かな','かしら','よね','わ','わよ','わね','ぞ','ぜ','さ','もん','こと','の','のよ','のね','って','っけ','じゃない','でしょ','だろ']
+    _nof = [f for f in _fin if f not in _cnt and not any(r[1].startswith(f) for r in _pb.PB)]
+    check(not _nof, 'finales toutes testées (absentes : %s)' % _nof)
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))

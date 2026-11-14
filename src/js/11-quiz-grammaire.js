@@ -9,17 +9,36 @@
   var GPG = [
     { id: 'wg', label: 'は・が' }, { id: 'nd', label: 'に・で・へ' }, { id: 'wo', label: 'を・が' }, { id: 'to', label: 'と・や・も' },
     { id: 'lm', label: 'から・まで・より' }, { id: 'cn', label: 'ので・けど・のに' }, { id: 'ds', label: 'だけ・しか・でも' },
-    { id: 'sf', label: 'ね・よ・か・な' }, { id: 'ex', label: 'なら・ずつ・など・ごろ…' }, { id: 'ot', label: 'の・ながら・たら' }
+    { id: 'sf', label: 'Finales : ね・よ・か・わ・ぞ…' }, { id: 'ex', label: 'なら・ずつ・など・によって…' }, { id: 'ot', label: 'の・ながら・たら' }
   ];
   var GROLES = [
     ['Thème', 'Sujet', 'Objet direct', 'Objet d’un état (好き, わかる…)', 'Lien entre deux noms', 'Appartenance', 'Citation'],
-    ['Moment précis', 'Destination', 'Direction', 'Lieu d’existence', 'Lieu de l’action', 'Lieu parcouru', 'Point de départ', 'Limite (jusqu’à)', 'Date limite', 'Moyen / instrument', 'Accompagnement', 'Destinataire'],
+    ['Moment précis', 'Destination', 'Direction', 'Lieu d’existence', 'Lieu de l’action', 'Lieu parcouru', 'Point de départ', 'Limite (jusqu’à)', 'Date limite', 'Moyen / instrument', 'Accompagnement', 'Destinataire', 'Cible de l’action', 'Manière, état', 'Cadre, étendue'],
     ['Cause', 'Opposition (mais)', 'Pourtant (surprise, regret)', 'Condition', 'Simultanéité'],
     ['Restriction (seulement)', 'Restriction (ne… que)', 'Addition (aussi)', 'Liste complète', 'Liste d’exemples', 'Comparaison'],
-    ['Question', 'Chercher l’accord', 'Informer (« je te le dis »)', 'Invitation (〜ませんか)', 'Interdiction']
+    ['Question', 'Chercher l’accord', 'Informer (« je te le dis »)', 'Invitation (〜ませんか)', 'Interdiction', 'Exclamation, monologue (な)',
+     'Question familière (かい)', 'Doute, « je me demande » (かな)', 'Doute, ton féminin (かしら)', 'Confirmation insistante (よね)', 'Assertion douce, ton féminin (わ)', 'Assertion ferme, ton féminin (わよ)', 'Partage d’émotion, ton féminin (わね)',
+     'Avertissement, ton masculin (ぞ)', 'Entrain, ton masculin (ぜ)', 'Désinvolture (さ)', 'Justification, plainte (もん)', 'Exclamation douce, ton féminin (こと)', 'Question douce (の)', 'Explication affirmée (のよ)', 'Explication partagée (のね)',
+     'Citation familière (って)', 'Souvenir flou (っけ)', 'Confirmation, « non ? » (じゃない)', 'Confirmation polie (でしょ)', 'Confirmation familière, ton masculin (だろ)'],
+    ['Condition (なら)', 'Répartition (ずつ)', 'Exemples (など)', 'Exemples familiers (とか)', 'Environ (ごろ)', 'Environ (ぐらい)', 'Insistance (こそ)', 'Même (すら)', 'Même (さえ)', 'Même (だって)', 'Même (でも)', 'Pas même (数 + も)', 'N’importe quel (でも)', 'Proposition (でも)',
+     'Thème traité (について)', 'À propos de (に関して)', 'Selon (によって)', 'Source (によると)', 'En tant que (として)', 'Envers (に対して)', 'Point de vue (にとって)', 'Lieu formel (において)', 'Définition (とは)', 'Appellation (という)', 'Comparaison, « comme » (のような)',
+     'Seulement (ばかり)', 'Non seulement (だけでなく)', 'Degré (ほど)', 'Date limite (までに)', 'Dédain (なんか)', 'Personne qui agit (てほしい)', 'But (のために)', 'Cumul de raisons (し)', 'Concession (ても)', 'Pendant (間に)', 'Toute la durée (中)', 'Sans (ずに)', 'Chaque fois (たびに)', 'Dès que (たらすぐ)', 'Superlatif (一番)']
   ];
   var GINC = [['Destination', 'Direction'], ['Lien entre deux noms', 'Appartenance'], ['Restriction (seulement)', 'Restriction (ne… que)'], ['Opposition (mais)', 'Pourtant (surprise, regret)']];
-  function incompat(a, b) { return GINC.some(function (p) { return (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a); }); }
+  /* rôles trop proches pour être proposés ensemble dans une même question (deux réponses défendables) */
+  var GCLU = [
+    ['Liste d’exemples', 'Exemples (など)', 'Exemples familiers (とか)'], ['Comparaison', 'Comparaison, « comme » (のような)', 'Degré (ほど)'],
+    ['Condition', 'Condition (なら)', 'Concession (ても)', 'Dès que (たらすぐ)'], ['Simultanéité', 'Pendant (間に)', 'Toute la durée (中)', 'Chaque fois (たびに)', 'Dès que (たらすぐ)'],
+    ['Date limite', 'Date limite (までに)', 'Limite (jusqu’à)'], ['Cause', 'Cumul de raisons (し)', 'Source (によると)'], ['Thème traité (について)', 'À propos de (に関して)', 'Définition (とは)', 'Appellation (という)'],
+    ['Source (によると)', 'Selon (によって)'], ['Envers (に対して)', 'Point de vue (にとって)'], ['Même (すら)', 'Même (さえ)', 'Même (だって)', 'Même (でも)', 'Pas même (数 + も)', 'Insistance (こそ)'],
+    ['Environ (ごろ)', 'Environ (ぐらい)', 'Degré (ほど)'], ['Seulement (ばかり)', 'Restriction (seulement)', 'Restriction (ne… que)', 'Non seulement (だけでなく)'],
+    ['Chercher l’accord', 'Confirmation insistante (よね)', 'Confirmation, « non ? » (じゃない)', 'Confirmation polie (でしょ)', 'Confirmation familière, ton masculin (だろ)'],
+    ['Question', 'Question familière (かい)', 'Question douce (の)', 'Doute, « je me demande » (かな)', 'Doute, ton féminin (かしら)', 'Invitation (〜ませんか)'],
+    ['Assertion douce, ton féminin (わ)', 'Assertion ferme, ton féminin (わよ)', 'Partage d’émotion, ton féminin (わね)', 'Exclamation douce, ton féminin (こと)'], ['Entrain, ton masculin (ぜ)', 'Avertissement, ton masculin (ぞ)'],
+    ['Explication affirmée (のよ)', 'Explication partagée (のね)', 'Informer (« je te le dis »)'], ['Citation', 'Citation familière (って)'], ['Cible de l’action', 'Destinataire', 'Destination', 'Direction'],
+    ['Exclamation, monologue (な)', 'Désinvolture (さ)', 'Justification, plainte (もん)']
+  ];
+  function incompat(a, b) { return GINC.some(function (p) { return (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a); }) || GCLU.some(function (c) { return a !== b && c.indexOf(a) >= 0 && c.indexOf(b) >= 0; }); }
   var GFAM = [
     { id: 'pol', label: 'Polie (ます)', f: ['Polie, présent', 'Polie, négatif', 'Polie, passé', 'Polie, passé négatif'] },
     { id: 'sim', label: 'Simple & て', f: ['Négatif simple', 'Passé simple', 'Passé négatif simple', 'Forme en て', 'て négatif'] },
@@ -120,7 +139,9 @@
     function bucket(x) { var s = ST[kq][x.i]; if (!s) return 1; if (s.w) return 0; if (s.st >= 3) return 3; return 2; }
     function avail() { var p = pool(), q = 0; p.forEach(function (x) { q += typesFor(x).length; }); return { q: q, k: p.length }; }
     function build() {
-      var p = pool(), order = shuffle(p.slice()).sort(function (a, b) { return bucket(a) - bucket(b); });
+      var p = pool(), rk = {}, kv = {}, order = shuffle(p.slice());
+      order.forEach(function (x) { var a = x.c === 'p' ? x.p.a : null; if (a) rk[a] = (rk[a] || 0) + 1; kv[x.i] = (a ? rk[a] * 0.6 : 0) + Math.random() * 2.5; });   // particules : les très représentées (に, が, を, で) passent moins souvent en tête
+      order.sort(function (a, b) { return bucket(a) - bucket(b) || kv[a.i] - kv[b.i]; });
       var target = cfg.n === 0 ? avail().q : Math.min(cfg.n, avail().q), items = [], used = {}, guard = 0;
       while (items.length < target && guard++ < 10) {
         var round = [];

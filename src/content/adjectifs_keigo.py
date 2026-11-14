@@ -273,6 +273,8 @@ PART_X = [
  ('Chaque fois qu’on se voit, on parle. (たびに)', '会うたびに話します。'), ('On peut y aller en train ou en bus. (でも)', '電車でもバスでも行けます。'), ('Il a plu toute la journée. (中)', '一日中雨でした。'),
  ('J’ai pris des photos pendant le voyage. (中に)', '旅行中に写真を撮りました。'), ('C’est environ mille yens. (ぐらい)', '千円ぐらいです。'), ('Tōkyō est plus grand que Kyōto. (より)', '東京は京都より大きいです。'),
  ('Le mont Fuji est la plus haute montagne du Japon. (いちばん)', '日本で富士山がいちばん高いです。'), ('Ce n’est pas aussi cher que ça. (ほど)', 'これはあれほど高くないです。'),
+ ('La réunion a lieu dans la salle 3. (において)', '会議は三号室において行われます。'), ('Pour moi, c’est très important. (にとって)', '私にとって、これはとても大切です。'), ('Je voudrais poser une question à ce sujet. (に関して)', 'それに関して、質問があります。'),
+ ('Pas seulement l’anglais, mais aussi le japonais. (だけでなく)', '英語だけでなく、日本語も話せます。'), ('Qu’est-ce que « wabi-sabi » ? (とは)', '「わびさび」とは何ですか。'),
 ]
 GRAMM2 = [
  ('Je suis en train de manger. (ている)', '今、ご飯を食べています。'), ('J’ai fini tous mes devoirs. (てしまう)', '宿題を全部やってしまいました。'), ('Je réserve l’hôtel à l’avance. (ておく)', 'ホテルを予約しておきます。'),
