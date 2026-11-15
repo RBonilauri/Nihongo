@@ -1,4 +1,4 @@
-import os as _os
+import os as _os, re
 # Particules et compteurs
 # Exécuté par build.py dans un espace de noms partagé (variables main, css, js…).
 from parts_bank import PB as _PARTS
@@ -6,8 +6,11 @@ def _pk(s, a):
     k = _kana(s)
     if 'なん＿＿' in k and a in ('が', 'を', 'は', 'も', 'か'): k = k.replace('なん＿＿', 'なに＿＿')
     return k
+def _km(a, d):
+    m = {x: _kana(x) for x in [a] + d.split(',') if re.search(r'[一-鿿]', x)}
+    return {'km': m} if m else {}
 def parts_json():
-    return [{'i': 'p%02d' % n, 's': s, 'a': a, 'd': d.split(','), 'fr': fr, 'n': nt, 'r': r, 'g': g, 'k': _pk(s, a)} for n, (s, a, d, fr, nt, r, g) in enumerate(_PARTS)]
+    return [{'i': 'p%02d' % n, 's': s, 'a': a, 'd': d.split(','), 'fr': fr, 'n': nt, 'r': r, 'g': g, 'k': _pk(s, a), **_km(a, d)} for n, (s, a, d, fr, nt, r, g) in enumerate(_PARTS)]
 
 _CBASE = {'本': 'ほん', '枚': 'まい', '冊': 'さつ', '台': 'だい', '個': 'こ', '着': 'ちゃく', '杯': 'はい', '人': 'にん', '匹': 'ひき', '頭': 'とう', '羽': 'わ', '皿': 'さら', '膳': 'ぜん', '切れ': 'きれ', '階': 'かい', '回': 'かい', '番': 'ばん', 'つ': 'つ', '軒': 'けん', '足': 'そく', '通': 'つう', '件': 'けん', '部': 'ぶ', '歳': 'さい', '時間': 'じかん', '分': 'ふん', '秒': 'びょう', '日': 'にち', '週間': 'しゅうかん', 'か月': 'かげつ', '年': 'ねん'}
 _CGROUP = {'Objets courants': 'obj', 'Êtres vivants': 'viv', 'Plats & boissons': 'pla', 'Autres': 'aut', 'Objets (suite)': 'obj', 'Durées et âge': 'tmp'}

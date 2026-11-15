@@ -157,9 +157,9 @@
       return items;
     }
 
-    function fillS(p, a) { return (cfg.ka && p.k ? p.k : p.s).replace(/（.*）/, '').replace('＿＿', a); }
+    function fillS(p, a) { return (cfg.ka && p.k ? p.k : p.s).replace(/（.*）/, '').replace('＿＿', cfg.ka && p.km && p.km[a] ? p.km[a] : a); }
     function kf(v, s) { return cfg.ka ? kfa(v, s) : s; }
-    function fillK(p, a) { return (p.k || p.s).replace(/（.*）/, '').replace('＿＿', a); }
+    function fillK(p, a) { return (p.k || p.s).replace(/（.*）/, '').replace('＿＿', p.km && p.km[a] ? p.km[a] : a); }
     function kfa(v, s) { for (var l in v.r) if (v.f[l] === s && v.r[l]) return v.r[l]; return v.kp && s.indexOf(v.kp) === 0 ? v.kk + s.slice(v.kp.length) : s; }
     function pshow(o) { return cfg.ka && o.k ? o.k : o.v; }
     function wrongAdj(v, l) {   // erreurs classiques : terminaison de l’autre type d’adjectif, ou い gardé

@@ -549,6 +549,11 @@ with sync_playwright() as p:
     _fin = ['かい','かな','かしら','よね','わ','わよ','わね','ぞ','ぜ','さ','もん','こと','の','のよ','のね','って','っけ','じゃない','でしょ','だろ']
     _nof = [f for f in _fin if f not in _cnt and not any(r[1].startswith(f) for r in _pb.PB)]
     check(not _nof, 'finales toutes testées (absentes : %s)' % _nof)
+    _hh = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+    _items = re.findall(r'\{"i":"p\d+","s":.*?"g":"\w+","k":"[^"]*"[^}]*\}\}?', _hh)
+    _kj = re.compile(r'[一-鿿]')
+    _bad = [x[:40] for x in _items if (_kj.search(re.search(r'"a":"([^"]*)"', x).group(1)) or _kj.search(re.search(r'"d":\[([^\]]*)\]', x).group(1))) and '"km"' not in x]
+    check(len(_items) > 200 and not _bad, 'particules à kanji (に関して…) : lecture en kana fournie (%d items, manquants %s)' % (len(_items), _bad[:2]))
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))
