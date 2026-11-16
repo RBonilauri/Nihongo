@@ -223,7 +223,7 @@
       else if (q.t === 'k2kun') { ask = 'Quelle est la lecture Kun de ce kanji ?'; big = bigKanji(x.k); }
       else if (q.t === 'r2w') { ask = 'Quel est ce mot ?'; big = '<div class="q-big word">' + esc(q.w[1]) + '</div>'; }
       else if (q.t === 's2w') { ask = 'Comment s’écrit ce mot ?'; big = '<div class="q-big sens">' + esc(q.w[2]) + '</div>'; if (opts.length > 1) hint = hintBtn(opts.map(function (o) { return o.k; }).join('\n')); }
-      else { ask = q.t === 'w2s' ? 'Que signifie ce mot ?' : 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; if (q.t === 'w2r') hint = hintBtn(otherReadings(q.w, x.k)); }
+      else { ask = q.t === 'w2s' ? 'Que signifie ce mot ?' : 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; if (q.t === 'w2r') hint = hintBtn(otherReadings(q.w, x.k) || (q.w[2] ? 'Sens : ' + q.w[2] : '')); }   // pas de découpage par kanji (jukujikun, mot à un kanji…) : l’ampoule donne le sens
       var gl = (opts.length < 2) ? '<p class="conj-note">Pas assez de choix pour ce kanji.</p>' : '';
       var multi = !Q.mixTag && cfg.lv.length > 1;
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + (multi ? '<div class="q-tag lvp lv-' + esc(x.l) + '">' + esc(x.l) + '</div>' : '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div>' + gl +

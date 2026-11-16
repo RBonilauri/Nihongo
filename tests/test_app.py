@@ -410,8 +410,8 @@ with sync_playwright() as p:
                     const want = a => JSON.parse(a.dataset.say); const w1 = want(m); m.click();
                     setTimeout(() => { const s1 = window.__said.slice(); window.__said = []; d[0].click(); setTimeout(() => r({ n: d.length, w1, s1, w2: want(d[0]), s2: window.__said.slice(), bottom: !!f.querySelector('.fbb #q-say') }), 700); }, 700); })""")
         pg.evaluate("(document.querySelector('.quiz:not([hidden]) #q-next') || [...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /Suivant|Continuer|Résultat/.test(b.innerText)) || {click(){}}).click()"); pg.wait_for_timeout(60)
-    multi = [a for a in amp if a['n'] >= 2 and a['hint']]
-    check(len(amp) >= 5 and len(multi) >= 3 and all((a['tk'] + ' →') not in a['hint'] and ' → ' in a['hint'] for a in multi) and all(not a['hint'] for a in amp if a['n'] < 2),
+    multi = [a for a in amp if a['n'] >= 2 and ' → ' in a['hint']]
+    check(len(amp) >= 5 and len(multi) >= 3 and all((a['tk'] + ' →') not in a['hint'] for a in multi) and all(a['hint'] for a in amp) and all(a['hint'].startswith('Sens :') for a in amp if a['n'] < 2),
           'questions « Comment se lit ce mot ? » : ampoule avec la lecture des autres kanji (sans celui à lire) %s' % amp[:3])
     check(spk and spk['n'] >= 1 and spk['w1'] and spk['w2'] and spk['s1'][:1] == spk['w1'][:1] and spk['s2'][:1] == spk['w2'][:1] and spk['bottom'], 'haut-parleur à droite de chaque kanji : lit les lectures on et kun (kanji de la question et kanji supplémentaires) %s' % spk)
     mk = [d for n, d in dets if n >= 2]
@@ -554,6 +554,10 @@ with sync_playwright() as p:
     _kj = re.compile(r'[一-鿿]')
     _bad = [x[:40] for x in _items if (_kj.search(re.search(r'"a":"([^"]*)"', x).group(1)) or _kj.search(re.search(r'"d":\[([^\]]*)\]', x).group(1))) and '"km"' not in x]
     check(len(_items) > 200 and not _bad, 'particules à kanji (に関して…) : lecture en kana fournie (%d items, manquants %s)' % (len(_items), _bad[:2]))
+    _qk = open(os.path.join(ROOT, 'src/js/09-quiz-kanji.js'), encoding='utf-8').read()
+    check("hintBtn(otherReadings(q.w, x.k) || (q.w[2] ?" in _qk, 'Mot → lecture : ampoule toujours présente (lectures des autres kanji, sinon le sens)')
+    _kd = __import__('json').loads(re.search(r'id="kanji-data"[^>]*>(.*?)</script>', _hh, re.S).group(1))
+    check(all(w[2] for x in _kd for w in x['kw']), 'tous les mots de kanji ont un sens (repli de l’ampoule)')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))
