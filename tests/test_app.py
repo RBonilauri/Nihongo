@@ -388,9 +388,9 @@ with sync_playwright() as p:
     pg.evaluate("[...document.querySelectorAll('button.quizcard')].find(b => /quiz kanji/i.test(b.innerText)).click()"); pg.wait_for_timeout(300)
     pg.click('.quiz:not([hidden]) [data-lv="ALL"]'); pg.wait_for_timeout(200)
     for _ in range(8):   # l'écran se redessine à chaque clic : un chip par tour
-        pg.evaluate("(() => { const b = [...document.querySelectorAll('.quiz:not([hidden]) [data-t]')].find(b => (b.dataset.t === 'l2k') !== b.classList.contains('on')); if (b) b.click(); })()"); pg.wait_for_timeout(120)
-    has_l2k = pg.evaluate("!![...document.querySelectorAll('.quiz:not([hidden]) [data-t=\"l2k\"]')].length")
-    check(has_l2k, 'quiz kanji : type « Lecture → kanji » proposé')
+        pg.evaluate("(() => { const b = [...document.querySelectorAll('.quiz:not([hidden]) [data-t]')].find(b => (b.dataset.t === 'on2k' || b.dataset.t === 'kun2k') !== b.classList.contains('on')); if (b) b.click(); })()"); pg.wait_for_timeout(120)
+    has_l2k = pg.evaluate("document.querySelectorAll('.quiz:not([hidden]) [data-t=\"on2k\"], .quiz:not([hidden]) [data-t=\"kun2k\"]').length") == 2
+    check(has_l2k, 'quiz kanji : types « Lecture On → kanji » et « Lecture Kun → kanji » proposés')
     pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Lancer/.test(b.innerText)).click()"); pg.wait_for_timeout(300)
     lk = []
     for _ in range(40):

@@ -4,15 +4,16 @@
     { id: 's2k', label: 'Sens → kanji', short: 'Kanji' },
     { id: 'k2on', label: 'Kanji → lecture On', short: 'On' },
     { id: 'k2kun', label: 'Kanji → lecture Kun', short: 'Kun' },
-    { id: 'l2k', label: 'Lecture → kanji', short: 'Lecture' },
+    { id: 'on2k', label: 'Lecture On → kanji', short: 'On → kanji' },
+    { id: 'kun2k', label: 'Lecture Kun → kanji', short: 'Kun → kanji' },
     { id: 'w2r', label: 'Mot → lecture', short: 'Mot' }
   ];
   var WT = ['w2r'], WMAX = 8;
   var QPRESETS = [
-    { label: 'Tout', types: ['k2s', 's2k', 'k2on', 'k2kun', 'l2k', 'w2r'] },
+    { label: 'Tout', types: ['k2s', 's2k', 'k2on', 'k2kun', 'on2k', 'kun2k', 'w2r'] },
     { label: 'Mots', types: ['w2r'] },
-    { label: 'Sans les mots', types: ['k2s', 's2k', 'k2on', 'k2kun', 'l2k'] },
-    { label: 'Lectures', types: ['k2on', 'k2kun', 'l2k', 'w2r'] },
+    { label: 'Sans les mots', types: ['k2s', 's2k', 'k2on', 'k2kun', 'on2k', 'kun2k'] },
+    { label: 'Lectures', types: ['k2on', 'k2kun', 'on2k', 'kun2k', 'w2r'] },
     { label: 'Sens', types: ['k2s', 's2k'] }
   ];
   var QN = [10, 25, 50, 100, 150, 200];
@@ -36,7 +37,7 @@
     var cfg = ST.kqc || { lv: 'N5', types: QT.map(function (t) { return t.id; }), n: 25, wrong: false };
     cfg.types = cfg.types.filter(function (t) { return QT.some(function (z) { return z.id === t; }); });
     if (!cfg.types.length) cfg.types = QT.map(function (t) { return t.id; });
-    if (!cfg.l2k) { cfg.l2k = 1; if (cfg.types.indexOf('l2k') < 0 && cfg.types.indexOf('k2on') >= 0) cfg.types.push('l2k'); }   // nouveau type « lecture → kanji » : ajouté une fois aux réglages existants
+    if (!cfg.l2k2) { cfg.l2k2 = 1; var hadL = cfg.types.indexOf('l2k') >= 0 || (!cfg.l2k && cfg.types.indexOf('k2on') >= 0); cfg.types = cfg.types.filter(function (z) { return z !== 'l2k'; }); if (hadL) cfg.types.push('on2k', 'kun2k'); }   // « lecture → kanji » : deux types distincts (On / Kun), ajoutés une fois aux réglages existants
     if (!Array.isArray(cfg.lv)) cfg.lv = (cfg.lv === 'ALL' || !cfg.lv) ? ['N5', 'N4', 'N3', 'N2', 'N1'] : [cfg.lv];
     cfg.lv = cfg.lv.filter(function (l) { return ['N5', 'N4', 'N3', 'N2', 'N1'].indexOf(l) >= 0; }); if (!cfg.lv.length) cfg.lv = ['N5'];
     var Q = null;
@@ -83,7 +84,7 @@
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function levelPool(lv) { return KD.filter(function (x) { return lv === 'ALL' || (Array.isArray(lv) ? lv.indexOf(x.l) >= 0 : x.l === lv); }); }
     function elig(x, t) {
-      return t === 'k2s' || t === 's2k' || (t === 'k2on' && x.on) || (t === 'k2kun' && x.kun) || (t === 'l2k' && (x.on || x.kun)) || (WT.indexOf(t) >= 0 && x.kw.length);
+      return t === 'k2s' || t === 's2k' || (t === 'k2on' && x.on) || (t === 'k2kun' && x.kun) || (t === 'on2k' && x.on) || (t === 'kun2k' && x.kun) || (WT.indexOf(t) >= 0 && x.kw.length);
     }
     function parts(cell) { return cell.split(/[・･]/).map(function (p) { return p.replace(/[()（）]/g, '').trim(); }).filter(Boolean); }
     function senseToks(sn) { return sn.toLowerCase().split(/\s*[\/,;]\s*/).map(function (t) { return t.replace(/\(.*?\)/g, '').trim(); }).filter(Boolean); }
@@ -130,8 +131,8 @@
       } else if (q.t === 's2k') {
         add(x.k, true); var ty = senseToks(x.s);
         sameFirst(x, pool.filter(function (c) { return disjoint(ty, senseToks(c.s)); })).some(function (c) { add(c.k, false); return out.length >= 4; });
-      } else if (q.t === 'l2k') {
-        if (!q.f) q.f = x.on && x.kun ? (Math.random() < 0.5 ? 'on' : 'kun') : x.on ? 'on' : 'kun';
+      } else if (q.t === 'on2k' || q.t === 'kun2k') {
+        q.f = q.t === 'on2k' ? 'on' : 'kun';
         var fl = q.f, rx = rdAll(x[fl]);
         add(x.k, true);   // aucune autre proposition ne partage une lecture (même On, ou même Kun / radical) avec la question
         sameFirst(x, pool.filter(function (c) { return c[fl] && disjoint(rx, rdAll(c[fl])); })).some(function (c) { add(c.k, false); return out.length >= 4; });
@@ -230,14 +231,14 @@
       else if (q.t === 's2k') { ask = 'Quel kanji correspond à ce sens ?'; big = '<div class="q-big sens">' + esc(x.s) + '</div>'; }
       else if (q.t === 'k2on') { ask = 'Quelle est la lecture On de ce kanji ?'; big = bigKanji(x.k); }
       else if (q.t === 'k2kun') { ask = 'Quelle est la lecture Kun de ce kanji ?'; big = bigKanji(x.k); }
-      else if (q.t === 'l2k') { ask = 'À quel kanji correspond cette lecture ' + (q.f === 'on' ? 'On' : 'Kun') + ' ?'; big = '<div class="q-big word">' + esc(x[q.f]) + '</div>'; }
+      else if (q.t === 'on2k' || q.t === 'kun2k') { ask = 'À quel kanji correspond cette lecture ' + (q.f === 'on' ? 'On' : 'Kun') + ' ?'; big = '<div class="q-big word">' + esc(x[q.f]) + '</div>'; }
       else if (q.t === 'r2w') { ask = 'Quel est ce mot ?'; big = '<div class="q-big word">' + esc(q.w[1]) + '</div>'; }
       else if (q.t === 's2w') { ask = 'Comment s’écrit ce mot ?'; big = '<div class="q-big sens">' + esc(q.w[2]) + '</div>'; if (opts.length > 1) hint = hintBtn(opts.map(function (o) { return o.k; }).join('\n')); }
       else { ask = q.t === 'w2s' ? 'Que signifie ce mot ?' : 'Comment se lit ce mot ?'; big = '<div class="q-big word">' + q.w[0].split('').map(function (ch) { return ch === x.k ? '<b>' + esc(ch) + '</b>' : esc(ch); }).join('') + '</div>'; if (q.t === 'w2r') hint = hintBtn(otherReadings(q.w, x.k) || (q.w[2] ? 'Sens : ' + q.w[2] : '')); }   // pas de découpage par kanji (jukujikun, mot à un kanji…) : l’ampoule donne le sens
       var gl = (opts.length < 2) ? '<p class="conj-note">Pas assez de choix pour ce kanji.</p>' : '';
       var multi = !Q.mixTag && cfg.lv.length > 1;
       body.innerHTML = '<div class="q-card">' + (Q.mixTag || '') + (multi ? '<div class="q-tag lvp lv-' + esc(x.l) + '">' + esc(x.l) + '</div>' : '') + '<div class="q-ask">' + ask + '</div>' + big + hint + '</div>' + gl +
-        '<div class="q-opts">' + opts.map(function (o, i) { return '<button type="button" class="qopt' + (q.t === 's2k' || q.t === 'l2k' ? ' kj' : '') + '" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="q-fb"></div>';
+        '<div class="q-opts">' + opts.map(function (o, i) { return '<button type="button" class="qopt' + (q.t === 's2k' || q.t === 'on2k' || q.t === 'kun2k' ? ' kj' : '') + '" data-i="' + i + '">' + esc(o.v) + '</button>'; }).join('') + '</div><div id="q-fb"></div>';
     }
     function otherReadings(w, tk) {
       var seg = (w[3] || '').split('|'), out = [], ki = 0, chars = w[0].split(''), isK = function (c) { return /[\u4e00-\u9fff\u3005]/.test(c); };
