@@ -28,10 +28,11 @@
     function J(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } }
     var KD = J('kanji-data') || [], VD = J('vocab-data') || [], GD = J('grammar-data') || { verbs: [], parts: [] }, MD = J('map-data') || { p: [] }, CD = J('counter-data') || { counters: [] };
     var vById = {}; VD.forEach(function (x) { vById[x.i] = x; });
+    gdDerive(GD); var nVs = 0; GD.verbs.forEach(function (v) { nVs += Object.keys(v.f || {}).length; });
     var QZ = [
       { n: 'Kanji', ic: '漢', it: ST.kq, s: ST.kqs, tot: KD.length },
       { n: 'Vocabulaire & phrases', ic: '語', it: ST.vq, s: ST.vqs, tot: VD.length },
-      { n: 'Conjugaison', ic: '動', it: ST.gq_c, s: ST.gqs_c, tot: 0 },
+      { n: 'Conjugaison', ic: '動', it: ST.gq_c, s: ST.gqs_c, tot: nVs },
       { n: 'Particules', ic: '助', it: ST.gq_p, s: ST.gqs_p, tot: GD.parts.length },
       { n: 'Compteurs', ic: '数', it: ST.cq, s: ST.cqs, tot: 0 },
       { n: 'Géographie', ic: '地', it: ST.gq, s: ST.gqs, tot: MD.p.length + (MD.ids ? MD.ids.length : 0) + (J('geo-words') || []).length }
@@ -98,6 +99,7 @@
     function J(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } }
     var KD = J('kanji-data') || [], VD = J('vocab-data') || [], GD = J('grammar-data') || { verbs: [], parts: [] }, MD = J('map-data') || { p: [] }, CD = J('counter-data') || { counters: [], reads: [] };
     var nC = (CD.reads || []).length; (CD.counters || []).forEach(function (c) { if (c.k !== 'つ') nC++; nC += (c.ex || []).length; });
+    gdDerive(GD);   // formes dérivées (progressif, adjectifs…) : mêmes éléments que le quiz de conjugaison
     var nV = 0; GD.verbs.forEach(function (v) { nV += Object.keys(v.f || {}).length; });
     var T = [['k', 'Kanji', '漢', ST.kq, KD.length], ['v', 'Vocabulaire & phrases', '語', ST.vq, VD.length], ['c', 'Conjugaison', '動', ST.gq_c, nV], ['p', 'Particules', '助', ST.gq_p, GD.parts.length], ['n', 'Compteurs', '数', ST.cq, nC], ['g', 'Géographie', '地', ST.gq, MD.p.length + (MD.ids ? MD.ids.length : 0) + (J('geo-words') || []).length]];
     var tot = 0, mTot = 0, nTot = 0;
