@@ -562,6 +562,7 @@ with sync_playwright() as p:
     check(all(("it.t === '%s') {" % t) in _qg and _qg.count("jpMiniSet(setOf(x), 'jm-quiz')") >= 5 for t in ('reg', 'cap', 'rd')) and
           all(re.search(r"it\.t === '%s'\) \{[^\n]*jpMiniSet\(setOf\(x\)" % t, _qg) for t in ('reg', 'cap', 'rd')) and not re.search(r"it\.t === 'c2p'\) \{[^\n]*jpMiniSet", _qg),
           'géographie : préfecture surlignée sur la carte pour région / chef-lieu / lecture (pas pour chef-lieu → préfecture)')
+    check("class=\"vq-pl\"" in _qg and "REGK[x.r]" in _qg and "esc(o.k)" in _qg, 'géographie : correction d’une région = kana + romaji + liste des préfectures lues en kana')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))

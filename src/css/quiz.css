@@ -56,6 +56,7 @@
   .q-big.vq { font-size: 2.2rem; line-height: 1.35; overflow-wrap: anywhere; }
   .vq-ear { width: auto; padding: 0 1.6rem; margin: .4rem 0; }
   .vq-opt { text-align: left; font-size: .95rem; line-height: 1.35; }
+  .vq-pl { display: grid; gap: 1px; margin-top: .4rem; border-top: 1px dashed var(--border); padding-top: .4rem; } .vq-pr { display: grid; grid-template-columns: 3.8rem 1fr auto; gap: .6rem; align-items: baseline; padding: .15rem 0; } .vq-pn { font-size: 1.1rem; }
   .vq-ans { display: grid; gap: .15rem; margin: .3rem 0; }
   .vq-jp { font-size: 1.6rem; line-height: 1.3; overflow-wrap: anywhere; } .vq-ro { color: var(--muted); font-size: .85rem; }
   .vq-mj { font-size: 1.15rem; flex: 0 0 38%; overflow-wrap: anywhere; }

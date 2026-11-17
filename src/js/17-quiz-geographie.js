@@ -176,11 +176,12 @@
       if (x.k === 'w') return '<div class="vq-ans"><div class="vq-jp">' + esc(x.w.jp) + '</div>' + (x.w.kk && x.w.kk !== x.w.jp ? '<div>' + esc(x.w.kk) + '</div>' : '') + (x.w.ro ? '<div class="vq-ro">' + esc(x.w.ro) + '</div>' : '') + '<div>' + esc(x.w.fr) + '</div></div>';
       if (x.k === 'r') {
         var m = M.p.filter(function (o) { return o.r === x.r; });
-        return '<div class="vq-ans"><div class="vq-jp">' + esc(M.reg[x.r][0]) + '</div><div class="vq-ro">' + esc(M.reg[x.r][1]) + '</div><div>' + m.map(function (o) { return esc(o.n); }).join('・') + '</div></div>';
+        return '<div class="vq-ans"><div class="vq-jp">' + esc(M.reg[x.r][0]) + '</div>' + (REGK[x.r] && REGK[x.r] !== M.reg[x.r][0] ? '<div>' + esc(REGK[x.r]) + '</div>' : '') + '<div class="vq-ro">' + esc(M.reg[x.r][1]) + '</div>' +
+          '<div class="vq-pl">' + m.map(function (o) { return '<div class="vq-pr"><span class="vq-pn">' + esc(o.n) + '</span><span>' + esc(o.k) + '</span><span class="vq-ro">' + esc(o.ro) + '</span></div>'; }).join('') + '</div></div>';
       }
       var o = x.o;
       return '<div class="vq-ans"><div class="vq-jp">' + esc(o.n) + '</div><div>' + esc(o.k) + '</div><div class="vq-ro">' + esc(o.ro) + '</div>' +
-        '<div><b>Région</b> · ' + esc(rl(o.r)) + '</div><div><b>Chef-lieu</b> · ' + esc(o.cap) + (o.cap !== o.capk ? ' (' + esc(o.capk) + ')' : '') + ' · ' + esc(o.capr) + '</div></div>';
+        '<div><b>Région</b> · ' + esc(M.reg[o.r][0]) + (REGK[o.r] && REGK[o.r] !== M.reg[o.r][0] ? ' (' + esc(REGK[o.r]) + ')' : '') + ' · ' + esc(M.reg[o.r][1]) + '</div><div><b>Chef-lieu</b> · ' + esc(o.cap) + (o.cap !== o.capk ? ' (' + esc(o.capk) + ')' : '') + ' · ' + esc(o.capr) + '</div></div>';
     }
     function answer(b) {
       var cur = Q.cur; if (cur.done) return; cur.done = true;
