@@ -558,6 +558,10 @@ with sync_playwright() as p:
     check("hintBtn(otherReadings(q.w, x.k) || (q.w[2] ?" in _qk, 'Mot → lecture : ampoule toujours présente (lectures des autres kanji, sinon le sens)')
     _kd = __import__('json').loads(re.search(r'id="kanji-data"[^>]*>(.*?)</script>', _hh, re.S).group(1))
     check(all(w[2] for x in _kd for w in x['kw']), 'tous les mots de kanji ont un sens (repli de l’ampoule)')
+    _qg = open(os.path.join(ROOT, 'src/js/17-quiz-geographie.js'), encoding='utf-8').read()
+    check(all(("it.t === '%s') {" % t) in _qg and _qg.count("jpMiniSet(setOf(x), 'jm-quiz')") >= 5 for t in ('reg', 'cap', 'rd')) and
+          all(re.search(r"it\.t === '%s'\) \{[^\n]*jpMiniSet\(setOf\(x\)" % t, _qg) for t in ('reg', 'cap', 'rd')) and not re.search(r"it\.t === 'c2p'\) \{[^\n]*jpMiniSet", _qg),
+          'géographie : préfecture surlignée sur la carte pour région / chef-lieu / lecture (pas pour chef-lieu → préfecture)')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))

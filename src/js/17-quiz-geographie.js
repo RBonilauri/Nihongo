@@ -155,10 +155,10 @@
       }
       else if (it.t === 'map') { ask = 'Quelle est cette préfecture ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'rmap') { ask = 'Quelle est cette région ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
-      else if (it.t === 'reg') { ask = 'Dans quelle région se trouve cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
-      else if (it.t === 'cap') { ask = 'Quel est le chef-lieu de cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
+      else if (it.t === 'reg') { ask = 'Dans quelle région se trouve cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>' + jpMiniSet(setOf(x), 'jm-quiz'); }
+      else if (it.t === 'cap') { ask = 'Quel est le chef-lieu de cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>' + jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'c2p') { ask = 'De quelle préfecture est-ce le chef-lieu ?'; big = '<div class="q-big word vq">' + esc(x.o.cap) + '</div>'; }
-      else if (it.t === 'rd') { ask = 'Comment se lit ce nom ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>'; }
+      else if (it.t === 'rd') { ask = 'Comment se lit ce nom ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>' + jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (ST.silent) { ask = 'Quelle préfecture se lit ainsi ?'; big = '<div class="q-big word vq">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.k) + '</div>'; }
       else { ask = 'Écoute, puis choisis la préfecture'; big = '<button type="button" class="qgo vq-ear" id="g-replay">🔊 Réécouter</button>' + earAlt(x.k === 'r' ? M.reg[x.r][0] : x.o.k); }
       var hl = [], ok = opts.some(function (o) { return o.k && HK.test(o.v); });
