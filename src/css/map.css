@@ -25,6 +25,7 @@
   .jm-quiz { margin: .6rem auto 0; max-width: 250px; } .jm-quiz svg { display: block; width: 100%; height: auto; }
   .jm-quiz .jm-p { fill: var(--border); stroke: var(--bg); stroke-width: .7; fill-opacity: 1; cursor: default; } .jm-quiz .jm-p.jm-on { fill: var(--ink); stroke: var(--ink); stroke-width: 1.2; } .jm-quiz .jm-fr { stroke-width: .8; }
   .vq-reg { margin-top: .3rem; } .vq-reg b { color: var(--muted); }
+  .jm-dot { fill: #d64545; stroke: #fff; stroke-width: 1.6; pointer-events: none; } .jm-dot-h { fill: #d64545; fill-opacity: .28; pointer-events: none; }
   .jm-mini { margin: .7rem auto 0; max-width: 190px; } .jm-mini svg { display: block; width: 100%; height: auto; }
   .jm-mini .jm-p { fill: var(--border); stroke: var(--bg); stroke-width: .7; cursor: default; fill-opacity: 1; }
   .jm-mini .jm-p.jm-on { fill: var(--ink); stroke: var(--ink); stroke-width: 1.2; }

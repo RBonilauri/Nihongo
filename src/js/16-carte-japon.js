@@ -20,9 +20,9 @@
     return M.p.map(function (o) { return '<path class="' + cls + (set[o.n] ? ' jm-on' : '') + '" data-n="' + o.n + '" d="' + o.d + '"/>'; }).join('');
   }
   function jpFrame(M) { var f = M.frame; return '<rect class="jm-fr" x="' + f[0] + '" y="' + f[1] + '" width="' + f[2] + '" height="' + f[3] + '"/>'; }
-  function jpMiniSet(set, cls) {
-    var M = jpm();
-    return '<div class="' + cls + '"><svg viewBox="' + M.vb.join(' ') + '" role="img" aria-label="Carte du Japon">' + jpPaths(set, 'jm-p') + jpFrame(M) + '</svg></div>';
+  function jpMiniSet(set, cls, dotN) {   // dotN : préfecture dont on marque le chef-lieu d’un point
+    var M = jpm(), o = dotN && M.by[dotN], dot = o && o.c ? '<circle class="jm-dot-h" cx="' + o.c[0] + '" cy="' + o.c[1] + '" r="10"/><circle class="jm-dot" cx="' + o.c[0] + '" cy="' + o.c[1] + '" r="5.5"/>' : '';
+    return '<div class="' + cls + '"><svg viewBox="' + M.vb.join(' ') + '" role="img" aria-label="Carte du Japon">' + jpPaths(set, 'jm-p') + jpFrame(M) + dot + '</svg></div>';
   }
   function jpMini(x) {
     var set = jpSet(x.jp); if (!set) return '';

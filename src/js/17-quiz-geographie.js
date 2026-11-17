@@ -157,7 +157,7 @@
       else if (it.t === 'rmap') { ask = 'Quelle est cette région ?'; big = jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'reg') { ask = 'Dans quelle région se trouve cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>' + jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (it.t === 'cap') { ask = 'Quel est le chef-lieu de cette préfecture ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>' + jpMiniSet(setOf(x), 'jm-quiz'); }
-      else if (it.t === 'c2p') { ask = 'De quelle préfecture est-ce le chef-lieu ?'; big = '<div class="q-big word vq">' + esc(x.o.cap) + '</div>'; }
+      else if (it.t === 'c2p') { ask = 'De quelle préfecture est-ce le chef-lieu ?'; big = '<div class="q-big word vq">' + esc(x.o.cap) + '</div>' + jpMiniSet([], 'jm-quiz', x.o.n); }
       else if (it.t === 'rd') { ask = 'Comment se lit ce nom ?'; big = '<div class="q-big word vq">' + esc(x.o.n) + '</div>' + jpMiniSet(setOf(x), 'jm-quiz'); }
       else if (ST.silent) { ask = 'Quelle préfecture se lit ainsi ?'; big = '<div class="q-big word vq">' + esc(x.k === 'r' ? M.reg[x.r][0] : x.o.k) + '</div>'; }
       else { ask = 'Écoute, puis choisis la préfecture'; big = '<button type="button" class="qgo vq-ear" id="g-replay">🔊 Réécouter</button>' + earAlt(x.k === 'r' ? M.reg[x.r][0] : x.o.k); }
@@ -195,7 +195,7 @@
       if (good) { Q.ok++; st.st++; st.w = false; } else { st.st = 0; st.w = true; st.x = (st.x || 0) + 1; if (!Q.wrongList.some(function (w) { return w.i === x.i; })) Q.wrongList.push({ i: x.i, t: it.t }); }
       ST.gq[x.i] = st; save();
       var last = Q.i + 1 >= Q.items.length;
-      $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' || x.k === 'w' ? '' : jpMiniSet(setOf(x), 'jm-mini')) +
+      $('g-fb').innerHTML = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div>' + answerHtml(x) + (it.t === 'map' || it.t === 'rmap' || x.k === 'w' ? '' : jpMiniSet(setOf(x), 'jm-mini', x.o && x.o.n)) +
         '<div class="fbb">' + (canSpeak ? '<button type="button" class="mini" id="g-say" data-id="' + x.i + '">🔊 Écouter</button>' : '') + '<button type="button" class="qgo" id="g-next">' + (last ? 'Voir le score' : 'Suivant') + '</button></div></div>';
       kdetAdd($('g-fb'));
       $('g-fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });

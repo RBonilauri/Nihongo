@@ -44,7 +44,14 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
 </head>
 <body>
 ''' 
-html = head + main + '\n<script type="application/json" id="kanji-data">' + _KJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="kanji-gloss">' + _GLJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="vocab-data">' + _VJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="geo-words">' + _GW.replace('</', '<\\/') + '</script>\n<script type="application/json" id="grammar-data">' + _GJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="map-data">' + open(os.path.join(HERE, 'data', 'japanmap.json'), encoding='utf-8').read().replace('</', '<\\/') + '</script>\n<script type="application/json" id="counter-data">' + _CJ.replace('</', '<\\/') + '</script>\n<script>' + js + '</script>\n</body>\n</html>\n'
+import json as _jm
+def _mapjson():
+    """carte du Japon + position du chef-lieu de chaque préfecture (champ c = [x, y] dans le repère de la carte)"""
+    m = _jm.load(open(os.path.join(HERE, 'data', 'japanmap.json'), encoding='utf-8'))
+    pos = _jm.load(open(os.path.join(HERE, 'data', 'capitales_pos.json'), encoding='utf-8'))
+    for o in m['p']: o['c'] = pos[o['n']]
+    return _jm.dumps(m, ensure_ascii=False, separators=(',', ':'))
+html = head + main + '\n<script type="application/json" id="kanji-data">' + _KJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="kanji-gloss">' + _GLJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="vocab-data">' + _VJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="geo-words">' + _GW.replace('</', '<\\/') + '</script>\n<script type="application/json" id="grammar-data">' + _GJ.replace('</', '<\\/') + '</script>\n<script type="application/json" id="map-data">' + _mapjson().replace('</', '<\\/') + '</script>\n<script type="application/json" id="counter-data">' + _CJ.replace('</', '<\\/') + '</script>\n<script>' + js + '</script>\n</body>\n</html>\n'
 open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf-8').write(html)
 print(len(html))
 

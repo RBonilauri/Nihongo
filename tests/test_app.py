@@ -560,9 +560,12 @@ with sync_playwright() as p:
     check(all(w[2] for x in _kd for w in x['kw']), 'tous les mots de kanji ont un sens (repli de l’ampoule)')
     _qg = open(os.path.join(ROOT, 'src/js/17-quiz-geographie.js'), encoding='utf-8').read()
     check(all(("it.t === '%s') {" % t) in _qg and _qg.count("jpMiniSet(setOf(x), 'jm-quiz')") >= 5 for t in ('reg', 'cap', 'rd')) and
-          all(re.search(r"it\.t === '%s'\) \{[^\n]*jpMiniSet\(setOf\(x\)" % t, _qg) for t in ('reg', 'cap', 'rd')) and not re.search(r"it\.t === 'c2p'\) \{[^\n]*jpMiniSet", _qg),
-          'géographie : préfecture surlignée sur la carte pour région / chef-lieu / lecture (pas pour chef-lieu → préfecture)')
+          all(re.search(r"it\.t === '%s'\) \{[^\n]*jpMiniSet\(setOf\(x\)" % t, _qg) for t in ('reg', 'cap', 'rd')) and not re.search(r"it\.t === 'c2p'\) \{[^\n]*jpMiniSet\(setOf", _qg),
+          'géographie : préfecture surlignée sur la carte pour région / chef-lieu / lecture (chef-lieu → préfecture : point seul, sans surbrillance)')
     check("class=\"vq-pl\"" in _qg and "REGK[x.r]" in _qg and "esc(o.k)" in _qg, 'géographie : correction d’une région = kana + romaji + liste des préfectures lues en kana')
+    _mp = __import__('json').loads(re.search(r'id="map-data">(.*?)</script>', _hh, re.S).group(1).replace('<\\/', '</'))
+    check(len(_mp['p']) == 47 and all(len(o.get('c', [])) == 2 for o in _mp['p']), 'carte : position du chef-lieu connue pour les 47 préfectures')
+    check("jpMiniSet([], 'jm-quiz', x.o.n)" in _qg and "jpMiniSet(setOf(x), 'jm-mini', x.o && x.o.n)" in _qg, 'géographie : chef-lieu → préfecture montre le point du chef-lieu ; la correction aussi')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))
