@@ -384,6 +384,34 @@ with sync_playwright() as p:
     check(len(big) > 0, 'quiz kanji tous niveaux : une question s’affiche')
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
 
+    print('Quiz kanji : lecture → kanji')
+    pg.evaluate("[...document.querySelectorAll('button.quizcard')].find(b => /quiz kanji/i.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    pg.click('.quiz:not([hidden]) [data-lv="ALL"]'); pg.wait_for_timeout(200)
+    for _ in range(8):   # l'écran se redessine à chaque clic : un chip par tour
+        pg.evaluate("(() => { const b = [...document.querySelectorAll('.quiz:not([hidden]) [data-t]')].find(b => (b.dataset.t === 'l2k') !== b.classList.contains('on')); if (b) b.click(); })()"); pg.wait_for_timeout(120)
+    has_l2k = pg.evaluate("!![...document.querySelectorAll('.quiz:not([hidden]) [data-t=\"l2k\"]')].length")
+    check(has_l2k, 'quiz kanji : type « Lecture → kanji » proposé')
+    pg.evaluate("[...document.querySelectorAll('.quiz:not([hidden]) button')].find(b => /^Lancer/.test(b.innerText)).click()"); pg.wait_for_timeout(300)
+    lk = []
+    for _ in range(40):
+        r = pg.evaluate("""() => { const q = document.querySelector('.quiz:not([hidden]) .q-card'); if (!q) return null; const big = q.querySelector('.q-big'); if (!big) return null;
+            const o = [...document.querySelectorAll('.quiz:not([hidden]) .qopt')].map(b => b.textContent.trim());
+            const KD = JSON.parse(document.getElementById('kanji-data').textContent), by = {}; KD.forEach(x => by[x.k] = x);
+            const rd = c => (c || '').split(/[・･]/).map(p => p.trim()).filter(Boolean).flatMap(p => [p.replace(/[()（）]/g, ''), p.replace(/[(（][^)）]*[)）]/g, '')]);
+            const ask = q.querySelector('.q-ask').textContent, f = /On/.test(ask) ? 'on' : 'kun', rq = rd(big.textContent);
+            const own = o.filter(k => by[k] && rd(by[k][f]).some(z => rq.indexOf(z) >= 0));
+            const full = o.filter(k => by[k] && by[k][f] && by[k][f].replace(/\s/g, '') === big.textContent.replace(/\s/g, ''));
+            return { ask, big: big.textContent, o, own, full }; }""")
+        if not r: break
+        lk.append(r)
+        pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(50)
+        pg.evaluate("(document.querySelector('.quiz:not([hidden]) #q-next') || {click(){}}).click()"); pg.wait_for_timeout(50)
+    check(len(lk) >= 20 and all(r['ask'].startswith('À quel kanji') and len(r['o']) == 4 and all(re.match(r'^[\u4e00-\u9fff\u3005]$', k) for k in r['o']) for r in lk),
+          'lecture → kanji : question + 4 kanji %s' % (lk[:1],))
+    check(all(len(r['own']) == 1 and len(r['full']) == 1 for r in lk), 'lecture → kanji : une seule bonne réponse (aucune autre proposition ne partage une lecture) %s' % [r for r in lk if len(r['own']) != 1][:2])
+    check(any('On' in r['ask'] for r in lk) and any('Kun' in r['ask'] for r in lk), 'lecture → kanji : On et Kun tirés')
+    pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(200)
+
     print('Quiz kanji : ampoule des lectures')
     sg = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); let w = 0, s = 0; d.forEach(x => x.kw.forEach(k => { w++; if (k[3]) s++; })); const m = d.find(x => x.k === '満').kw.find(k => k[0] === '満室'); return [w, s, m && m[3]]; }""")
     check(sg[1] / sg[0] > 0.9 and sg[2] == 'まん|しつ', 'découpage des lectures par kanji : >90 %% des mots, 満室 = まん|しつ %s' % sg)
