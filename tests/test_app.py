@@ -360,6 +360,12 @@ with sync_playwright() as p:
     ox = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => x.g.startsWith('Outils:')); return [v.length, v.filter(x => !x.ex || !x.ex[0] || !x.ex[1]).length]; }""")
     check(ox[0] >= 141 and ox[1] == 0, 'chaque mot Outils a un exemple (%s)' % ox)
 
+    print('Vocabulaire / Adjectifs : exemples partout')
+    vx2 = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => /^(Vocabulaire|Adjectifs):/.test(x.g)); const bad = v.filter(x => !x.ex || !x.ex[0] || !x.ex[1] || (/[一-鿿]/.test(x.ex[0]) && !x.ex[2])); const kj = v.filter(x => x.ex && x.ex[2] && /[一-鿿]/.test(x.ex[2])); return [v.length, bad.length, kj.length, bad.slice(0, 5).map(x => x.jp)]; }""")
+    check(vx2[0] >= 1000 and vx2[1] == 0 and vx2[2] == 0, 'chaque mot Vocabulaire et Adjectifs a un exemple JP + FR (+ kana sans kanji quand la phrase contient des kanji) (%s)' % vx2)
+    vx3 = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => /^Vocabulaire:/.test(x.g) && x.ex); return v.filter(x => !x.ex[0].includes(x.jp.replace(/[〜~]/g, '').slice(0, 1))).length; }""")
+    check(vx3 == 0, 'les exemples contiennent bien le mot ou sa première lettre (%s)' % vx3)
+
     print('Listes de kanji complètes')
     kc = pg.evaluate("""() => { const d = JSON.parse(document.getElementById('kanji-data').textContent); const c = {}; d.forEach(x => c[x.l] = (c[x.l] || 0) + 1);
         return [c.N5, c.N4, c.N3, c.N2, d.length - new Set(d.map(x => x.k)).size, d.filter(x => !x.kw.length || !x.s).length, '駅少多店世事発局機'.split('').filter(k => !d.some(x => x.k === k)).length]; }""")
