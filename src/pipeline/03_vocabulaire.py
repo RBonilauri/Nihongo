@@ -12,6 +12,7 @@ def vocab_json(html):
         fr = _re.sub(r'\s+', ' ', fr).strip(); jp = _re.sub(r'\s+', ' ', jp).strip()
         if not fr or not jp or len(jp) > 45 or len(fr) > 70 or (fr, jp) in seen: return
         if (jp.startswith('〜') and not tilde) or fr.startswith('-'): return
+        if jp.endswith('…') and _re.fullmatch(r'[\d\s,–\-…]+', fr): return   # ligne-raccourci d’un tableau (« 11–13, 16–19… ») : reste dans la leçon, pas dans le quiz
         seen.add((fr, jp))
         _it = {'i': _hl.md5((fr + '|' + jp).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''}
         if g.startswith('Outils:'):

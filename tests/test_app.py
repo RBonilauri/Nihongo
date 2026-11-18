@@ -600,6 +600,8 @@ with sync_playwright() as p:
     _kg = re.findall(r'<table class="particle-grid kana-grid".*?</table>', _hh, re.S)
     check(len(_kg) == 5 and all('<thead' not in t and not re.search(r'<tr>\s*<td class="desc"', t) for t in _kg) and '.particle-grid.kana-grid td:first-child { position: static' in _hh,
           'kana : 5 tableaux (hiragana/katakana : base, dakuten, yōon) sans en-tête ni colonne de gauche, sans défilement horizontal')
+    _vd = __import__('json').loads(re.search(r'id="vocab-data"[^>]*>(.*?)</script>', _hh, re.S).group(1))
+    check(not [v for v in _vd if v['jp'].endswith('…') and re.fullmatch(r'[\d\s,–\-…]+', v['fr'])] and any(v['jp'] == '十五日' for v in _vd), 'vocabulaire : lignes-raccourcis (« 11–13, 16–19… ») absentes du quiz, jours réels conservés')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))
