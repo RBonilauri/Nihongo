@@ -597,6 +597,9 @@ with sync_playwright() as p:
     _mp = __import__('json').loads(re.search(r'id="map-data">(.*?)</script>', _hh, re.S).group(1).replace('<\\/', '</'))
     check(len(_mp['p']) == 47 and all(len(o.get('c', [])) == 2 for o in _mp['p']), 'carte : position du chef-lieu connue pour les 47 préfectures')
     check("jpMiniSet([], 'jm-quiz', x.o.n)" in _qg and "jpMiniSet(setOf(x), 'jm-mini', x.o && x.o.n)" in _qg, 'géographie : chef-lieu → préfecture montre le point du chef-lieu ; la correction aussi')
+    _kg = re.findall(r'<table class="particle-grid kana-grid".*?</table>', _hh, re.S)
+    check(len(_kg) == 5 and all('<thead' not in t and not re.search(r'<tr>\s*<td class="desc"', t) for t in _kg) and '.particle-grid.kana-grid td:first-child { position: static' in _hh,
+          'kana : 5 tableaux (hiragana/katakana : base, dakuten, yōon) sans en-tête ni colonne de gauche, sans défilement horizontal')
     check(not errs, 'aucune erreur JavaScript %s' % errs[:2])
     b.close()
 print('\n%s' % ('TOUT PASSE' if not fails else '%d ÉCHEC(S)' % len(fails)))

@@ -229,6 +229,10 @@ body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: en
   .particle-grid tbody tr:hover { background: var(--aged); }
   .particle-grid td { padding: 0.6rem 0.9rem; vertical-align: middle; }
   .particle-grid .hidden { display: none; }
+  .kana-grid { table-layout: fixed; }
+  .kana-grid td { padding: 0.5rem 0.1rem; }
+  .kana-grid tbody tr:hover { background: none; }
+  .particle-grid.kana-grid td:first-child { position: static; background: none; }
 
   /* ── KANA ── */
   .kana { font-family: 'Noto Serif JP', serif; font-size: 1.2rem; font-weight: 700; color: var(--red); display: inline-block; min-width: 50px; }
@@ -3802,16 +3806,9 @@ tr.kalt > td:first-child { opacity: .85; }
           Syllabaire arrondi, dérivé des kanji cursifs. Utilisé pour les terminaisons verbales et adjectivales (okurigana), les particules, les mots japonais natifs, et les furigana. Tout ce que le katakana et les kanji ne couvrent pas s'écrit en hiragana.
         </p>
 <div class="section-title">Table principale — 五十音 Gojūon</div>
-<div class="scroll-x"><table class="particle-grid" style="margin-bottom:1.6rem;text-align:center">
-<thead>
-<tr>
-<th></th>
-<th>あ — a</th><th>い — i</th><th>う — u</th><th>え — e</th><th>お — o</th>
-</tr>
-</thead>
+<div class="scroll-x"><table class="particle-grid kana-grid" style="margin-bottom:1.6rem;text-align:center">
 <tbody>
 <tr data-ro="a i u e o">
-<td class="desc" style="font-weight:600;color:var(--muted)">∅</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">あ</span><br/><span style="font-size:0.6rem;color:var(--muted)">a</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">い</span><br/><span style="font-size:0.6rem;color:var(--muted)">i</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">う</span><br/><span style="font-size:0.6rem;color:var(--muted)">u</span></td>
@@ -3819,7 +3816,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">お</span><br/><span style="font-size:0.6rem;color:var(--muted)">o</span></td>
 </tr>
 <tr data-ro="ka ki ku ke ko">
-<td class="desc" style="font-weight:600;color:var(--muted)">k</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">か</span><br/><span style="font-size:0.6rem;color:var(--muted)">ka</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">き</span><br/><span style="font-size:0.6rem;color:var(--muted)">ki</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">く</span><br/><span style="font-size:0.6rem;color:var(--muted)">ku</span></td>
@@ -3827,7 +3823,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">こ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ko</span></td>
 </tr>
 <tr data-ro="sa shi su se so">
-<td class="desc" style="font-weight:600;color:var(--muted)">s</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">さ</span><br/><span style="font-size:0.6rem;color:var(--muted)">sa</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">し</span><br/><span style="font-size:0.6rem;color:var(--muted)">shi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">す</span><br/><span style="font-size:0.6rem;color:var(--muted)">su</span></td>
@@ -3835,7 +3830,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">そ</span><br/><span style="font-size:0.6rem;color:var(--muted)">so</span></td>
 </tr>
 <tr data-ro="ta chi tsu te to">
-<td class="desc" style="font-weight:600;color:var(--muted)">t</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">た</span><br/><span style="font-size:0.6rem;color:var(--muted)">ta</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ち</span><br/><span style="font-size:0.6rem;color:var(--muted)">chi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">つ</span><br/><span style="font-size:0.6rem;color:var(--muted)">tsu</span></td>
@@ -3843,7 +3837,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">と</span><br/><span style="font-size:0.6rem;color:var(--muted)">to</span></td>
 </tr>
 <tr data-ro="na ni nu ne no">
-<td class="desc" style="font-weight:600;color:var(--muted)">n</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">な</span><br/><span style="font-size:0.6rem;color:var(--muted)">na</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">に</span><br/><span style="font-size:0.6rem;color:var(--muted)">ni</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ぬ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nu</span></td>
@@ -3851,7 +3844,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">の</span><br/><span style="font-size:0.6rem;color:var(--muted)">no</span></td>
 </tr>
 <tr data-ro="ha hi fu he ho">
-<td class="desc" style="font-weight:600;color:var(--muted)">h</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">は</span><br/><span style="font-size:0.6rem;color:var(--muted)">ha</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ひ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ふ</span><br/><span style="font-size:0.6rem;color:var(--muted)">fu</span></td>
@@ -3859,7 +3851,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ほ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ho</span></td>
 </tr>
 <tr data-ro="ma mi mu me mo">
-<td class="desc" style="font-weight:600;color:var(--muted)">m</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ま</span><br/><span style="font-size:0.6rem;color:var(--muted)">ma</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">み</span><br/><span style="font-size:0.6rem;color:var(--muted)">mi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">む</span><br/><span style="font-size:0.6rem;color:var(--muted)">mu</span></td>
@@ -3867,7 +3858,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">も</span><br/><span style="font-size:0.6rem;color:var(--muted)">mo</span></td>
 </tr>
 <tr data-ro="ya yu yo">
-<td class="desc" style="font-weight:600;color:var(--muted)">y</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">や</span><br/><span style="font-size:0.6rem;color:var(--muted)">ya</span></td>
 <td style="background:var(--aged)"></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ゆ</span><br/><span style="font-size:0.6rem;color:var(--muted)">yu</span></td>
@@ -3875,7 +3865,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">よ</span><br/><span style="font-size:0.6rem;color:var(--muted)">yo</span></td>
 </tr>
 <tr data-ro="ra ri ru re ro">
-<td class="desc" style="font-weight:600;color:var(--muted)">r</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ら</span><br/><span style="font-size:0.6rem;color:var(--muted)">ra</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">り</span><br/><span style="font-size:0.6rem;color:var(--muted)">ri</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">る</span><br/><span style="font-size:0.6rem;color:var(--muted)">ru</span></td>
@@ -3883,7 +3872,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ろ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ro</span></td>
 </tr>
 <tr data-ro="wa wo">
-<td class="desc" style="font-weight:600;color:var(--muted)">w</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">わ</span><br/><span style="font-size:0.6rem;color:var(--muted)">wa</span></td>
 <td style="background:var(--aged)"></td>
 <td style="background:var(--aged)"></td>
@@ -3891,50 +3879,43 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">を</span><br/><span style="font-size:0.6rem;color:var(--muted)">wo (o)</span></td>
 </tr>
 <tr data-ro="n">
-<td class="desc" style="font-weight:600;color:var(--muted)">n</td>
 <td colspan="5" style="text-align:left;padding-left:1.2rem"><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--red)">ん</span><span style="font-size:0.6rem;color:var(--muted);margin-left:0.4rem">n — consonne seule, jamais en début de mot</span></td>
 </tr>
 </tbody>
 </table></div>
 <div class="section-title">Dakuten 濁点 — Sonorisation ( ゛)</div>
 <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.8rem;line-height:1.6">Deux petits traits <strong>゛</strong> ajoutés en haut à droite sonorisent la consonne. Un petit cercle <strong>゜</strong> (handakuten) transforme h → p.</p>
-<div class="scroll-x"><table class="particle-grid" style="margin-bottom:1.6rem;text-align:center">
-<thead><tr><th>Base</th><th>a</th><th>i</th><th>u</th><th>e</th><th>o</th></tr></thead>
+<div class="scroll-x"><table class="particle-grid kana-grid" style="margin-bottom:1.6rem;text-align:center">
 <tbody>
-<tr data-ro='ka" ga gi gu ge go'>
-<td class="desc" style="font-weight:600;color:var(--muted)">g (か゛)</td>
+<tr data-ro="ga gi gu ge go">
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">が</span><br/><span style="font-size:0.6rem;color:var(--muted)">ga</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぎ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぐ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gu</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">げ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ge</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ご</span><br/><span style="font-size:0.6rem;color:var(--muted)">go</span></td>
 </tr>
-<tr data-ro='sa" za ji zu ze zo'>
-<td class="desc" style="font-weight:600;color:var(--muted)">z (さ゛)</td>
+<tr data-ro="za ji zu ze zo">
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ざ</span><br/><span style="font-size:0.6rem;color:var(--muted)">za</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">じ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ji</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ず</span><br/><span style="font-size:0.6rem;color:var(--muted)">zu</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぜ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ze</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぞ</span><br/><span style="font-size:0.6rem;color:var(--muted)">zo</span></td>
 </tr>
-<tr data-ro='ta" da ji zu de do'>
-<td class="desc" style="font-weight:600;color:var(--muted)">d (た゛)</td>
+<tr data-ro="da ji zu de do">
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">だ</span><br/><span style="font-size:0.6rem;color:var(--muted)">da</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぢ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ji (rare)</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">づ</span><br/><span style="font-size:0.6rem;color:var(--muted)">zu (rare)</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">で</span><br/><span style="font-size:0.6rem;color:var(--muted)">de</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ど</span><br/><span style="font-size:0.6rem;color:var(--muted)">do</span></td>
 </tr>
-<tr data-ro='ha" ba bi bu be bo'>
-<td class="desc" style="font-weight:600;color:var(--muted)">b (は゛)</td>
+<tr data-ro="ba bi bu be bo">
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ば</span><br/><span style="font-size:0.6rem;color:var(--muted)">ba</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">び</span><br/><span style="font-size:0.6rem;color:var(--muted)">bi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぶ</span><br/><span style="font-size:0.6rem;color:var(--muted)">bu</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">べ</span><br/><span style="font-size:0.6rem;color:var(--muted)">be</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぼ</span><br/><span style="font-size:0.6rem;color:var(--muted)">bo</span></td>
 </tr>
-<tr data-ro="ha゜ pa pi pu pe po">
-<td class="desc" style="font-weight:600;color:var(--muted)">p (は゜)</td>
+<tr data-ro="pa pi pu pe po">
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぱ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pa</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぴ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--red)">ぷ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pu</span></td>
@@ -3945,20 +3926,19 @@ tr.kalt > td:first-child { opacity: .85; }
 </table></div>
 <div class="section-title">Yōon 拗音 — Combinaisons avec い-kana + や・ゆ・よ petit</div>
 <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.8rem;line-height:1.6">On combine un kana en い avec un petit や ゃ、ゆ ゅ、よ ょ pour former une syllabe contractée.</p>
-<div class="scroll-x"><table class="particle-grid" style="margin-bottom:0.5rem;text-align:center">
-<thead><tr><th>Base</th><th>＋ゃ (ya)</th><th>＋ゅ (yu)</th><th>＋ょ (yo)</th></tr></thead>
+<div class="scroll-x"><table class="particle-grid kana-grid" style="margin-bottom:0.5rem;text-align:center">
 <tbody>
-<tr data-ro="ki kya kyu kyo"><td class="desc">き</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">きゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">kya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">きゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">kyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">きょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">kyo</span></td></tr>
-<tr data-ro="shi sha shu sho"><td class="desc">し</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">しゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">sha</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">しゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">shu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">しょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">sho</span></td></tr>
-<tr data-ro="chi cha chu cho"><td class="desc">ち</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ちゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">cha</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ちゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">chu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ちょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">cho</span></td></tr>
-<tr data-ro="ni nya nyu nyo"><td class="desc">に</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">にゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">にゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">にょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nyo</span></td></tr>
-<tr data-ro="hi hya hyu hyo"><td class="desc">ひ</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ひゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ひゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ひょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hyo</span></td></tr>
-<tr data-ro="mi mya myu myo"><td class="desc">み</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">みゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">mya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">みゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">myu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">みょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">myo</span></td></tr>
-<tr data-ro="ri rya ryu ryo"><td class="desc">り</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">りゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">rya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">りゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ryu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">りょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ryo</span></td></tr>
-<tr data-ro="gi gya gyu gyo"><td class="desc">ぎ</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぎゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぎゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぎょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gyo</span></td></tr>
-<tr data-ro="ji ja ju jo"><td class="desc">じ</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">じゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ja</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">じゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ju</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">じょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">jo</span></td></tr>
-<tr data-ro="bi bya byu byo"><td class="desc">び</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">びゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">bya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">びゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">byu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">びょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">byo</span></td></tr>
-<tr data-ro="pi pya pyu pyo"><td class="desc">ぴ</td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぴゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぴゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぴょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pyo</span></td></tr>
+<tr data-ro="kya kyu kyo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">きゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">kya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">きゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">kyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">きょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">kyo</span></td></tr>
+<tr data-ro="sha shu sho"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">しゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">sha</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">しゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">shu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">しょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">sho</span></td></tr>
+<tr data-ro="cha chu cho"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ちゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">cha</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ちゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">chu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ちょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">cho</span></td></tr>
+<tr data-ro="nya nyu nyo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">にゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">にゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">にょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nyo</span></td></tr>
+<tr data-ro="hya hyu hyo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ひゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ひゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ひょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hyo</span></td></tr>
+<tr data-ro="mya myu myo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">みゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">mya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">みゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">myu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">みょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">myo</span></td></tr>
+<tr data-ro="rya ryu ryo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">りゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">rya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">りゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ryu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">りょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ryo</span></td></tr>
+<tr data-ro="gya gyu gyo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぎゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぎゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぎょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gyo</span></td></tr>
+<tr data-ro="ja ju jo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">じゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ja</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">じゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ju</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">じょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">jo</span></td></tr>
+<tr data-ro="bya byu byo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">びゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">bya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">びゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">byu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">びょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">byo</span></td></tr>
+<tr data-ro="pya pyu pyo"><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぴゃ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pya</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぴゅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pyu</span></td><td><span style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--red)">ぴょ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pyo</span></td></tr>
 </tbody>
 </table></div>
 <p style="font-size:0.68rem;color:var(--muted);margin-top:0.5rem;font-style:italic">っ (petit tsu) = consonne doublée — 切手 きって kitte. ー n'existe pas en hiragana (voyelle longue marquée par la voyelle elle-même : おかあさん).</p>
@@ -3967,16 +3947,9 @@ tr.kalt > td:first-child { opacity: .85; }
           Syllabaire anguleux, dérivé de fragments de kanji. Utilisé pour les mots étrangers (gairaigo), les onomatopées, les noms scientifiques, et pour mettre en relief un mot (équivalent de l'italique). Mêmes sons que l'hiragana, formes différentes.
         </p>
 <div class="section-title">Table principale — 五十音 Gojūon</div>
-<div class="scroll-x"><table class="particle-grid" style="margin-bottom:1.6rem;text-align:center">
-<thead>
-<tr>
-<th></th>
-<th>ア — a</th><th>イ — i</th><th>ウ — u</th><th>エ — e</th><th>オ — o</th>
-</tr>
-</thead>
+<div class="scroll-x"><table class="particle-grid kana-grid" style="margin-bottom:1.6rem;text-align:center">
 <tbody>
 <tr data-ro="a i u e o">
-<td class="desc" style="font-weight:600;color:var(--muted)">∅</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ア</span><br/><span style="font-size:0.6rem;color:var(--muted)">a</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">イ</span><br/><span style="font-size:0.6rem;color:var(--muted)">i</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ウ</span><br/><span style="font-size:0.6rem;color:var(--muted)">u</span></td>
@@ -3984,7 +3957,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">オ</span><br/><span style="font-size:0.6rem;color:var(--muted)">o</span></td>
 </tr>
 <tr data-ro="ka ki ku ke ko">
-<td class="desc" style="font-weight:600;color:var(--muted)">k</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">カ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ka</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">キ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ki</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ク</span><br/><span style="font-size:0.6rem;color:var(--muted)">ku</span></td>
@@ -3992,7 +3964,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">コ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ko</span></td>
 </tr>
 <tr data-ro="sa shi su se so">
-<td class="desc" style="font-weight:600;color:var(--muted)">s</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">サ</span><br/><span style="font-size:0.6rem;color:var(--muted)">sa</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">シ</span><br/><span style="font-size:0.6rem;color:var(--muted)">shi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ス</span><br/><span style="font-size:0.6rem;color:var(--muted)">su</span></td>
@@ -4000,7 +3971,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ソ</span><br/><span style="font-size:0.6rem;color:var(--muted)">so</span></td>
 </tr>
 <tr data-ro="ta chi tsu te to">
-<td class="desc" style="font-weight:600;color:var(--muted)">t</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">タ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ta</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">チ</span><br/><span style="font-size:0.6rem;color:var(--muted)">chi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ツ</span><br/><span style="font-size:0.6rem;color:var(--muted)">tsu</span></td>
@@ -4008,7 +3978,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ト</span><br/><span style="font-size:0.6rem;color:var(--muted)">to</span></td>
 </tr>
 <tr data-ro="na ni nu ne no">
-<td class="desc" style="font-weight:600;color:var(--muted)">n</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ナ</span><br/><span style="font-size:0.6rem;color:var(--muted)">na</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ニ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ni</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ヌ</span><br/><span style="font-size:0.6rem;color:var(--muted)">nu</span></td>
@@ -4016,7 +3985,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ノ</span><br/><span style="font-size:0.6rem;color:var(--muted)">no</span></td>
 </tr>
 <tr data-ro="ha hi fu he ho">
-<td class="desc" style="font-weight:600;color:var(--muted)">h</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ハ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ha</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ヒ</span><br/><span style="font-size:0.6rem;color:var(--muted)">hi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">フ</span><br/><span style="font-size:0.6rem;color:var(--muted)">fu</span></td>
@@ -4024,7 +3992,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ホ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ho</span></td>
 </tr>
 <tr data-ro="ma mi mu me mo">
-<td class="desc" style="font-weight:600;color:var(--muted)">m</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">マ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ma</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ミ</span><br/><span style="font-size:0.6rem;color:var(--muted)">mi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ム</span><br/><span style="font-size:0.6rem;color:var(--muted)">mu</span></td>
@@ -4032,7 +3999,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">モ</span><br/><span style="font-size:0.6rem;color:var(--muted)">mo</span></td>
 </tr>
 <tr data-ro="ya yu yo">
-<td class="desc" style="font-weight:600;color:var(--muted)">y</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ヤ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ya</span></td>
 <td style="background:var(--aged)"></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ユ</span><br/><span style="font-size:0.6rem;color:var(--muted)">yu</span></td>
@@ -4040,7 +4006,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ヨ</span><br/><span style="font-size:0.6rem;color:var(--muted)">yo</span></td>
 </tr>
 <tr data-ro="ra ri ru re ro">
-<td class="desc" style="font-weight:600;color:var(--muted)">r</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ラ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ra</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">リ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ri</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ル</span><br/><span style="font-size:0.6rem;color:var(--muted)">ru</span></td>
@@ -4048,7 +4013,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ロ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ro</span></td>
 </tr>
 <tr data-ro="wa wo">
-<td class="desc" style="font-weight:600;color:var(--muted)">w</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ワ</span><br/><span style="font-size:0.6rem;color:var(--muted)">wa</span></td>
 <td style="background:var(--aged)"></td>
 <td style="background:var(--aged)"></td>
@@ -4056,17 +4020,14 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ヲ</span><br/><span style="font-size:0.6rem;color:var(--muted)">wo (o)</span></td>
 </tr>
 <tr data-ro="n">
-<td class="desc" style="font-weight:600;color:var(--muted)">n</td>
 <td colspan="5" style="text-align:left;padding-left:1.2rem"><span style="font-family:'Noto Serif JP',serif;font-size:1.6rem;color:var(--gold)">ン</span><span style="font-size:0.6rem;color:var(--muted);margin-left:0.4rem">n — consonne seule</span></td>
 </tr>
 </tbody>
 </table></div>
 <div class="section-title">Dakuten 濁点 — Sonorisation</div>
-<div class="scroll-x"><table class="particle-grid" style="margin-bottom:1.6rem;text-align:center">
-<thead><tr><th>Base</th><th>a</th><th>i</th><th>u</th><th>e</th><th>o</th></tr></thead>
+<div class="scroll-x"><table class="particle-grid kana-grid" style="margin-bottom:1.6rem;text-align:center">
 <tbody>
 <tr data-ro="ga gi gu ge go">
-<td class="desc" style="font-weight:600;color:var(--muted)">g</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ガ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ga</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ギ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">グ</span><br/><span style="font-size:0.6rem;color:var(--muted)">gu</span></td>
@@ -4074,7 +4035,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ゴ</span><br/><span style="font-size:0.6rem;color:var(--muted)">go</span></td>
 </tr>
 <tr data-ro="za ji zu ze zo">
-<td class="desc" style="font-weight:600;color:var(--muted)">z</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ザ</span><br/><span style="font-size:0.6rem;color:var(--muted)">za</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ジ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ji</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ズ</span><br/><span style="font-size:0.6rem;color:var(--muted)">zu</span></td>
@@ -4082,7 +4042,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ゾ</span><br/><span style="font-size:0.6rem;color:var(--muted)">zo</span></td>
 </tr>
 <tr data-ro="da ji zu de do">
-<td class="desc" style="font-weight:600;color:var(--muted)">d</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ダ</span><br/><span style="font-size:0.6rem;color:var(--muted)">da</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ヂ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ji (rare)</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ヅ</span><br/><span style="font-size:0.6rem;color:var(--muted)">zu (rare)</span></td>
@@ -4090,7 +4049,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ド</span><br/><span style="font-size:0.6rem;color:var(--muted)">do</span></td>
 </tr>
 <tr data-ro="ba bi bu be bo">
-<td class="desc" style="font-weight:600;color:var(--muted)">b</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">バ</span><br/><span style="font-size:0.6rem;color:var(--muted)">ba</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ビ</span><br/><span style="font-size:0.6rem;color:var(--muted)">bi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ブ</span><br/><span style="font-size:0.6rem;color:var(--muted)">bu</span></td>
@@ -4098,7 +4056,6 @@ tr.kalt > td:first-child { opacity: .85; }
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ボ</span><br/><span style="font-size:0.6rem;color:var(--muted)">bo</span></td>
 </tr>
 <tr data-ro="pa pi pu pe po">
-<td class="desc" style="font-weight:600;color:var(--muted)">p</td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">パ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pa</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">ピ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pi</span></td>
 <td><span style="font-family:'Noto Serif JP',serif;font-size:1.4rem;color:var(--gold)">プ</span><br/><span style="font-size:0.6rem;color:var(--muted)">pu</span></td>
