@@ -136,6 +136,55 @@
       return r.replace(/\s+/g, ' ').replace(/\bde ([aeiouyéèêhœ])/g, function (m, x) { return 'd’' + x; }).replace(/ de d’/g, ' d’') + '.';
     }
 
+
+    /* ── phrase modèle par forme : cadre japonais (avant / après la forme) + phrase française ──
+       Cadres génériques, choisis pour rester grammaticaux avec n’importe quel verbe (sujet « je » ou sans agent) ;
+       la phrase française vient du même moteur de conjugaison. null si la forme n’a pas de cadre. */
+    var KF = { '今日は': 'きょうは', '明日': 'あした', '明日は': 'あしたは', '昨日': 'きのう', '昨日は': 'きのうは', '私は': 'わたしは', 'あなたに': 'あなたに', '弟に': 'おとうとに', 'ここでは': 'ここでは', 'あの時は': 'あのときは', 'これは': 'これは', 'まず': 'まず', '出かけました': 'でかけました', '休みます': 'やすみます', '電話します': 'でんわします', '電話': 'でんわ', 'びっくりしました': 'びっくりしました', 'なりました': 'なりました', '買います': 'かいます', '人': 'ひと', '思っています': 'おもっています' };
+    function kanaOf(t) { var o = t; Object.keys(KF).sort(function (a, b) { return b.length - a.length; }).forEach(function (k) { o = o.split(k).join(KF[k]); }); return o; }
+    function te2(o) { return o.inf.replace(/^s’/, 't’').replace(/^se /, 'te '); }
+    var VF = {   // [avant, après, fr(o)]
+      'Négatif simple': ['今日は', '。', function (o) { return 'Aujourd’hui, ' + lowFirst(o.JN) + '.'; }],
+      'Polie, présent': ['明日', '。', function (o) { return 'Demain, je vais ' + o.inf1 + '.'; }],
+      'Polie, négatif': ['明日は', '。', function (o) { return 'Demain, ' + lowFirst(o.JN) + '.'; }],
+      'Polie, passé': ['昨日', '。', function (o) { return 'Hier, ' + lowFirst(o.PC) + '.'; }],
+      'Polie, passé négatif': ['昨日は', '。', function (o) { return 'Hier, ' + lowFirst(o.PCN) + '.'; }],
+      'Passé simple': ['昨日', '。', function (o) { return 'Hier, ' + lowFirst(o.PC) + '.'; }],
+      'Passé négatif simple': ['昨日は', '。', function (o) { return 'Hier, ' + lowFirst(o.PCN) + '.'; }],
+      'Forme en て': ['まず', '、それから休みます。', function (o) { return 'D’abord, ' + lowFirst(o.J) + ', puis je me repose.'; }],
+      'て négatif': ['', '、出かけました。', function (o) { return 'Je suis sorti sans ' + o.inf + '.'; }],
+      'Désidératif': ['私は', '。', function (o) { return 'Je veux ' + o.inf1 + '.'; }],
+      'Désidératif négatif': ['私は', '。', function (o) { return 'Je ne veux pas ' + o.inf1 + '.'; }],
+      'Désidératif passé': ['私は', '。', function (o) { return 'Je voulais ' + o.inf1 + '.'; }],
+      'Désidératif passé négatif': ['私は', '。', function (o) { return 'Je ne voulais pas ' + o.inf1 + '.'; }],
+      'Potentiel': ['私は', '。', function (o) { return 'Je peux ' + o.inf1 + '.'; }],
+      'Passif': ['', 'ことがあります。', function (o) { return 'Il m’arrive de subir l’action de « ' + o.inf + ' ».'; }],
+      'Causatif': ['弟に', 'ことがあります。', function (o) { return 'Il m’arrive de faire ' + o.inf + ' (qqn).'; }],
+      'Causatif-passif': ['', 'ことがあります。', function (o) { return 'Il m’arrive d’être forcé de ' + o.inf + '.'; }],
+      'Volitif': ['', 'と思っています。', function (o) { return 'J’envisage de ' + o.inf1 + '.'; }],
+      'Impératif': ['', '！', function (o) { return (o.c ? o.IMP : cap(o.inf)) + ' !'; }],
+      'Interdiction': ['ここでは', '。', function (o) { return 'Ici, ' + (o.c ? lowFirst(o.IMPN) : 'ne pas ' + o.inf) + ' !'; }],
+      'Conditionnel ば': ['', 'いいです。', function (o) { return 'Il suffit de ' + o.inf + '.'; }],
+      'Conditionnel たら': ['', '、電話します。', function (o) { return o.c ? 'Quand ' + (o.c.aux === 'e' || o.pr ? (o.pr ? 'je me serai ' : 'je serai ') : 'j’aurai ') + o.c.pp + o.R + ', je t’appelle.' : 'Quand on aura ' + o.inf + ', je t’appelle.'; }],
+      'Souhait sur autrui (てほしい)': ['あなたに', '。', function (o) { return 'Je voudrais que tu le fasses (' + o.inf + ').'; }],
+      'Souhait sur autrui négatif (ないでほしい)': ['あなたに', '。', function (o) { return 'Je voudrais que tu ne le fasses pas (' + o.inf + ').'; }],
+      'Souhait sur autrui négatif (てほしくない)': ['あなたに', '。', function (o) { return 'Je ne veux pas que tu le fasses (' + o.inf + ').'; }],
+      'Souhait sur autrui passé (てほしかった)': ['あなたに', '。', function (o) { return 'J’aurais voulu que tu le fasses (' + o.inf + ').'; }],
+      'Souhait sur autrui passé négatif (ないでほしかった)': ['あなたに', '。', function (o) { return 'J’aurais voulu que tu ne le fasses pas (' + o.inf + ').'; }]
+    };
+    function adjFr(fr) { var s = (fr || '').replace(/\(.*?\)/g, '').split(/[\/,;]/)[0].trim(); return s ? lowFirst(s) : ''; }
+    var AF = {
+      'Adjectif négatif': ['これは', '。', function (a) { return 'Ce n’est pas ' + a + '.'; }],
+      'Adjectif passé': ['あの時は', '。', function (a) { return 'À ce moment-là, c’était ' + a + '.'; }],
+      'Adjectif passé négatif': ['あの時は', '。', function (a) { return 'À ce moment-là, ce n’était pas ' + a + '.'; }],
+      'Adjectif en て': ['これは', '、びっくりしました。', function (a) { return 'Comme c’est ' + a + ', j’ai été surpris.'; }],
+      'Adverbe': ['', 'なりました。', function (a) { return 'C’est devenu ' + a + '.'; }],
+      'Adjectif poli': ['これは', '。', function (a) { return 'C’est ' + a + '.'; }],
+      'Adjectif poli négatif': ['これは', '。', function (a) { return 'Ce n’est pas ' + a + '.'; }],
+      'Adjectif poli passé': ['あの時は', '。', function (a) { return 'À ce moment-là, c’était ' + a + '.'; }],
+      'Adjectif poli passé négatif': ['あの時は', '。', function (a) { return 'À ce moment-là, ce n’était pas ' + a + '.'; }],
+      'Adjectif condition': ['', '、買います。', function (a) { return 'Si c’est ' + a + ', j’achète.'; }]
+    };
     var cache = {};
     function get(fr) { if (!(fr in cache)) cache[fr] = parse(fr); return cache[fr]; }
     var Q = function (s) { return '« ' + s + ' »'; };
@@ -210,6 +259,16 @@
     return {
       // variantes de traduction pour (sens français du verbe, forme) ; [] si on ne sait pas
       tr: function (fr, label) { var o = get(fr), f = F[label]; if (!o || !f) return []; try { return f(o); } catch (e) { return []; } },
+      // phrase modèle d’une forme : {pre, post, preK, postK, fr} ou null
+      exf: function (fr, label, adj) {
+        var t, f;
+        if (adj) { t = AF[label]; f = adjFr(fr); if (!t || !f) return null; return { pre: t[0], post: t[1], preK: kanaOf(t[0]), postK: kanaOf(t[1]), fr: t[2](f) }; }
+        t = VF[label]; var o = get(fr); if (!t) return null;
+        try { f = o ? t[2](o) : null; } catch (e) { f = null; }
+        if (!f) return null;
+        if (o && !o.c) return null;
+        return { pre: t[0], post: t[1], preK: kanaOf(t[0]), postK: kanaOf(t[1]), fr: f.replace(/\b([dD])e ([aeiouyéèêhœ])/g, '$1’$2') };
+      },
       ok: function (fr) { return !!get(fr); },
       sent: sent,
       exact: function (fr) { var o = get(fr); return !!(o && o.c); }
