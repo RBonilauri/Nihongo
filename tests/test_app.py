@@ -181,13 +181,13 @@ with sync_playwright() as p:
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .qgo').click()"); pg.wait_for_timeout(300)
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(200)
     res = []
-    for _q in range(10):
+    for _q in range(25):
         pg.evaluate("document.querySelector('.quiz:not([hidden]) .qopt') && document.querySelector('.quiz:not([hidden]) .qopt').click()"); pg.wait_for_timeout(120)
         res.append(pg.evaluate("""() => { const q = document.querySelector('.quiz:not([hidden])'); const e = q.querySelector('.q-fb .vq-ex'); return [!!q.querySelector('#g-tr, #g-trb'), e ? [e.querySelector('.vq-exh').textContent, e.querySelector('.vq-exjp').textContent, e.querySelector('.vq-exfr').textContent, (e.querySelector('.vq-exk') || {}).textContent || ''] : null]; }"""))
         pg.evaluate("document.querySelector('.quiz:not([hidden]) #g-next') && document.querySelector('.quiz:not([hidden]) #g-next').click()"); pg.wait_for_timeout(120)
     check(not any(r[0] for r in res), 'bouton « Traduction » supprimé de la correction')
     okx = [r[1] for r in res if r[1]]
-    check(len(okx) >= 6 and all(e[0] == 'Phrase modèle' and e[1] and e[2] and not re.search('[一-鿿]', e[3]) for e in okx), 'conjugaison : phrase modèle (JP + kana sans kanji + FR) dans la correction %s %s' % (len(okx), [e for e in okx if not (e[0] == 'Phrase modèle' and e[1] and e[2] and not re.search('[一-鿿]', e[3]))][:2]))
+    check(len(okx) >= 21 and all(e[0] == 'Phrase modèle' and e[1] and e[2] and not re.search('[一-鿿]', e[3]) for e in okx), 'conjugaison : phrase modèle (JP + kana sans kanji + FR) dans la correction %s %s' % (len(okx), [e for e in okx if not (e[0] == 'Phrase modèle' and e[1] and e[2] and not re.search('[一-鿿]', e[3]))][:2]))
     pg.evaluate("document.querySelector('.quiz:not([hidden]) .x').click()"); pg.wait_for_timeout(150)
     # fiche « Conjuguer »
     pg.evaluate("document.querySelector('details.cjd[data-k=食べる]').open = true"); pg.wait_for_timeout(300)
