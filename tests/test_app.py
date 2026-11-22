@@ -363,6 +363,10 @@ with sync_playwright() as p:
     ox = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => x.g.startsWith('Outils:')); return [v.length, v.filter(x => !x.ex || !x.ex[0] || !x.ex[1]).length]; }""")
     check(ox[0] >= 141 and ox[1] == 0, 'chaque mot Outils a un exemple (%s)' % ox)
 
+    print('Vocabulaire : réponses lisibles')
+    vx4 = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent); return [v.filter(x => /⚠/.test(x.fr)).map(x => x.jp), v.filter(x => x.g === 'Temps:月' && /^\\d+$|^1er$/.test(x.fr)).length, v.filter(x => x.g === 'Temps:時刻' && /^\\d+h$/.test(x.fr)).length]; }""")
+    check(vx4[0] == [] and vx4[1] == 0 and vx4[2] == 0, 'aucune réponse de vocabulaire avec ⚠ ni réduite à un chiffre (« 7 ⚠ », « 7h ») %s' % vx4)
+
     print('Vocabulaire / Adjectifs : exemples partout')
     vx2 = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent).filter(x => /^(Vocabulaire|Adjectifs):/.test(x.g)); const bad = v.filter(x => !x.ex || !x.ex[0] || !x.ex[1] || (/[一-鿿]/.test(x.ex[0]) && !x.ex[2])); const kj = v.filter(x => x.ex && x.ex[2] && /[一-鿿]/.test(x.ex[2])); return [v.length, bad.length, kj.length, bad.slice(0, 5).map(x => x.jp)]; }""")
     check(vx2[0] >= 1000 and vx2[1] == 0 and vx2[2] == 0, 'chaque mot Vocabulaire et Adjectifs a un exemple JP + FR (+ kana sans kanji quand la phrase contient des kanji) (%s)' % vx2)

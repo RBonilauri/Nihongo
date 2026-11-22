@@ -15,8 +15,13 @@ def vocab_json(html):
         if not fr or not jp or len(jp) > 45 or len(fr) > 70 or (fr, jp) in seen: return
         if (jp.startswith('〜') and not tilde) or fr.startswith('-'): return
         if jp.endswith('…') and _re.fullmatch(r'[\d\s,–\-…]+', fr): return   # ligne-raccourci d’un tableau (« 11–13, 16–19… ») : reste dans la leçon, pas dans le quiz
+        _fr0 = fr
+        fr = _re.sub(r'\s*⚠.*$', '', fr).strip() or fr    # le signal ⚠ (lecture irrégulière…) reste dans les leçons : jamais dans une réponse de quiz
+        if g == 'Temps:月' and _re.fullmatch(r'\d+|1er', fr): return   # les 31 jours du mois sont déjà dans « Temps:日付 » (« Le 7 ») : doublon sans sens (« 7 ⚠ ») retiré du quiz
+        if g == 'Temps:時刻' and _re.fullmatch(r'\d+h', fr): fr = fr[:-1] + ' h (l’heure)'
+        if (fr, jp) in seen: return
         seen.add((fr, jp))
-        _it = {'i': _hl.md5((fr + '|' + jp).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''}
+        _it = {'i': _hl.md5((_fr0 + '|' + jp).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''}
         if g.startswith('Outils:'):
             _sub = g.split(':', 1)[1]
             _e = _OX.get(_sub + '|' + jp + '|' + _it['kk']) or _OX.get(_sub + '|' + jp)
