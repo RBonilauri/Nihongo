@@ -317,7 +317,7 @@
       var last = Q.i + 1 >= Q.items.length, h = '<div class="q-fb ' + (good ? 'good' : 'bad') + '"><div class="fbh">' + (good ? '✓ Bonne réponse' : '✗ Raté') + '</div><div class="vq-ans">';
       if (x.c === 'p') h += '<div class="vq-jp">' + esc(x.p.s.replace('＿＿', x.p.a).replace(/（.*）/, '')) + '</div>' + (HK.test(x.p.s) && x.p.k ? '<div class="vq-kk">' + esc(fillK(x.p, x.p.a)) + '</div>' : '') + '<div>' + esc(x.p.fr) + '</div><div class="vq-ro">' + esc(x.p.n) + '</div>';
       else h += '<div class="vq-jp">' + esc(x.v.f[x.l]) + '</div>' + (x.v.r[x.l] ? '<div>' + esc(x.v.r[x.l]) + '</div>' : '') + '<div><b>' + esc(x.l) + '</b> de ' + esc(x.v.v) + ' (' + esc(x.v.fr) + ')</div><div class="vq-ro">' + esc(x.v.g) + '</div>';
-      var exf = x.c === 'c' ? FRV.exf(x.v.fr, x.l, !!x.v.adj) : null;
+      var exf = x.c === 'c' ? FRV.exf(x.v.fr, x.l, !!x.v.adj, x.v.v) : null;
       if (exf) {
         var exjp = exf.pre + x.v.f[x.l] + exf.post, exk = exf.preK + (x.v.r[x.l] || x.v.f[x.l]) + exf.postK;
         h += '</div><div class="vq-ex"><div class="vq-exh">Phrase modèle</div><div class="vq-exjp">' + esc(exjp) + '</div>' + (/[一-鿿]/.test(exjp) && exk !== exjp ? '<div class="vq-exk">' + esc(exk) + '</div>' : '') + '<div class="vq-exfr">' + esc(exf.fr) + '</div>';

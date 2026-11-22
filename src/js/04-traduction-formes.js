@@ -140,7 +140,7 @@
     /* ── phrase modèle par forme : cadre japonais (avant / après la forme) + phrase française ──
        Cadres génériques, choisis pour rester grammaticaux avec n’importe quel verbe (sujet « je » ou sans agent) ;
        la phrase française vient du même moteur de conjugaison. null si la forme n’a pas de cadre. */
-    var KF = { '今日は': 'きょうは', '明日': 'あした', '明日は': 'あしたは', '昨日': 'きのう', '昨日は': 'きのうは', '私は': 'わたしは', 'あなたに': 'あなたに', '弟に': 'おとうとに', 'ここでは': 'ここでは', 'あの時は': 'あのときは', 'これは': 'これは', 'まず': 'まず', '出かけました': 'でかけました', '休みます': 'やすみます', '電話します': 'でんわします', '電話': 'でんわ', 'びっくりしました': 'びっくりしました', 'なりました': 'なりました', '買います': 'かいます', '人': 'ひと', '思っています': 'おもっています', '時々': 'ときどき', '今': 'いま', '休みの日は': 'やすみのひは', '寝たりします': 'ねたりします', '怒られます': 'おこられます', '元気になります': 'げんきになります', '一緒に': 'いっしょに', '私が': 'わたしが' };
+    var KF = { '今日は': 'きょうは', '明日': 'あした', '明日は': 'あしたは', '昨日': 'きのう', '昨日は': 'きのうは', '私は': 'わたしは', 'あなたに': 'あなたに', '弟に': 'おとうとに', 'ここでは': 'ここでは', 'あの時は': 'あのときは', 'これは': 'これは', 'まず': 'まず', '出かけました': 'でかけました', '休みます': 'やすみます', '電話します': 'でんわします', '電話': 'でんわ', 'びっくりしました': 'びっくりしました', 'なりました': 'なりました', '買います': 'かいます', '人': 'ひと', '思っています': 'おもっています', '時々': 'ときどき', '今': 'いま', '休みの日は': 'やすみのひは', '寝たりします': 'ねたりします', '怒られます': 'おこられます', '元気になります': 'げんきになります', '一緒に': 'いっしょに', '私が': 'わたしが', '彼は': 'かれは', 'あの時の彼は': 'あのときのかれは', '人が': 'ひとが', '家にいます': 'いえにいます', '教えてください': 'おしえてください', '私は日本語が': 'わたしはにほんごが', '私は車が': 'わたしはくるまが', '私は故郷が': 'わたしはふるさとが', '私は背中が': 'わたしはせなかが' };
     function kanaOf(t) { var o = t; Object.keys(KF).sort(function (a, b) { return b.length - a.length; }).forEach(function (k) { o = o.split(k).join(KF[k]); }); return o; }
     function te2(o) { return o.inf.replace(/^s’/, 't’').replace(/^se /, 'te '); }
     var VF = {   // [avant, après, fr(o)]
@@ -209,18 +209,48 @@
       'Souhait sur autrui passé négatif (ないでほしかった)': ['あなたに', '。', function (o) { return 'J’aurais voulu que tu ne le fasses pas (' + o.inf + ').'; }]
     };
     function adjFr(fr) { var s = (fr || '').replace(/\(.*?\)/g, '').split(/[\/,;]/)[0].trim(); return s ? lowFirst(s) : ''; }
-    var AF = {
-      'Adjectif négatif': ['これは', '。', function (a) { return 'Ce n’est pas ' + a + '.'; }],
-      'Adjectif passé': ['あの時は', '。', function (a) { return 'À ce moment-là, c’était ' + a + '.'; }],
-      'Adjectif passé négatif': ['あの時は', '。', function (a) { return 'À ce moment-là, ce n’était pas ' + a + '.'; }],
-      'Adjectif en て': ['これは', '、びっくりしました。', function (a) { return 'Comme c’est ' + a + ', j’ai été surpris.'; }],
-      'Adverbe': ['', 'なりました。', function (a) { return 'C’est devenu ' + a + '.'; }],
-      'Adjectif poli': ['これは', '。', function (a) { return 'C’est ' + a + '.'; }],
-      'Adjectif poli négatif': ['これは', '。', function (a) { return 'Ce n’est pas ' + a + '.'; }],
-      'Adjectif poli passé': ['あの時は', '。', function (a) { return 'À ce moment-là, c’était ' + a + '.'; }],
-      'Adjectif poli passé négatif': ['あの時は', '。', function (a) { return 'À ce moment-là, ce n’était pas ' + a + '.'; }],
-      'Adjectif condition': ['', '、買います。', function (a) { return 'Si c’est ' + a + ', j’achète.'; }]
+    /* adjectifs : sujet adapté au sens (chose « c’est », personne « il », état de celui qui parle « je », pluriel), sinon phrase écrite à la main (SP) */
+    var APERS = '親切 丁寧 真剣 真面目 正直 素直 熱心 頑固 器用 不器用 意地悪 積極的 消極的 わがまま のんき 生意気 冷静 勤勉 賢い 厳しい 我慢強い ずるい 優しい 可愛い 格好いい 頼もしい たくましい 図々しい 偉い 若い 強い 弱い 有名 失礼 可哀想 親しい 酷い 怪しい 素敵 立派 易しい'.split(' ');
+    var AEMO = '嬉しい 悲しい 眠い 眠たい 忙しい 悔しい 羨ましい 懐かしい だるい 苦しい 元気 暇 平気 幸せ 不幸 健康 無事 自由 孤独'.split(' ');
+    var APL = ['多い', '少ない'];
+    var AOVR = { '臭い': 'malodorant', 'だるい': 'sans énergie', '可哀想': 'à plaindre', '眠い': 'somnolent', '眠たい': 'somnolent', '易しい': 'doux' };
+    var SP = {   // [avant JP, présent, négatif, imparfait, imparfait négatif, adverbe]
+      '好き': ['私は日本語が', 'J’aime le japonais', 'Je n’aime pas le japonais', 'J’aimais le japonais', 'Je n’aimais pas le japonais', 'Je me suis mis à aimer le japonais'],
+      '嫌い': ['私は日本語が', 'Je déteste le japonais', 'Je ne déteste pas le japonais', 'Je détestais le japonais', 'Je ne détestais pas le japonais', 'Je me suis mis à détester le japonais'],
+      '大好き': ['私は日本語が', 'J’adore le japonais', 'Je n’adore pas le japonais', 'J’adorais le japonais', 'Je n’adorais pas le japonais', 'Je me suis mis à adorer le japonais'],
+      '得意': ['私は日本語が', 'Je suis fort en japonais', 'Je ne suis pas fort en japonais', 'J’étais fort en japonais', 'Je n’étais pas fort en japonais', 'Je suis devenu fort en japonais'],
+      '苦手': ['私は日本語が', 'Je suis faible en japonais', 'Je ne suis pas faible en japonais', 'J’étais faible en japonais', 'Je n’étais pas faible en japonais', 'Je suis devenu faible en japonais'],
+      '上手': ['私は日本語が', 'Je suis doué en japonais', 'Je ne suis pas doué en japonais', 'J’étais doué en japonais', 'Je n’étais pas doué en japonais', 'Je suis devenu doué en japonais'],
+      '下手': ['私は日本語が', 'Je suis mauvais en japonais', 'Je ne suis pas mauvais en japonais', 'J’étais mauvais en japonais', 'Je n’étais pas mauvais en japonais', 'Je suis devenu mauvais en japonais'],
+      '欲しい': ['私は車が', 'Je veux une voiture', 'Je ne veux pas de voiture', 'Je voulais une voiture', 'Je ne voulais pas de voiture', 'J’ai fini par vouloir une voiture'],
+      '恋しい': ['私は故郷が', 'Ma région natale me manque', 'Ma région natale ne me manque pas', 'Ma région natale me manquait', 'Ma région natale ne me manquait pas', 'Ma région natale a fini par me manquer'],
+      '痒い': ['私は背中が', 'Mon dos me démange', 'Mon dos ne me démange pas', 'Mon dos me démangeait', 'Mon dos ne me démangeait pas', 'Mon dos s’est mis à me démanger']
     };
+    var ASI = { 'Adjectif poli': 1, 'Adjectif négatif': 2, 'Adjectif poli négatif': 2, 'Adjectif passé': 3, 'Adjectif poli passé': 3, 'Adjectif passé négatif': 4, 'Adjectif poli passé négatif': 4 };
+    var APAST = { 'Adjectif passé': 1, 'Adjectif poli passé': 1, 'Adjectif passé négatif': 1, 'Adjectif poli passé négatif': 1 };
+    // sujet : [JP présent, JP passé, FR présent, FR négatif, FR imparfait, FR imparfait négatif, FR devenu, FR en て, FR condition, JP post en て, JP post condition]
+    var ASUB = {
+      thing: ['これは', 'あの時は', 'C’est', 'Ce n’est pas', 'C’était', 'Ce n’était pas', 'C’est devenu', 'Comme c’est ', ', j’ai été surpris.', 'びっくりしました', 'Si c’est ', ', j’achète.', '買います'],
+      pers: ['彼は', 'あの時の彼は', 'Il est', 'Il n’est pas', 'Il était', 'Il n’était pas', 'Il est devenu', 'Il est ', ', et il est à la maison.', '家にいます', 'S’il est ', ', dites-le-moi.', '教えてください'],
+      emo: ['私は', 'あの時は', 'Je suis', 'Je ne suis pas', 'J’étais', 'Je n’étais pas', 'Je suis devenu', 'Je suis ', ', et je suis à la maison.', '家にいます', 'Si je suis ', ', dites-le-moi.', '教えてください'],
+      pl: ['人が', 'あの時は人が', 'Ils sont', 'Ils ne sont pas', 'Ils étaient', 'Ils n’étaient pas', 'Ils sont devenus', 'Comme ils sont ', ', j’ai été surpris.', 'びっくりしました', 'S’ils sont ', ', dites-le-moi.', '教えてください']
+    };
+    function adjFrame(word, fr, label) {
+      var sp = SP[word];
+      if (sp) {
+        if (label === 'Adjectif en て') return { pre: sp[0], post: '、家にいます。', fr: sp[1] + ', et je suis à la maison.' };
+        if (label === 'Adjectif condition') return { pre: sp[0], post: '、教えてください。', fr: 'Si ' + lowFirst(sp[1]) + ', dites-le-moi.' };
+        if (label === 'Adverbe') return { pre: sp[0], post: 'なりました。', fr: sp[5] + '.' };
+        return ASI[label] ? { pre: sp[0], post: '。', fr: sp[ASI[label]] + '.' } : null;
+      }
+      var f = AOVR[word] || adjFr(fr); if (!f) return null;
+      var t = APL.indexOf(word) >= 0 ? 'pl' : AEMO.indexOf(word) >= 0 ? 'emo' : APERS.indexOf(word) >= 0 ? 'pers' : 'thing', S = ASUB[t];
+      if (label === 'Adjectif en て') return { pre: S[0], post: '、' + S[9] + '。', fr: S[7] + f + S[8] };
+      if (label === 'Adjectif condition') return { pre: '', post: '、' + S[12] + '。', fr: S[10] + f + S[11] };
+      if (label === 'Adverbe') return { pre: '', post: 'なりました。', fr: S[6] + ' ' + f + '.' };
+      if (!ASI[label]) return null;
+      return { pre: APAST[label] ? S[1] : S[0], post: '。', fr: S[ASI[label] + 1] + ' ' + f + '.' };
+    }
     var cache = {};
     function get(fr) { if (!(fr in cache)) cache[fr] = parse(fr); return cache[fr]; }
     var Q = function (s) { return '« ' + s + ' »'; };
@@ -296,9 +326,9 @@
       // variantes de traduction pour (sens français du verbe, forme) ; [] si on ne sait pas
       tr: function (fr, label) { var o = get(fr), f = F[label]; if (!o || !f) return []; try { return f(o); } catch (e) { return []; } },
       // phrase modèle d’une forme : {pre, post, preK, postK, fr} ou null
-      exf: function (fr, label, adj) {
+      exf: function (fr, label, adj, word) {
         var t, f;
-        if (adj) { t = AF[label]; f = adjFr(fr); if (!t || !f) return null; return { pre: t[0], post: t[1], preK: kanaOf(t[0]), postK: kanaOf(t[1]), fr: t[2](f) }; }
+        if (adj) { f = adjFrame(word, fr, label); if (!f) return null; return { pre: f.pre, post: f.post, preK: kanaOf(f.pre), postK: kanaOf(f.post), fr: f.fr }; }
         t = VF[label]; var o = get(fr); if (!t) return null;
         try { f = o ? t[2](o) : null; } catch (e) { f = null; }
         if (!f) return null;
