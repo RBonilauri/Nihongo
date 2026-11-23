@@ -102,7 +102,7 @@
         if (c.i === x.i || c.fr === x.fr || c.jp === x.jp) return false;
         if (qty(c.fr) !== qty(x.fr) || isPhrase(c) !== isPhrase(x)) return false;
         if ((c.ka || c.jp) === rx) return false;
-        var tc = toks(c.fr); if (tx.some(function (w) { return tc.indexOf(w) >= 0; })) return false;
+        var tc = toks(c.fr); if (!(x.g === 'Adjectifs:Conjugaison' && c.g === x.g) && tx.some(function (w) { return tc.indexOf(w) >= 0; })) return false;   // formes d’un même adjectif : le mot en commun est voulu
         return true;
       }));
     }

@@ -15,13 +15,21 @@ def vocab_json(html):
         if not fr or not jp or len(jp) > 45 or len(fr) > 70 or (fr, jp) in seen: return
         if (jp.startswith('〜') and not tilde) or fr.startswith('-'): return
         if jp.endswith('…') and _re.fullmatch(r'[\d\s,–\-…]+', fr): return   # ligne-raccourci d’un tableau (« 11–13, 16–19… ») : reste dans la leçon, pas dans le quiz
-        _fr0 = fr
+        _fr0, _jp0 = fr, jp
+        if g == 'Adjectifs:Conjugaison':   # réponse lisible : le sens de la forme (« a l’air calme »), pas une étiquette de grammaire ; jp sans les espaces de découpage du tableau
+            _m = _re.match(r'^(.+?) · (\S+) \(adjectif en [いな]\)$', fr)
+            if _m:
+                _a = {'大きい': ('grand', 'de façon grande'), '静か': ('calme', 'de façon calme')}.get(_m.group(2))
+                _t = {'Présent affirmatif': 'est %s', 'Présent négatif': 'n’est pas %s', 'Passé affirmatif': 'était %s', 'Passé négatif': 'n’était pas %s', 'Devant un nom': '%s (devant un nom)', 'Forme en て': 'est %s, et… (forme en て)', 'Supposition (～そう)': 'a l’air %s (～そう)', 'Conditionnel (～ば)': 'si c’est %s (%s)'}.get(_m.group(1))
+                if _a and _m.group(1) == 'Forme adverbiale': fr = '%s (forme adverbiale)' % _a[1]
+                elif _a and _t: fr = _t % ((_a[0], '～ば' if _m.group(2) == '大きい' else '～なら') if '%s (%s)' in _t else _a[0])
+            if ' / ' not in jp: jp = jp.replace(' ', '')
         fr = _re.sub(r'\s*⚠.*$', '', fr).strip() or fr    # le signal ⚠ (lecture irrégulière…) reste dans les leçons : jamais dans une réponse de quiz
         if g == 'Temps:月' and _re.fullmatch(r'\d+|1er', fr): return   # les 31 jours du mois sont déjà dans « Temps:日付 » (« Le 7 ») : doublon sans sens (« 7 ⚠ ») retiré du quiz
         if g == 'Temps:時刻' and _re.fullmatch(r'\d+h', fr): fr = fr[:-1] + ' h (l’heure)'
         if (fr, jp) in seen: return
         seen.add((fr, jp))
-        _it = {'i': _hl.md5((_fr0 + '|' + jp).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''}
+        _it = {'i': _hl.md5((_fr0 + '|' + _jp0).encode()).hexdigest()[:6], 'c': cat, 'g': g, 'fr': fr, 'jp': jp, 'ka': ka if ka and ka != jp else '', 'kk': (ka if ka and ka != jp else (_kana(jp) if _HASK.search(jp) else '')), 'ro': ro or ''}
         if g.startswith('Outils:'):
             _sub = g.split(':', 1)[1]
             _e = _OX.get(_sub + '|' + jp + '|' + _it['kk']) or _OX.get(_sub + '|' + jp)

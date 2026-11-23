@@ -365,6 +365,8 @@ with sync_playwright() as p:
 
     print('Vocabulaire : réponses lisibles')
     vx4 = pg.evaluate("""() => { const v = JSON.parse(document.getElementById('vocab-data').textContent); return [v.filter(x => /⚠/.test(x.fr)).map(x => x.jp), v.filter(x => x.g === 'Temps:月' && /^\\d+$|^1er$/.test(x.fr)).length, v.filter(x => x.g === 'Temps:時刻' && /^\\d+h$/.test(x.fr)).length]; }""")
+    vx5 = pg.evaluate("""() => JSON.parse(document.getElementById('vocab-data').textContent).filter(x => x.g === 'Adjectifs:Conjugaison' && (/·|adjectif en/.test(x.fr) || / /.test(x.jp.replace(' / ', '')))).map(x => x.jp)""")
+    check(vx5 == [], "conjugaison des adjectifs : réponses en français lisible, sans étiquette · ni espaces dans le japonais %s" % vx5)
     check(vx4[0] == [] and vx4[1] == 0 and vx4[2] == 0, 'aucune réponse de vocabulaire avec ⚠ ni réduite à un chiffre (« 7 ⚠ », « 7h ») %s' % vx4)
 
     print('Vocabulaire / Adjectifs : exemples partout')
